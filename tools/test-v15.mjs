@@ -60,7 +60,7 @@ TFm.patchFighter(Fighter, RULES); TFm.patchCpu(CpuBrain);
   const L = new Ladder(cfg, { kind: 'story', hero: 'ignis', level: 'normal' }), sc = L.scenesBefore();
   const p = planStory(sc, { hero: 'ignis', rival: L.rivals[0], world: L.stageAt(0), home: 'cenizas', final: cfg.finalStage, total: 3 });
   ok(p.find(s => s.key === 'story.prologue.1').world === 'equilibrio' && p.find(s => s.key === 'story.prologue.2').tour.join() === TOUR.join(), 'el prólogo muestra el Sello y recorre los cuatro mundos');
-  ok(p.find(s => s.key === 'story.ignis.intro').world === 'cenizas' && p.find(s => s.key.startsWith('story.arrive.')).world === L.stageAt(0) && p.find(s => s.kind === 'line' && s.side === 1).world === L.stageAt(0), 'el héroe habla en su mundo y el capítulo ocurre en el del rival');
+  ok(p.find(s => s.key === 'story.ignis.intro').world === 'cenizas' && p.find(s => s.key?.startsWith('story.arrive.')).world === L.stageAt(0) && p.find(s => s.kind === 'line' && s.side === 1).world === L.stageAt(0), 'el héroe habla en su mundo y el capítulo ocurre en el del rival');
   ok(['cenizas', 'mareas', 'bastion', 'viento', 'equilibrio'].every(w => es['story.arrive.' + w] && en['story.arrive.' + w]), 'cada mundo tiene su llegada narrada');
   const st = rd('data/stages.json').stages; ok(st.every(s => s.extras.includes('peaks') || s.id === 'mareas') && st.every(s => s.weather) && st.find(s => s.id === 'bosque').extras.includes('cascade'), 'todos los escenarios tienen cordillera, clima propio y el bosque su cascada'); }
 
