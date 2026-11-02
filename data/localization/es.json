@@ -717,5 +717,13 @@
  "result.ch.fail": "Desafío fallido",
  "result.ch.again2": "Jugar otra vez",
  "result.ch.reward": "Recompensa del desafío",
- "challenge.toast": "Desafío superado: {name} (+{n} Rose Gold)"
+ "challenge.toast": "Desafío superado: {name} (+{n} Rose Gold)",
+ "set.song": "Canción",
+ "set.song.auto": "Elemental",
+ "set.song.epic": "Himno de los Elementos",
+ "set.song.synth": "Neón Elemental",
+ "set.song.lofi": "Brisa del Templo",
+ "set.song.drums": "Tambores del Volcán",
+ "set.song.shuffle": "Aleatoria",
+ "set.song.now": "Suena: {name}"
 }

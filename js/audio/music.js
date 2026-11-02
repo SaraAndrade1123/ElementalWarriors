@@ -37,6 +37,45 @@ export const TRACKS = {
     drums: { menu: '................', battle: 'k...h...k...h...' }, texture: 'none'
   }
 };
+// ── Canciones extra (v1.5): se eligen en Ajustes › Sonido › Canción. Llevan melodía (lead, 1 compás = 16 pasos; número =
+//    semitonos sobre la tónica + leadOct, −1 = silencio) y, algunas, línea de bajo (bass: semitonos sobre la fundamental del acorde).
+const _ = -1;
+export const SONGS = {
+  epic: { // «Himno de los Cuatro Elementos»: re menor heroico, cuerdas, metales y taikos
+    trim: 1.05, bpm: 92, root: 38, padWave: 'sawtooth', padCut: 1300, padGain: 0.035, inst: 'brass', leadInst: 'brass', leadOct: 24,
+    chords: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5], [0, 3, 7], [-4, 0, 3], [-7, -3, 0], [-5, -1, 2]],
+    arp: { menu: [0, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, 2, -1, -1, -1], battle: [0, -1, 1, -1, 2, -1, 1, -1, 0, -1, 1, -1, 2, -1, 4, -1] },
+    drums: { menu: 't...............', battle: 'T...t.t.T...t.tt' },
+    lead: [[12, _, _, _, 10, _, 12, _, 15, _, _, _, 14, _, 12, _], [10, _, _, _, 8, _, 7, _, 5, _, _, _, 7, _, _, _], [12, _, _, _, 15, _, 17, _, 19, _, _, _, 17, _, 15, _], [14, _, _, _, 12, _, 10, _, 12, _, _, _, _, _, _, _],
+      [19, _, _, _, 17, _, 15, _, 17, _, _, _, 15, _, 14, _], [12, _, _, _, 10, _, 12, _, 15, _, _, _, 12, _, _, _], [8, _, _, _, 7, _, 5, _, 7, _, _, _, 10, _, 12, _], [14, _, _, _, _, _, 12, _, 11, _, _, _, _, _, _, _]],
+    texture: 'none' },
+  synth: { // «Neón Elemental»: synthwave en la menor, bajo en corcheas y caja con eco
+    trim: 0.95, bpm: 118, root: 33, padWave: 'sawtooth', padCut: 1800, padGain: 0.03, inst: 'pluck', instWave: 'sawtooth', instCut: 2400, leadInst: 'square', leadOct: 36,
+    chords: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5]],
+    arp: { menu: [0, -1, 1, -1, 2, -1, 4, -1, 2, -1, 1, -1, 0, -1, 1, -1], battle: [0, 1, 2, 4, 2, 1, 0, 1, 2, 4, 5, 4, 2, 1, 2, 4] },
+    drums: { menu: 'k.......k.......', battle: 'k.h.s.h.k.hks.hh' },
+    bass: [0, _, 0, _, 0, _, 12, _, 0, _, 0, _, 12, _, 0, _],
+    lead: [[12, _, 15, _, 19, _, _, 17, _, 15, _, 12, _, _, _, _], [8, _, 12, _, 15, _, _, 12, _, _, 10, _, 8, _, _, _], [15, _, 19, _, 22, _, _, 19, _, 17, _, 15, _, _, _, _], [14, _, _, _, 12, _, 10, _, 14, _, _, _, 12, _, _, _]],
+    texture: 'none' },
+  lofi: { // «Brisa del Templo»: lo-fi relajado en fa, piano eléctrico, acordes con séptima y crujido de vinilo
+    trim: 1.1, bpm: 76, root: 41, padWave: 'triangle', padCut: 1100, padGain: 0.04, inst: 'epiano', leadInst: 'epiano', leadOct: 24,
+    chords: [[0, 4, 7, 11], [-3, 0, 4, 7], [2, 5, 9, 12], [-5, -1, 2, 5]],
+    arp: { menu: [0, -1, -1, 2, -1, -1, 1, -1, 3, -1, -1, -1, 2, -1, -1, -1], battle: [0, -1, 2, -1, 1, -1, 3, -1, 2, -1, 1, -1, 4, -1, 3, -1] },
+    drums: { menu: 'k.......s..k....', battle: 'k..h.sh.kk.h.sh.' },
+    bass: [0, _, _, _, _, _, 7, _, 0, _, _, _, 12, _, _, _],
+    lead: [[16, _, _, 14, _, 12, _, _, _, _, _, _, _, _, _, _], [_, _, 12, _, 14, _, 16, _, _, 19, _, _, _, _, _, _], [21, _, _, 19, _, _, 16, _, 14, _, _, _, _, _, _, _], [_, _, _, _, 12, _, 11, _, 12, _, _, _, _, _, _, _]],
+    texture: 'vinyl' },
+  drums: { // «Tambores del Volcán»: percusión de guerra, bordón grave y gritos de metal
+    trim: 1, bpm: 104, root: 36, padWave: 'sawtooth', padCut: 700, padGain: 0.03, inst: 'wood', leadInst: 'brass', leadOct: 24,
+    chords: [[0, 7, 12], [1, 8, 13], [0, 7, 12], [-2, 5, 10]],
+    arp: { menu: [0, -1, -1, 0, -1, -1, 1, -1, 0, -1, -1, 0, -1, -1, 2, -1], battle: [0, -1, 0, 1, -1, 0, 2, -1, 0, -1, 0, 1, -1, 2, 1, -1] },
+    drums: { menu: 'T.....t.T.......', battle: 'T.t.tTt.T.tt.Tt.' },
+    lead: [[12, _, _, _, _, _, 13, _, 12, _, _, _, _, _, _, _], [_, _, _, _, _, _, _, _, 15, _, 13, _, 12, _, _, _], [12, _, _, _, _, _, 13, _, 15, _, _, _, 17, _, _, _], [15, _, 13, _, 12, _, _, _, 10, _, _, _, _, _, _, _]],
+    texture: 'rumble' },
+};
+Object.assign(TRACKS, SONGS);
+export const ELEMENT_TRACKS = ['fire', 'water', 'earth', 'wind', 'neutral'];
+export const SONG_IDS = Object.keys(SONGS);
 export const TRACK_IDS = Object.keys(TRACKS);
 export const MODES = ['menu', 'battle'];
 export const trackFor = element => (TRACKS[element] ? element : 'neutral');
@@ -81,7 +120,14 @@ function instrument(ctx, out, tr, t, f, len, rng, mode) {
   } else if (tr.inst === 'flute') {
     tone(ctx, out, { t, f, dur: len * 1.6, type: 'sine', gain: 0.1 * vol, attack: 0.04, curve: 'swell', peak: 0.3, vib: { hz: 5.5, cents: 12 } });
     hit(ctx, out, { t, ft: 'bandpass', f: f * 2, q: 2, dur: len * 1.2, gain: 0.012, rng });
-  } else tone(ctx, out, { t, f, dur: 0.4, type: tr.instWave || 'triangle', gain: 0.12 * vol, cut: tr.instCut || 3000 });
+  } else if (tr.inst === 'brass' || tr.inst === 'epiano') voice(ctx, out, tr.inst, t, f, len, vol * .85, rng);
+  else tone(ctx, out, { t, f, dur: 0.4, type: tr.instWave || 'triangle', gain: 0.12 * vol, cut: tr.instCut || 3000 });
+}
+// voces de melodía: metales (dos sierras filtradas con ataque lento), onda cuadrada (synthwave) y piano eléctrico (campana suave)
+function voice(ctx, out, kind, t, f, len, vol, rng) {
+  if (kind === 'brass') { for (const d of [-6, 6]) tone(ctx, out, { t, f: f * Math.pow(2, d / 1200), dur: len * 2.2, type: 'sawtooth', gain: 0.045 * vol, attack: 0.05, cut: 1500, vib: { hz: 5, cents: 8 } }); }
+  else if (kind === 'square') { tone(ctx, out, { t, f, dur: len * 2, type: 'square', gain: 0.04 * vol, attack: 0.01, cut: 2600, vib: { hz: 6, cents: 10 } }); tone(ctx, out, { t: t + len * 1.5, f, dur: len * 1.5, type: 'square', gain: 0.015 * vol, cut: 1800 }); }
+  else { tone(ctx, out, { t, f, dur: 1.1, type: 'sine', gain: 0.09 * vol }); tone(ctx, out, { t, f: f * 2, dur: 0.35, type: 'sine', gain: 0.03 * vol }); tone(ctx, out, { t, f: f * 4.02, dur: 0.12, type: 'sine', gain: 0.012 * vol }); }
 }
 
 /**
@@ -99,6 +145,9 @@ export function scheduleStep(ctx, out, track, mode, step, t, rng) {
     if (tr.texture === 'rumble') tone(ctx, out, { t, f: midiToHz(tr.root - 12 + chord[0]), dur: 16 * s16, type: 'sine', gain: 0.1, attack: 0.5, curve: 'hold' });
   }
   if (tr.texture === 'embers' && k % 4 === 2 && rng() < (mode === 'battle' ? 0.5 : 0.3)) hit(ctx, out, { t, ft: 'bandpass', f: 3000 + rng() * 4000, q: 1.5, dur: 0.012, gain: 0.04, rng });
+  if (tr.lead && (mode === 'battle' || bar % 8 >= 4)) { const n = tr.lead[bar % tr.lead.length][k]; if (n >= 0) voice(ctx, out, tr.leadInst || 'brass', t, midiToHz(tr.root + (tr.leadOct ?? 24) + n), s16 * 2, mode === 'battle' ? 1 : .7, rng); } // en el menú la melodía entra cada pocos compases
+  if (tr.bass && mode === 'battle') { const b = tr.bass[k]; if (b >= 0) tone(ctx, out, { t, f: midiToHz(tr.root + 12 + chord[0] + b), dur: s16 * 1.8, type: 'sawtooth', gain: 0.07, cut: 520 }); }
+  if (tr.texture === 'vinyl' && rng() < .25) hit(ctx, out, { t: t + rng() * s16, ft: 'highpass', f: 3000, dur: 0.006, gain: 0.025, rng });
   const a = tr.arp[mode][k];
   if (a >= 0) { const tones = chord.length; const semis = chord[a % tones] + 12 * Math.floor(a / tones); instrument(ctx, out, tr, t, midiToHz(tr.root + 36 + semis), s16 * 2, rng, mode); }
   const d = tr.drums[mode][k];

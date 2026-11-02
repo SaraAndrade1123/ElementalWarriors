@@ -49,7 +49,7 @@ ok(layersFor('nope', 'fire') === null, 'un efecto inexistente devuelve null');
 ok(ELEMENTS.every(e => layersFor('hit_heavy', e).length > SFX.hit_heavy.layers.length), 'los golpes tienen capa propia por elemento');
 
 // ---------- Música ----------
-ok(TRACK_IDS.length === 5 && ELEMENTS.every(e => TRACKS[e]) && TRACKS.neutral, 'hay una pieza por elemento y una neutra');
+ok(TRACK_IDS.length >= 9 && ELEMENTS.every(e => TRACKS[e]) && TRACKS.neutral && ['epic', 'synth', 'lofi', 'drums'].every(k => TRACKS[k]?.lead?.length >= 4), 'hay una pieza por elemento, una neutra y 4 canciones extra con melodía');
 ok(TRACK_IDS.every(id => { const t = TRACKS[id]; return t.bpm >= 50 && t.bpm <= 180 && t.chords.length >= 2 && t.chords.every(c => c.length >= 3 && c.every(Number.isInteger)) && MODES.every(m => t.arp[m].length === 16 && t.drums[m].length === 16 && t.arp[m].every(a => Number.isInteger(a) && a >= -1 && a < 8) && /^[kshtT.]+$/.test(t.drums[m])) && t.trim >= 0.5 && t.trim <= 2; }), 'compases, acordes, patrones y trim válidos en todas las piezas');
 ok(trackFor('fire') === 'fire' && trackFor('xyz') === 'neutral' && trackFor(undefined) === 'neutral', 'un elemento desconocido usa la pieza neutra');
 {

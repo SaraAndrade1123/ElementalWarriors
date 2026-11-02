@@ -717,5 +717,13 @@
  "result.ch.fail": "Challenge failed",
  "result.ch.again2": "Play again",
  "result.ch.reward": "Challenge reward",
- "challenge.toast": "Challenge complete: {name} (+{n} Rose Gold)"
+ "challenge.toast": "Challenge complete: {name} (+{n} Rose Gold)",
+ "set.song": "Song",
+ "set.song.auto": "Elemental",
+ "set.song.epic": "Anthem of the Elements",
+ "set.song.synth": "Elemental Neon",
+ "set.song.lofi": "Temple Breeze",
+ "set.song.drums": "Volcano Drums",
+ "set.song.shuffle": "Shuffle",
+ "set.song.now": "Now playing: {name}"
 }

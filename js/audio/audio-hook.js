@@ -26,6 +26,19 @@ export function installAudio({ menu, scene, meta = null, stages = null, roster =
   const css = h('link', { rel: 'stylesheet', href: 'css/audio.css' }); document.head.append(css);
   const elementOf = i => ELEMENT_OF[roster[i]?.id];
   const inMenu = () => menu.enabled && !scene.match;
+  // Canción elegida en Ajustes: «elemental» (cambia con el escenario y el guerrero), una fija o «aleatoria» (otra en cada combate).
+  const SONGS = ['auto', 'epic', 'synth', 'lofi', 'drums', 'shuffle'];
+  const ls = { get: () => { try { return localStorage.getItem('ew.song'); } catch { return null; } }, set: v => { try { localStorage.setItem('ew.song', v); } catch { /* sin almacenamiento */ } } };
+  let song = SONGS.includes(ls.get()) ? ls.get() : 'auto', lastEl = null, lastMode = 'menu', shuffled = null;
+  const rawMusic = audio.music.bind(audio);
+  audio.music = (el, mode = 'menu') => {
+    lastEl = el; lastMode = mode;
+    if (song === 'auto') return rawMusic(el, mode);
+    if (song === 'shuffle') { if (!shuffled || (mode === 'battle' && audio.nowPlaying?.mode !== 'battle')) { const pool = ['epic', 'synth', 'lofi', 'drums', 'fire', 'water', 'earth', 'wind'].filter(x => x !== shuffled); shuffled = pool[Math.floor(Math.random() * pool.length)]; } return rawMusic(shuffled, mode); }
+    return rawMusic(song, mode);
+  };
+  audio.setSong = v => { if (!SONGS.includes(v)) return; song = v; ls.set(v); shuffled = null; audio.music(lastEl ?? elementOf(menu.idx), lastMode); };
+  audio.song = () => song;
   const menuMusic = () => audio.music(elementOf(menu.idx), 'menu');
 
   // 1) El navegador solo permite sonido tras un gesto del usuario: el primero lo desbloquea y arranca la música del menú.
@@ -123,7 +136,9 @@ export function installAudio({ menu, scene, meta = null, stages = null, roster =
           onkeydown: nav });
         return h('label', { class: 'vol' }, h('span', {}, label), input, out);
       };
-      block.append(slider('music', t('set.music')), slider('sfx', t('set.sfx')),
+      const songs = h('div', { class: 'tabs songs', role: 'group', 'aria-label': t('set.song') }, ...SONGS.map(v => h('button', { id: 'song-' + v, 'aria-pressed': String(song === v), onkeydown: nav,
+        onclick: () => { audio.setSong(v); menu.keep = 'song-' + v; menu.page_settings(); menu.toast(t('set.song.now', { name: t('set.song.' + v) })); } }, t('set.song.' + v))));
+      block.append(h('p', { class: 'note song-l' }, t('set.song')), songs, slider('music', t('set.music')), slider('sfx', t('set.sfx')),
         h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: s.muted, onchange: e => audio.setMuted(e.target.checked), onkeydown: nav }), t('set.mute')));
     }
     const note = panel.querySelector('.note'); note ? panel.insertBefore(block, note) : panel.append(block);
