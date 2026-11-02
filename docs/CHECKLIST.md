@@ -215,3 +215,12 @@ La F7 recibida partía de la F3 (sin F4 ni las animaciones de v0.6.0). Se hizo u
 - [x] Vida infinita: con ella nadie cae y se regenera tras cada combo; sin ella hay K.O. real.
 - [x] Terra: Fisura de Colmillos (`fangs`), Ola Tectónica (`slabwave`), Meteorito con levitación y lanzamiento a dos manos.
 - [x] `npm test` = 17 suites OK (nueva `tools/test-v13.mjs`).
+
+## v1.4.0
+- [x] `index.html` de un solo archivo (sin servidor; datos, modelos y tipografías dentro); `index-dev.html` para desarrollar; `npm run build`.
+- [x] Resumen por jugador con bonificaciones, puntuación, rango S–D y Rose Gold extra (tope 500); 2 jugadores con dos tarjetas y oro a la misma cuenta.
+- [x] Resultados: veredicto en una línea, botones en fila dentro del panel, compacto en celular, logros sin tapar botones.
+- [x] Pie fijo para el botón principal de los paneles del menú (no tapa pestañas).
+- [x] Vista previa de armas sin cartel y a distancia de impacto.
+- [x] Fuego con lenguas de llama, humo y estallido; escenarios con capas de fondo y vida ambiental.
+- [x] `npm test` = 18 suites OK (nueva `tools/test-v14.mjs`).

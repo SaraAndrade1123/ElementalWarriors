@@ -889,7 +889,8 @@ body.story-cine #hud,body.story-cine #touch,body.story-cine #menu,body.story-cin
 .rc-who i{font:700 .66rem var(--f-body);font-style:normal;letter-spacing:.24em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 70%,#fff)}
 .rc-who b{font:800 1.2rem/1.1 var(--f-display);color:#fff;letter-spacing:.04em;overflow-wrap:anywhere}
 .rc-win{font:700 .62rem var(--f-body);font-style:normal;letter-spacing:.2em;text-transform:uppercase;color:#0b1020;background:linear-gradient(#fff3c8,#c9a44c);padding:2px 8px}
-.rc-body{display:grid;gap:10px;min-width:0}
+.rc-body{display:flex;flex-direction:column;gap:10px;min-width:0;align-self:stretch}
+.rc-tot{margin-top:auto}
 .rc-bon{list-style:none;margin:0;padding:0 6px 0 0;max-height:236px;overflow:auto;scrollbar-width:thin}
 .rc-bon li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 2px;border-bottom:1px solid rgba(201,164,76,.14);animation:rowIn .35s calc(var(--d,0s) + .25s + var(--i,0) * .06s) both}
 .rc-bon li span{font:600 .95rem var(--f-body);color:#c8d1e4;min-width:0}
@@ -908,6 +909,10 @@ body.story-cine #hud,body.story-cine #touch,body.story-cine #menu,body.story-cin
 .duo .rc-who{justify-items:start}
 .duo .rk{width:92px;height:92px}.duo .rk::before{inset:12px}.duo .rk-l{font-size:3.1rem}
 
+/* avisos (logros) arriba mientras se ven los resultados: nunca encima de los botones */
+body:has(#result:not([hidden])) .toast{top:max(12px,env(safe-area-inset-top));bottom:auto;left:auto;right:max(12px,env(safe-area-inset-right));transform:translateY(-8px);max-width:min(340px,60vw)}
+body:has(#result:not([hidden])) .toast.on{transform:none}
+
 /* botones: en fila, siempre dentro del panel */
 #result .rp .rp-nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:2px 0 0;padding:0;list-style:none}
 #result .rp .rp-nav li{flex:1 1 210px;max-width:300px;min-width:0}
@@ -917,21 +922,26 @@ body.story-cine #hud,body.story-cine #touch,body.story-cine #menu,body.story-cin
 
 /* ── celular en horizontal y ventanas bajas ── */
 @media (max-height:560px){
-  #result{place-items:start center;padding:8px}
-  #result .panel.rp{padding:12px 16px 12px;gap:8px}
-  #result .rp h2{font-size:clamp(1.4rem,5.5vh,1.9rem)}#result .rp h2.long{font-size:clamp(1.2rem,4.6vh,1.6rem)}#result .rp h2.xlong{font-size:clamp(1.05rem,4vh,1.4rem)}
+  #result{place-items:center;padding:6px}
+  #result .panel.rp{padding:10px 14px;gap:8px;width:min(97vw,820px)}
+  #result .panel.rp.duo{width:min(98vw,1060px)}
+  /* cabecera en una sola fila: veredicto a la izquierda, ganador y chapas a la derecha */
+  .rp-head{grid-template-columns:auto minmax(0,1fr) auto;align-items:center;justify-items:start;gap:14px;text-align:left}
+  #result .rp h2{font-size:clamp(1.3rem,6.4vh,1.8rem)}#result .rp h2.long{font-size:clamp(1.1rem,5.2vh,1.5rem)}#result .rp h2.xlong{font-size:clamp(1rem,4.6vh,1.3rem)}
   #result .rp h2::after{display:none}
-  #r-sub{font-size:.95rem}.rp-chips .chip{padding:3px 10px}.rp-chips .chip b{font-size:.9rem}
-  .rcard{grid-template-columns:100px minmax(0,1fr);gap:12px;padding:10px 12px}
-  .rk{width:84px;height:84px}.rk::before{inset:11px}.rk-l{font-size:2.7rem}
-  .rc-side{gap:8px}.rc-who b{font-size:1rem}
-  .rc-bon{max-height:max(90px,calc(100dvh - 250px))}.rc-bon li{padding:3px 2px}.rc-bon li span,.rc-bon li b{font-size:.84rem}
-  .rc-tot b{font-size:1.3rem}.rc-gold{padding:4px 10px}.rc-gold b{font-size:.92rem}
-  .duo .rk{width:62px;height:62px}.duo .rk::before{inset:8px}.duo .rk-l{font-size:2rem}.duo .rcard{gap:8px}
-  .duo .rc-bon{max-height:max(80px,calc(100dvh - 275px))}
-  #result .rp .rp-nav{gap:8px}#result .rp .rp-nav li{flex-basis:160px}#result .rp .rp-nav .nav-item{height:38px;font-size:.92rem}
-  #result .rp #r-stats dt,#result .rp #r-stats dd{padding:4px 2px;font-size:.88rem}
+  #r-sub{font-size:.9rem}.rp-chips{justify-content:flex-end;gap:6px}.rp-chips .chip{padding:3px 9px}.rp-chips .chip i{font-size:.62rem}.rp-chips .chip b{font-size:.85rem}
+  .rcard{grid-template-columns:96px minmax(0,1fr);gap:12px;padding:8px 12px}
+  .rk{width:78px;height:78px}.rk::before{inset:10px}.rk-l{font-size:2.5rem}.rk i{font-size:.56rem}
+  .rc-side{gap:6px}.rc-who b{font-size:.98rem}.rc-who i{font-size:.58rem}
+  .rc-body{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;align-content:space-between;gap:6px 12px}
+  .rc-bon{grid-column:1/-1;max-height:max(72px,calc(100dvh - 205px))}.rc-bon li{padding:3px 2px}.rc-bon li span,.rc-bon li b{font-size:.82rem}
+  .rc-tot{margin-top:0;padding-top:6px}.rc-tot b{font-size:1.25rem}.rc-gold{padding:4px 10px;align-self:end}.rc-gold b{font-size:.9rem}
+  .duo .rcard{gap:6px}.duo .rk{width:56px;height:56px}.duo .rk::before{inset:7px}.duo .rk-l{font-size:1.8rem}.duo .rk i{display:none}
+  .duo .rc-bon{max-height:max(64px,calc(100dvh - 262px))}
+  #result .rp .rp-nav{gap:8px}#result .rp .rp-nav li{flex-basis:150px}#result .rp .rp-nav .nav-item{height:36px;font-size:.9rem}
+  #result .rp #r-stats dt,#result .rp #r-stats dd{padding:3px 2px;font-size:.86rem}
 }
+@media (max-height:560px) and (max-width:700px){.rp-head{grid-template-columns:1fr;justify-items:center;text-align:center}.rp-chips{justify-content:center}}
 /* ── celular en vertical ── */
 @media (max-width:600px) and (min-height:561px){
   #result .panel.rp{padding:18px 14px}
@@ -940,6 +950,9 @@ body.story-cine #hud,body.story-cine #touch,body.story-cine #menu,body.story-cin
   .rk{width:84px;height:84px}.rk-l{font-size:2.6rem}
 }
 @media (prefers-reduced-motion:reduce){.rcard,.rk,.rc-bon li,.rk-S::after{animation:none!important}}
+
+/* vista previa de armas: la placa del guerrero del menú no tapa la demostración */
+body.wpreview .plaque{opacity:0;pointer-events:none;transition:opacity .25s}
 
 /* css/mobile.css */
 /* ════════════ Celular y pantallas bajas (v1.3) ════════════

@@ -50,3 +50,15 @@ html = html.replace('</body>', () => `<script>window.__EW_ASSETS=${esc(JSON.stri
 html = html.replace('<!doctype html>', '<!doctype html>\n<!-- Archivo GENERADO por tools/build-standalone.mjs a partir de index-dev.html: no editar a mano. -->');
 writeFileSync(join(ROOT, 'index.html'), html);
 console.log(`index.html listo: ${(html.length / 1048576).toFixed(1)} MB (código ${(js.length / 1024).toFixed(0)} KB, ${Object.keys(assets).length} recursos)`);
+
+// 5 · versión para publicar en línea (página alojada): mismo contenido sin <html>/<head>/<body> (el alojamiento los pone)
+import { mkdirSync } from 'node:fs';
+{
+  const head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>')).replace(/<meta charset[^>]*>\s*/i, '').replace(/<meta name="viewport"[^>]*>\s*/i, '');
+  const body = html.slice(html.indexOf('>', html.indexOf('<body')) + 1, html.lastIndexOf('</body>'));
+  const boot = `<script>document.documentElement.lang='es';document.body.dataset.reduce='0';</script>`;
+  const css = `<style>html,body{height:100%;margin:0;padding:0!important;background:#05070f;color:#e8ecf5;overflow:hidden}</style>`;
+  mkdirSync(join(ROOT, 'dist'), { recursive: true });
+  writeFileSync(join(ROOT, 'dist/elemental-warriors-online.html'), head.replace(/<title>[^<]*<\/title>/, '<title>Elemental Warriors</title>') + css + '\n' + boot + body);
+  console.log('dist/elemental-warriors-online.html listo (para publicar en línea)');
+}

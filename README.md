@@ -1,15 +1,8 @@
-# Elemental Warriors (v1.3.0 · cinemáticas, historia 3D y celular)
+# Elemental Warriors (v1.4.0 · resumen con rango, un solo archivo y escenarios vivos)
 
 ## Cómo abrirlo
-1. Instala Node.js (nodejs.org).
-2. En la carpeta del proyecto: `npm start` (o `npx serve .`) y abre http://localhost:5173
-   - Alternativa: extensión **Live Server** de VS Code sobre `index.html`.
-3. No funciona con doble clic en index.html (los navegadores bloquean módulos y modelos desde file://).
-
-**Si al cargar dice «N modelo(s) no cargaron»**: el juego se abrió sin servidor o desde otra carpeta. Abre la consola (F12):
-el mensaje dice qué archivo falló (pasando el ratón sobre el aviso también se ve). Comprueba que existe `assets/characters/*.glb`
-y que abres la página con `npm start` o Live Server desde la carpeta del proyecto. Si un modelo carga pero algo de su
-preparación falla en tu navegador, ahora se usa un modo seguro (sin contorno) en lugar del marcador provisional.
+- **Jugar**: abre `index.html` con doble clic (o desde el celular). Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet.
+- **Desarrollar**: `npm start` y abre http://localhost:5173/index-dev.html (usa los módulos de `js/`). Tras cambiar código, datos o estilos, `npm run build` vuelve a generar `index.html` (y `dist/elemental-warriors-online.html`, la versión que se publica en línea).
 
 Comprobar datos: `npm run check`.
 Si un guerrero mira hacia atrás, cambia su `yaw` en `data/characters.json` (por ejemplo, suma 3.14).
@@ -92,3 +85,13 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Manos naturales**: la muñeca sigue la línea del antebrazo y solo gira para orientar la palma (puño: palma hacia dentro y abajo al estirar; mano abierta: palma al frente al empujar). Guardias con los antebrazos verticales y el pulgar cerrado sobre el puño.
 - **Vida infinita** (entrenamiento) arreglada: activada nadie cae y la vida se recupera al acabar cada combo; desactivada el daño se queda y hay K.O. real (luego ambos vuelven con la vida llena).
 - **Terra**: técnicas nuevas y distintas — *Fisura de Colmillos* (barrido bajo que hace brotar una hilera de colmillos de piedra) y *Ola Tectónica* (arranca el suelo y empuja una ola de losas que lanza al rival); *Meteorito* ahora levanta la roca con las palmas y la lanza a dos manos.
+
+## v1.4.0 — Resumen del combate, un solo archivo y escenarios vivos
+- **Un solo archivo**: `index.html` lleva dentro el código, los datos, las tipografías y los modelos; se abre con doble clic o en el celular sin servidor (`tools/build-standalone.mjs`, `npm run build`). La fuente para desarrollar es `index-dev.html`.
+- **Resumen estilo Naruto Storm** (`js/game/fight-report.js`, `js/ui/result-screen.js`): primer golpe, combo máximo, Resonancia acertada, K.O. con Resonancia, rondas perfectas, remontada, contraataques, guardia rota, agarres, técnicas elementales, golpes con arma, bloqueos, daño, vida y tiempo restantes. Cada lado recibe puntuación, **rango S/A/B/C/D** y Rose Gold extra.
+- **2 jugadores**: dos resúmenes (J1 y J2) y lo que gana cada uno se suma a la misma cuenta de Rose Gold.
+- **Pantallas de resultados** rehechas: veredicto siempre en una línea, botones en fila y siempre dentro del panel, versión compacta para celular; los avisos de logros ya no tapan los botones.
+- **Menú**: el botón principal («¡Combatir!», «Comenzar historia»…) queda en un pie fijo y el contenido se desplaza encima sin quedar tapado (`js/ui/panel-dock.js`).
+- **Vista previa de armas**: sin el cartel «vista previa en vivo»; cada arma se muestra a la distancia a la que conecta (la daga contraataca a un maniquí que ataca).
+- **Fuego de Ignis**: lenguas de fuego con forma de llama, humo, cola que sale despedida de la bola y estallido de llamas al impactar.
+- **Escenarios**: capas pintadas con perspectiva (bosques, templos, volcán humeante, castillo, luna y mar, agujas, cañón, arcos, islas flotantes, estrellas y aurora), faroles que se mecen, estandartes, ríos de lava, farolillos que suben, cometas, pájaros y rocas (`js/stages/stage-extras.js`).
