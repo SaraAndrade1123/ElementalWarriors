@@ -1,4 +1,4 @@
-# Elemental Warriors (v1.4.0 · resumen con rango, un solo archivo y escenarios vivos)
+# Elemental Warriors (v1.5.0 · transformación, desafíos, música y mundos)
 
 ## Cómo abrirlo
 - **Jugar**: abre `index.html` con doble clic (o desde el celular). Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet.
@@ -95,3 +95,11 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Vista previa de armas**: sin el cartel «vista previa en vivo»; cada arma se muestra a la distancia a la que conecta (la daga contraataca a un maniquí que ataca).
 - **Fuego de Ignis**: lenguas de fuego con forma de llama, humo, cola que sale despedida de la bola y estallido de llamas al impactar.
 - **Escenarios**: capas pintadas con perspectiva (bosques, templos, volcán humeante, castillo, luna y mar, agujas, cañón, arcos, islas flotantes, estrellas y aurora), faroles que se mecen, estandartes, ríos de lava, farolillos que suben, cometas, pájaros y rocas (`js/stages/stage-extras.js`).
+
+## v1.5.0 — Transformación definitiva, desafíos, música y mundos
+- **Transformación definitiva (F5)** (`js/game/transform.js`): con la Resonancia al 100 % pulsa **Y** (o I+O a la vez; 2 jugadores: J1 **Q**, J2 **7** / **'**; táctil: botón ✹). Gasta toda la Resonancia y durante 12 s: +25 % de daño, −20 % de daño recibido, +12 % de velocidad, regeneración y técnica de Resonancia a mitad de precio. Congelado de cámara, cartel con el nombre de la forma (Llama Soberana, Marea Eterna, Coloso de Jade, Ojo del Huracán), onda de choque, cuerpo que brilla y aura; barra de duración y aviso «¡Transformación lista!» en el HUD. La CPU también se transforma (no los maniquís). Suma bonificación al resumen.
+- **58 desafíos** en 4 categorías: técnica (24, contra el maniquí), combate (18, contra la CPU con condición: sin recibir golpes, en menos de 25 s, combo de 10, rango S, contra el elemento que te gana, solo con los puños, remontada…), modos (9: Arcade sin continuar, 10 victorias en Supervivencia, las 4 historias…) y 2 jugadores (7). Cada uno paga su recompensa.
+- **Música**: 4 canciones nuevas con melodía (Himno de los Elementos, Neón Elemental, Brisa del Templo, Tambores del Volcán) y opción **Aleatoria**; se elige en Ajustes › Sonido › Canción.
+- **Escenarios**: cordilleras con luz, sombra y nieve; clima propio (lluvia y niebla en el bosque, brasas y meteoros en las cenizas, tormenta con relámpagos en las mareas, tormenta de arena en el bastión, nieve y tornado en el viento, aurora en el equilibrio); cascada con río en el bosque; símbolos de cada elemento (pebeteros de llama eterna, tromba de agua, monolito con rocas en órbita, orbes de los cuatro elementos).
+- **Historia**: el prólogo recorre los mundos de los elementos y sus desastres; el héroe se presenta en su mundo; cada capítulo empieza con la llegada narrada al mundo del rival, que se ve con su clima y efectos.
+- **Vista previa de la daga**: el maniquí ataca justo cuando la daga está en guardia, así se ve el bloqueo y el contraataque.

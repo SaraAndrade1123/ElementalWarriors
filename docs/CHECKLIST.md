@@ -224,3 +224,12 @@ La F7 recibida partía de la F3 (sin F4 ni las animaciones de v0.6.0). Se hizo u
 - [x] Vista previa de armas sin cartel y a distancia de impacto.
 - [x] Fuego con lenguas de llama, humo y estallido; escenarios con capas de fondo y vida ambiental.
 - [x] `npm test` = 18 suites OK (nueva `tools/test-v14.mjs`).
+
+## v1.5.0
+- [x] Transformación definitiva funcional (Y / I+O / Q / 7; táctil ✹), mejoras que no se pierden con el triángulo elemental, CPU, HUD, bonificación, desafío y estadística `transformations`.
+- [x] 58 desafíos (técnica, combate, modos, 2 jugadores) con recompensa propia (tope 400) y rival automático (ventaja elemental / espejo).
+- [x] 4 canciones nuevas + aleatoria, elegibles en Ajustes.
+- [x] Escenarios con cordillera, clima y símbolos; cascada en el bosque.
+- [x] Historia con planos de mundo (recorrido del prólogo, llegadas narradas).
+- [x] Daga en la vista previa: maniquí guiado para mostrar el contraataque.
+- [x] `npm test` = 19 suites OK (nueva `tools/test-v15.mjs`).

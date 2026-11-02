@@ -99,9 +99,13 @@ export function addExtras(cfg, K) {
   const light = (k = 0) => hex(sky[Math.min(2, sky.length - 1)].clone().lerp(gr, .35 + k)), shade = (k = 0) => hex(gr.clone().multiplyScalar(.75 - k).lerp(sky[1], .25));
   const E = {
     // ── cordilleras grandes y visibles detrás del ring (dos filas, con nieve si el clima es frío) ──
-    peaks() { const snow = cfg.weather === 'snow' || cfg.id === 'bosque' ? 'rgba(240,248,255,.95)' : null;
-      layer((x, W, H) => paint.range(x, W, H, R, light(.15), shade(.1), snow, 9, .97, .05), { w: 150, h: 26, y: 8.5, z: -23 });
-      layer((x, W, H) => paint.range(x, W, H, R, light(.35), shade(.25), null, 12, .98, .3), { w: 120, h: 16, y: 4, z: -17 }); },
+    peaks() { // contraste garantizado: siluetas más oscuras que el cielo, cara iluminada con el color del escenario y nieve en los climas fríos
+      const snow = ['snow', 'rain'].includes(cfg.weather) ? 'rgba(240,248,255,.95)' : null, acc = new THREE.Color(cfg.rim);
+      const lum = sky[1].r * .3 + sky[1].g * .59 + sky[1].b * .11, base = sky[1].clone().lerp(new THREE.Color(0x1a2240), .35);
+      const far = base.clone().multiplyScalar(lum > .45 ? .66 : .55), near = base.clone().lerp(gr, .4).multiplyScalar(lum > .45 ? .46 : .38);
+      const lit = c => hex(c.clone().lerp(acc, .25).multiplyScalar(1.35));
+      layer((x, W, H) => paint.range(x, W, H, R, lit(far), hex(far), snow, 9, .97, .22), { w: 150, h: 22, y: 3, z: -23 });
+      layer((x, W, H) => paint.range(x, W, H, R, lit(near), hex(near), null, 12, .98, .28), { w: 120, h: 14, y: 2.5, z: -17 }); },
     // ── clima ──
     rain() { const n = 360, pos = new Float32Array(n * 6), sp = [];
       for (let i = 0; i < n; i++) { const x0 = (R() * 2 - 1) * 22, y0 = R() * 16, z0 = -10 + R() * 9; pos.set([x0, y0, z0, x0 - .08, y0 + .7, z0], i * 6); sp.push(14 + R() * 8); }
@@ -123,16 +127,16 @@ export function addExtras(cfg, K) {
       anim.push((t, dt) => { for (const m of ms) { m.t += dt * .5; if (m.t > 1.6) { m.t = 0; m.x0 = (R() * 2 - 1) * 40; } const k = Math.min(1, m.t); m.s.position.set(m.x0 + k * 14, 26 - k * 18, -34); m.s.material.opacity = m.t < 1 ? .9 : 0; m.s.scale.set(4, 1.2, 1); m.s.material.rotation = -.9; } }); },
     // ── cascada del bosque: acantilado, caída de agua animada, espuma y río ──
     cascade() {
-      const cliff = new THREE.Mesh(new THREE.PlaneGeometry(34, 16), new THREE.MeshBasicMaterial({ map: tex(1024, 512, (x, W, H) => { x.fillStyle = shade(.05); x.beginPath(); x.moveTo(0, H); x.lineTo(0, H * .12); for (let i = 0; i <= 20; i++) x.lineTo(i * W / 20, H * (.08 + R() * .1)); x.lineTo(W, H); x.fill();
-        x.fillStyle = 'rgba(0,0,0,.18)'; for (let i = 0; i < 40; i++) x.fillRect(R() * W, H * (.2 + R() * .7), 30 + R() * 80, 6 + R() * 10); paint.pines(x, W, H, R, shade(.15), 22, .16, .45); }), transparent: true, depthWrite: false, fog: false }));
-      cliff.renderOrder = -4; add(cliff, -9, 6, -15);
+      const rockC = gr.clone().multiplyScalar(.6).lerp(new THREE.Color(0x56606e), .45), cliff = new THREE.Mesh(new THREE.PlaneGeometry(22, 14), new THREE.MeshBasicMaterial({ map: tex(1024, 512, (x, W, H) => { const g3 = x.createLinearGradient(W, 0, 0, 0); g3.addColorStop(0, hex(rockC.clone().multiplyScalar(1.25))); g3.addColorStop(1, hex(rockC.clone().multiplyScalar(.7))); x.fillStyle = g3; x.beginPath(); x.moveTo(0, H); x.lineTo(0, H * .12); for (let i = 0; i <= 20; i++) x.lineTo(i * W / 20, H * (.08 + R() * .1)); x.lineTo(W, H); x.fill();
+        x.fillStyle = 'rgba(0,0,0,.22)'; for (let i = 0; i < 60; i++) x.fillRect(R() * W, H * (.2 + R() * .75), 30 + R() * 90, 5 + R() * 12); x.fillStyle = 'rgba(255,255,255,.08)'; for (let i = 0; i < 30; i++) x.fillRect(R() * W, H * (.2 + R() * .7), 20 + R() * 60, 3); paint.pines(x, W, H, R, hex(gr.clone().multiplyScalar(.55)), 22, .16, .45); }), transparent: true, depthWrite: false, fog: false }));
+      cliff.renderOrder = -4; add(cliff, -9.5, 5.2, -8.8);
       const wt = tex(128, 512, (x, W, H) => { const g2 = x.createLinearGradient(0, 0, W, 0); g2.addColorStop(0, 'rgba(160,215,255,.3)'); g2.addColorStop(.5, 'rgba(235,250,255,.95)'); g2.addColorStop(1, 'rgba(160,215,255,.3)'); x.fillStyle = g2; x.fillRect(0, 0, W, H); x.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < 80; i++) x.fillRect(R() * W, R() * H, 2 + R() * 3, 24 + R() * 60); });
       wt.wrapT = THREE.RepeatWrapping; wt.repeat.set(1, 2.5);
-      const fall = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 13.5, 1, 8), new THREE.MeshBasicMaterial({ map: wt, transparent: true, opacity: .9, depthWrite: false, fog: false })); fall.renderOrder = -3; add(fall, -7, 6.3, -14.8);
+      const fall = new THREE.Mesh(new THREE.PlaneGeometry(3, 12, 1, 8), new THREE.MeshBasicMaterial({ map: wt, transparent: true, opacity: .9, depthWrite: false, fog: false })); fall.renderOrder = -3; add(fall, -6.2, 5.6, -8.6);
       anim.push((t, dt) => { wt.offset.y += dt * 1.1; });
-      for (let i = 0; i < 10; i++) { const sp = sprite(smokeMap, 0xffffff, 3, -7 + (R() - .5) * 3, -.2, -14.5, THREE.NormalBlending, .5), ph = R() * 6; anim.push(t => { const k = (t * .5 + ph) % 1; sp.position.y = -.2 + k * 2.5; sp.scale.setScalar(2 + k * 4); sp.material.opacity = .55 * (1 - k); }); }
+      for (let i = 0; i < 10; i++) { const sp = sprite(smokeMap, 0xffffff, 3, -6.2 + (R() - .5) * 3, -.2, -8.3, THREE.NormalBlending, .5), ph = R() * 6; anim.push(t => { const k = (t * .5 + ph) % 1; sp.position.y = -.2 + k * 2.5; sp.scale.setScalar(2 + k * 4); sp.material.opacity = .55 * (1 - k); }); }
       const rt = tex(256, 64, (x, W, H) => { x.fillStyle = '#6fbde8'; x.fillRect(0, 0, W, H); x.strokeStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 30; i++) { x.beginPath(); const y = R() * H; x.moveTo(R() * W, y); x.lineTo(R() * W, y); x.stroke(); } }); rt.wrapS = THREE.RepeatWrapping; rt.repeat.set(6, 1);
-      const river = new THREE.Mesh(new THREE.PlaneGeometry(60, 2.4), new THREE.MeshBasicMaterial({ map: rt, transparent: true, opacity: .85, fog: false })); river.rotation.x = -Math.PI / 2; add(river, 0, -.35, -12.5); anim.push((t, dt) => { rt.offset.x += dt * .25; }); },
+      const river = new THREE.Mesh(new THREE.PlaneGeometry(60, 2.4), new THREE.MeshBasicMaterial({ map: rt, transparent: true, opacity: .85, fog: false })); river.rotation.x = -Math.PI / 2; add(river, 0, -.3, -6.4); anim.push((t, dt) => { rt.offset.x += dt * .25; }); },
     // ── símbolos de cada elemento ──
     brazier() { // pebetero de la llama eterna
       for (const sx of [-1, 1]) { const x0 = sx * 13; add(new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.5, 6, 8), K.stone), x0, 2.6, -11); add(new THREE.Mesh(new THREE.CylinderGeometry(2, 1, 1.2, 10), K.dark), x0, 6.2, -11);
@@ -158,10 +162,10 @@ export function addExtras(cfg, K) {
 
     // capas de bosque: pinos lejanos azulados y pinos medios
     forestback() {
-      layer((x, W, H) => { paint.hills(x, W, H, R, tone(.75), .2, .62, 2); paint.pines(x, W, H, R, tone(.7), 90, .64, .7); }, { w: 170, h: 40, y: 12, z: -34 });
+      layer((x, W, H) => { paint.hills(x, W, H, R, tone(.75), .2, .62, 2); paint.pines(x, W, H, R, tone(.7), 90, .64, .7); }, { w: 170, h: 40, y: 7, z: -34 });
       layer((x, W, H) => { paint.pines(x, W, H, R, tone(.45), 60, .7, 1.1); }, { w: 130, h: 30, y: 8, z: -24 });
     },
-    temples() { layer((x, W, H) => { paint.hills(x, W, H, R, tone(.6), .25, .7, 5); paint.pagoda(x, W * .3, H * .5, 1.3, tone(.6), 'rgba(255,214,120,.9)'); paint.pagoda(x, W * .74, H * .56, .9, tone(.6), 'rgba(255,214,120,.9)'); }, { w: 150, h: 34, y: 11, z: -29 }); },
+    temples() { layer((x, W, H) => { paint.hills(x, W, H, R, tone(.6), .25, .7, 5); paint.pagoda(x, W * .3, H * .5, 1.3, tone(.6), 'rgba(255,214,120,.9)'); paint.pagoda(x, W * .74, H * .56, .9, tone(.6), 'rgba(255,214,120,.9)'); }, { w: 150, h: 34, y: 6, z: -29 }); },
     birds() {
       for (let i = 0; i < 9; i++) { const sp = sprite(birdMap, new THREE.Color(cfg.ground).multiplyScalar(.4), .9 + R() * .5, -40 + R() * 20, 9 + R() * 6, -20 - R() * 6), ph = R() * 6, sp0 = 1.5 + R();
         anim.push((t) => { sp.position.x = -40 + ((t * sp0 + ph * 10) % 80); sp.position.y += Math.sin(t * 2 + ph) * .004; sp.scale.y = (.45 + .25 * Math.abs(Math.sin(t * 8 + ph))) * sp.scale.x; }); }
@@ -180,10 +184,10 @@ export function addExtras(cfg, K) {
         m.scale.y = .6 + R() * .4; m.rotation.y = R() * 6; m.castShadow = true; add(m, x, r * .3, -3.2 - R() * 2.5); }
     },
     volcano() {
-      layer((x, W, H) => paint.volcano(x, W, H, tone(.55), 'rgba(255,120,40,.95)'), { w: 160, h: 46, y: 15, z: -36 });
-      for (let i = 0; i < 10; i++) { const sp = sprite(smokeMap, 0x2a1a1a, 8, 20, 22, -35.5, THREE.NormalBlending, .6), ph = i / 10;
-        anim.push(t => { const k = (t * .06 + ph) % 1; sp.position.set(20 + k * 14 + Math.sin(t * .3 + i) * 2, 26 + k * 18, -35.5); sp.scale.setScalar(6 + k * 16); sp.material.opacity = .55 * Math.sin(Math.PI * k); }); }
-      const lava = flame(20, 27, -36, 14, '#ff6a20'); anim.push(t => { lava.scale.setScalar(lava.userData.base * (1 + .15 * Math.sin(t * 2.2))); });
+      layer((x, W, H) => paint.volcano(x, W, H, '#3b1714', 'rgba(255,120,40,.95)'), { w: 160, h: 46, y: -3, z: -36 });
+      for (let i = 0; i < 10; i++) { const sp = sprite(smokeMap, 0x2a1a1a, 8, 19, 10, -35.5, THREE.NormalBlending, .6), ph = i / 10;
+        anim.push(t => { const k = (t * .06 + ph) % 1; sp.position.set(19 + k * 14 + Math.sin(t * .3 + i) * 2, 10 + k * 14, -35.5); sp.scale.setScalar(6 + k * 16); sp.material.opacity = .55 * Math.sin(Math.PI * k); }); }
+      const lava = flame(19, 10.5, -36, 12, '#ff6a20'); anim.push(t => { lava.scale.setScalar(lava.userData.base * (1 + .15 * Math.sin(t * 2.2))); });
     },
     castle() { layer((x, W, H) => paint.castle(x, W, H, R, tone(.35, .1), 'rgba(255,150,60,.95)'), { w: 140, h: 30, y: 9, z: -24 }); },
     lavaflow() {
@@ -211,10 +215,10 @@ export function addExtras(cfg, K) {
       for (let i = 0; i < 16; i++) { const x0 = -24 + R() * 48, z = -14 - R() * 16, sp = flame(x0, 0, z, .9 + R() * .6, '#ffb35a'), ph = R(), spd = .03 + R() * .03;
         anim.push(t => { const k = (t * spd + ph) % 1; sp.position.set(x0 + Math.sin(t * .4 + ph * 9) * .6, k * 16, z); sp.material.opacity = Math.min(1, k * 5) * (1 - k * k); }); }
     },
-    spires() { layer((x, W, H) => paint.spires(x, W, H, R, tone(.55), 16), { w: 150, h: 36, y: 13, z: -30 }); layer((x, W, H) => paint.spires(x, W, H, R, tone(.25, .1), 9), { w: 110, h: 22, y: 7, z: -20 }); },
+    spires() { layer((x, W, H) => paint.spires(x, W, H, R, tone(.55), 16), { w: 150, h: 36, y: 8, z: -30 }); layer((x, W, H) => paint.spires(x, W, H, R, tone(.25, .1), 9), { w: 110, h: 22, y: 7, z: -20 }); },
     canyon() { layer((x, W, H) => { paint.hills(x, W, H, R, tone(.6), .3, .55, 7); }, { w: 170, h: 40, y: 14, z: -34 }); layer((x, W, H) => { paint.hills(x, W, H, R, tone(.35, .05), .25, .7, 3); }, { w: 130, h: 30, y: 8, z: -24 }); },
     arches() { layer((x, W, H) => paint.arches(x, W, H, R, tone(.45, .05)), { w: 130, h: 32, y: 10, z: -26 }); },
-    islands() { layer((x, W, H) => paint.islands(x, W, H, R, tone(.55), 'rgba(255,230,160,.9)', 7), { w: 160, h: 40, y: 14, z: -32 }); },
+    islands() { layer((x, W, H) => paint.islands(x, W, H, R, tone(.55), 'rgba(255,230,160,.9)', 7), { w: 160, h: 40, y: 9, z: -32 }); },
     cloudsea() {
       for (let i = 0; i < 16; i++) { const sp = sprite(smokeMap, 0xffffff, 10 + R() * 10, -50 + i * 6.5, -1 + R() * 2, -18 - R() * 14, THREE.NormalBlending, .7), x0 = sp.position.x, ph = R() * 6;
         anim.push(t => { sp.position.x = x0 + Math.sin(t * .05 + ph) * 3; }); }
