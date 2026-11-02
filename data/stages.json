@@ -1,0 +1,28 @@
+{
+ "stages": [
+  {"id":"bosque","element":"neutral","unlock":{"type":"free"},
+   "sky":["#6fb7ff","#a9dcff","#f4f0c8"],"fog":{"color":"#9ecfe8","density":0.014},
+   "ground":"#5f7a4a","slab":"#7d8a78","accent":"#ffd54a","rim":"#ffe9a8","key":"#fff1d6","keyI":2.4,
+   "props":["trees","ruins","mountains","sunglow"],"fx":{"kind":"leaves","color":"#9be26a","count":90,"size":0.16}},
+  {"id":"cenizas","element":"fire","unlock":{"type":"free"},
+   "sky":["#14060a","#4a1218","#c4482a"],"fog":{"color":"#2a0d10","density":0.022},
+   "ground":"#2a2224","slab":"#3b2f33","accent":"#ff7a35","rim":"#ff6a2a","key":"#ffb07a","keyI":1.7,
+   "props":["fortress","torches","cracks","mountains"],"fx":{"kind":"ash","color":"#ffb347","count":140,"size":0.12}},
+  {"id":"mareas","element":"water","unlock":{"type":"free"},
+   "sky":["#05142e","#0f3b6b","#5fd0ff"],"fog":{"color":"#0c2a4d","density":0.02},
+   "ground":"#2b4a66","slab":"#3d6283","accent":"#5fd0ff","rim":"#2f8cff","key":"#bfe6ff","keyI":1.9,
+   "props":["temple","waterfall","pool","pillars"],"fx":{"kind":"bubbles","color":"#9fe3ff","count":120,"size":0.13}},
+  {"id":"bastion","element":"earth","unlock":{"type":"free"},
+   "sky":["#14120a","#3a3318","#8c7a3c"],"fog":{"color":"#2a2412","density":0.02},
+   "ground":"#4a4332","slab":"#5c5440","accent":"#b9d86a","rim":"#6fbf4a","key":"#ffe8b0","keyI":1.8,
+   "props":["colossus","crystals","pillars","mountains"],"fx":{"kind":"dust","color":"#d8c890","count":110,"size":0.1}},
+  {"id":"viento","element":"wind","unlock":{"type":"free"},
+   "sky":["#6a8fd6","#b6cff5","#f4f8ff"],"fog":{"color":"#c4d6f2","density":0.012},
+   "ground":"#b8c4d8","slab":"#d0d8e8","accent":"#e6f4ff","rim":"#d4ecff","key":"#ffffff","keyI":2.5,
+   "props":["bridges","flags","clouds","pillars"],"fx":{"kind":"streaks","color":"#ffffff","count":80,"size":0.14}},
+  {"id":"equilibrio","element":"all","unlock":{"type":"free"},
+   "sky":["#070b1e","#2a2352","#a8566a"],"fog":{"color":"#1d1a3a","density":0.012},
+   "ground":"#2a3556","slab":"#34416a","accent":"#ffd54a","rim":"#c9a44c","key":"#fff1d6","keyI":2.2,
+   "props":["sigils","pillars","ringhalo","mountains"],"fx":{"kind":"motes","color":"#f1dc9a","count":120,"size":0.11}}
+ ]
+}

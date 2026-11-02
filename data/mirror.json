@@ -1,0 +1,11 @@
+{
+ "_doc": "Chroma ESPEJO: el aspecto del segundo guerrero cuando los dos luchadores son el mismo. No es una paleta de la tienda: se aplica en el sombreador sobre CUALQUIER modelo (no depende de su textura), así sirve igual para diseños personalizados futuros. hue = giro de matiz en grados, sat/val = multiplicadores de saturación y brillo, keepSkin = conserva los tonos de piel, tint/tintAmount = tiñe metales y blancos, rim/rimStrength/rimPower = contorno luminoso que identifica al espejo, fx = color de aura y partículas del menú/HUD. Un guerrero sin entrada usa «default» (y su fx se calcula girando el suyo). Nombre visible: clave de texto mirror.<id>.name (o mirror.generic).",
+ "version": 1,
+ "default": { "hue": 165, "sat": 1.1, "val": 0.9, "keepSkin": true, "tint": "#ffffff", "tintAmount": 0.18, "rim": "#e8f4ff", "rimStrength": 0.65, "rimPower": 2.4 },
+ "chars": {
+  "ignis":  { "hue": 150, "sat": 1.15, "val": 0.92, "tint": "#7dffb0", "tintAmount": 0.22, "rim": "#5dffa8", "rimStrength": 0.8, "fx": { "color": "#3dff9a", "light": "#1fd47a" } },
+  "aqua":   { "hue": 175, "sat": 1.1, "val": 0.95, "tint": "#ffc46b", "tintAmount": 0.22, "rim": "#ffb347", "rimStrength": 0.8, "fx": { "color": "#ffb347", "light": "#ff8c1a" } },
+  "terra":  { "hue": -140, "sat": 1.15, "val": 0.92, "tint": "#ff9fd0", "tintAmount": 0.25, "rim": "#ff6fb5", "rimStrength": 0.8, "fx": { "color": "#ff6fb5", "light": "#e0408f" } },
+  "zephyr": { "hue": -45, "sat": 1.35, "val": 0.86, "tint": "#ff8090", "tintAmount": 0.3, "rim": "#ff5a6e", "rimStrength": 0.85, "fx": { "color": "#ff5a6e", "light": "#d92a45" } }
+ }
+}

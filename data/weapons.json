@@ -1,0 +1,50 @@
+{
+ "_doc": "Armas de la tienda (v0.9). No son de ningún guerrero: cualquiera puede comprarlas (Rose Gold) y equipar UNA. Cada arma da UNA técnica extra en su propio botón (no sustituye a los golpes normales, que son sin arma) y una mejora pasiva. La técnica se adapta al elemento de quien la usa (ver 'element'). move = golpe con el formato de data/moves.json; campos extra: parry [t0,t1] (ventana de contraataque), reflect [t0,t1] (devuelve proyectiles), proj.fan (n.º de proyectiles en abanico), proj.boomerang (vuelve a la mano), proj.snare (enreda). after = qué hace con el arma al terminar: stow (la guarda), throw (la lanza y desaparece), return (vuelve y la recoge), vanish (se disuelve en su elemento). passive: ward (reduce la desventaja del triángulo elemental, 0-1), atk, def, speed, meter (multiplicadores extra, 0.05 = +5 %). Ver docs/ARMAS.md.",
+ "version": 1,
+ "element": {
+  "fire":  { "dmg": 1.15 },
+  "water": { "hitstun": 1.25, "blockstun": 1.15 },
+  "wind":  { "range": 1.15, "speed": 1.2, "kb": 1.3 },
+  "earth": { "guardDmg": 1.5, "armor": true }
+ },
+ "weapons": {
+  "wp_cuchillos": {
+   "kind": "knives", "cd": 4, "hands": "F", "sheath": "hip", "after": "throw", "ai": "zone", "passive": { "meter": 0.1, "speed": 0.04 },
+   "move": { "cat": "weapon", "startup": 0.2, "active": 0.05, "recovery": 0.3, "dmg": 0, "hit": "mid", "hitstun": 0, "blockstun": 0, "kb": 0, "kbBlock": 0, "range": 0, "y0": 0, "y1": 0, "cancel": [],
+     "proj": { "kind": "w_knife", "fan": 3, "spread": 2.2, "speed": 17, "life": 0.55, "w": 0.5, "h": 0.3, "y": 1.9, "x0": 0.9, "dmg": 4, "hit": "mid", "hitstun": 0.22, "blockstun": 0.14, "kb": 1.5, "kbBlock": 1, "chip": 0.5 } }
+  },
+  "wp_boleadoras": {
+   "kind": "bola", "cd": 7, "hands": "F", "sheath": "hip", "after": "throw", "ai": "antiair", "passive": { "speed": 0.05 },
+   "move": { "cat": "weapon", "startup": 0.34, "active": 0.05, "recovery": 0.34, "dmg": 0, "hit": "mid", "hitstun": 0, "blockstun": 0, "kb": 0, "kbBlock": 0, "range": 0, "y0": 0, "y1": 0, "cancel": [],
+     "proj": { "kind": "w_bola", "snare": true, "speed": 12, "vy": 3.2, "life": 0.75, "w": 0.7, "h": 0.7, "y": 2.0, "x0": 0.9, "dmg": 7, "hit": "mid", "hitstun": 0.95, "blockstun": 0.2, "kb": 0.5, "kbBlock": 1.5, "spike": true } }
+  },
+  "wp_bumeran": {
+   "kind": "boomerang", "cd": 6, "hands": "F", "sheath": "back", "after": "return", "ai": "zone", "passive": { "meter": 0.15 },
+   "move": { "cat": "weapon", "startup": 0.26, "active": 0.05, "recovery": 0.3, "dmg": 0, "hit": "mid", "hitstun": 0, "blockstun": 0, "kb": 0, "kbBlock": 0, "range": 0, "y0": 0, "y1": 0, "cancel": [],
+     "proj": { "kind": "w_boomerang", "boomerang": true, "multi": 3, "gap": 0.3, "speed": 13, "life": 1.25, "w": 0.8, "h": 0.5, "y": 1.9, "x0": 0.9, "dmg": 6, "hit": "mid", "hitstun": 0.34, "blockstun": 0.2, "kb": 2, "kbBlock": 1.5, "chip": 1 } }
+  },
+  "wp_daga": {
+   "kind": "dagger", "cd": 7, "hands": "F", "sheath": "hip", "after": "stow", "ai": "counter", "passive": { "ward": 0.3, "def": 0.05 },
+   "move": { "cat": "weapon", "startup": 0.55, "active": 0.08, "recovery": 0.3, "dmg": 9, "hit": "mid", "hitstun": 0.55, "blockstun": 0.25, "kb": 4, "kbBlock": 2.5, "range": 2.0, "y0": 1.0, "y1": 2.6, "lunge": 2.6, "cancel": [],
+     "parry": [0.08, 0.5], "riposte": { "dmg": 2.2, "hitstun": 1.6 } }
+  },
+  "wp_abanico": {
+   "kind": "fan", "cd": 6, "hands": "F", "sheath": "hip", "after": "stow", "ai": "counter", "passive": { "ward": 0.5 },
+   "move": { "cat": "weapon", "startup": 0.2, "active": 0.22, "recovery": 0.32, "dmg": 6, "hit": "mid", "hitstun": 0.4, "blockstun": 0.3, "kb": 9, "kbBlock": 7, "range": 2.6, "y0": 0.3, "y1": 3.0, "lunge": 0.4, "cancel": [],
+     "reflect": [0.12, 0.44], "reach": 3.4 }
+  },
+  "wp_garfios": {
+   "kind": "hooks", "cd": 7, "hands": "FB", "sheath": "back", "after": "stow", "ai": "pull", "passive": { "ward": 0.25, "atk": 0.05 },
+   "move": { "cat": "weapon", "startup": 0.26, "active": 0.1, "recovery": 0.34, "dmg": 8, "hit": "mid", "hitstun": 0.7, "blockstun": 0.3, "kb": 0, "kbBlock": 2, "pull": 5.5, "range": 3.2, "y0": 0.6, "y1": 2.6, "lunge": 1.2, "guardDmg": 40, "cancel": [] }
+  },
+  "wp_maza": {
+   "kind": "mace", "cd": 8, "hands": "F", "sheath": "back", "after": "stow", "ai": "guard", "passive": { "atk": 0.08, "speed": -0.04 },
+   "move": { "cat": "weapon", "startup": 0.36, "active": 0.08, "recovery": 0.42, "dmg": 15, "hit": "high", "hitstun": 0.5, "blockstun": 0.34, "kb": 5, "kbBlock": 4, "range": 2.4, "y0": 0.0, "y1": 2.4, "lunge": 1.8, "guardDmg": 70, "kd": true, "cancel": [] }
+  },
+  "wp_arco": {
+   "kind": "bow", "cd": 6, "hands": "F", "sheath": "back", "after": "vanish", "ai": "zone", "passive": { "atk": 0.05 },
+   "move": { "cat": "weapon", "startup": 0.42, "active": 0.05, "recovery": 0.3, "dmg": 0, "hit": "mid", "hitstun": 0, "blockstun": 0, "kb": 0, "kbBlock": 0, "range": 0, "y0": 0, "y1": 0, "cancel": [],
+     "proj": { "kind": "w_arrow", "speed": 24, "life": 0.7, "w": 0.9, "h": 0.25, "y": 2.1, "x0": 1.0, "dmg": 15, "hit": "mid", "hitstun": 0.5, "blockstun": 0.24, "kb": 4, "kbBlock": 2, "chip": 2 } }
+  }
+ }
+}

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio de audio — Elemental Warriors</title>
+<style>
+ body{margin:0;padding:20px;font:15px/1.4 system-ui,sans-serif;background:#0b1020;color:#e8ecff}
+ h1{font-size:1.3rem;margin:0 0 4px} h2{font-size:1.05rem;margin:22px 0 8px;color:#f0d58c} p{margin:4px 0 10px;color:#9aa6d0}
+ .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center} button,select{font:inherit;color:inherit;background:#18204a;border:1px solid #3a4470;padding:6px 12px;cursor:pointer;border-radius:3px}
+ button:hover{border-color:#f0d58c} button.on{background:#c9a24a;color:#111}
+ label{display:inline-flex;gap:8px;align-items:center;margin-right:16px}
+ table{border-collapse:collapse;width:100%;font-size:13px} td,th{padding:3px 8px;border-bottom:1px solid #243060;text-align:right} td:first-child,th:first-child{text-align:left}
+ .bad{color:#ff8d9b} .ok{color:#8dffb0}
+</style></head><body>
+<h1>Laboratorio de audio</h1>
+<p>Escucha cada efecto y cada pieza musical. Todo se genera por código: edita los números en <code>js/audio/sfx-bank.js</code> y <code>js/audio/music.js</code> y recarga.</p>
+<div class="row"><label>Música <input id="v-music" type="range" min="0" max="100" value="50"></label><label>Efectos <input id="v-sfx" type="range" min="0" max="100" value="80"></label>
+<label>Elemento <select id="el"><option value="">(ninguno)</option><option>fire</option><option>water</option><option>earth</option><option>wind</option></select></label></div>
+<h2>Música</h2><div class="row" id="music"></div>
+<h2>Efectos</h2><div class="row" id="sfx"></div>
+<h2>Medición (renderizado sin conexión)</h2><div class="row"><button id="measure">Medir todo</button><span id="status"></span></div><div id="report"></div>
+<script type="module" src="js/audio/audio-lab.js"></script></body></html>

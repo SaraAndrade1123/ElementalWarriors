@@ -1,0 +1,124 @@
+{
+ "roster": [
+  {
+   "id": "ignis",
+   "name": "Ignis",
+   "element": "fire",
+   "shape": "diamond",
+   "model": "assets/characters/ignis.glb",
+   "height": 3.5,
+   "yaw": -0.45,
+   "fx": {
+    "color": "#ff7a35",
+    "light": "#ff6a2a",
+    "rise": 1.4,
+    "sway": 0.3,
+    "drift": 0.1,
+    "size": 0.09
+   },
+   "stats": {
+    "vida": 7,
+    "velocidad": 6,
+    "fuerza": 7,
+    "defensa": 5,
+    "alcance": 5
+   },
+   "provisional": {
+    "title": "Zuko - Avatar: The Last Airbender",
+    "author": "Chechorams16",
+    "license": "CC-BY-4.0",
+    "url": "https://sketchfab.com/3d-models/zuko-avatar-the-last-airbender-45ee31248ed94f6db1b42b563b79c358"
+   }
+  },
+  {
+   "id": "aqua",
+   "name": "Aqua",
+   "element": "water",
+   "shape": "drop",
+   "model": "assets/characters/aqua.glb",
+   "height": 3.4,
+   "yaw": -0.45,
+   "fx": {
+    "color": "#5fd0ff",
+    "light": "#2f8cff",
+    "rise": 0.5,
+    "sway": 0.6,
+    "drift": 0,
+    "size": 0.11
+   },
+   "stats": {
+    "vida": 6,
+    "velocidad": 6,
+    "fuerza": 5,
+    "defensa": 6,
+    "alcance": 8
+   },
+   "provisional": {
+    "title": "Katara - Avatar: The Last Airbender",
+    "author": "Chechorams16",
+    "license": "CC-BY-4.0",
+    "url": "https://sketchfab.com/3d-models/katara-avatar-the-last-airbender-87ee6b99aea74f8f992e939c15a44f0e"
+   }
+  },
+  {
+   "id": "terra",
+   "name": "Terra",
+   "element": "earth",
+   "shape": "block",
+   "model": "assets/characters/terra.glb",
+   "height": 3.3,
+   "yaw": -0.45,
+   "fx": {
+    "color": "#b9d86a",
+    "light": "#6fbf4a",
+    "rise": 0.15,
+    "sway": 0.25,
+    "drift": -0.1,
+    "size": 0.08
+   },
+   "stats": {
+    "vida": 9,
+    "velocidad": 3,
+    "fuerza": 9,
+    "defensa": 8,
+    "alcance": 4
+   },
+   "provisional": {
+    "title": "Toph - Avatar: The Last Airbender",
+    "author": "Chechorams16",
+    "license": "CC-BY-4.0",
+    "url": "https://sketchfab.com/3d-models/toph-avatar-the-last-airbender-730598f557ae4baaabb7c0a658d82aa8"
+   }
+  },
+  {
+   "id": "zephyr",
+   "name": "Zephyr",
+   "element": "wind",
+   "shape": "tri",
+   "model": "assets/characters/zephyr.glb",
+   "height": 3,
+   "yaw": -0.45,
+   "fx": {
+    "color": "#e3f0ff",
+    "light": "#9cc8ff",
+    "rise": 0.3,
+    "sway": 1.6,
+    "drift": 1.8,
+    "size": 0.07
+   },
+   "stats": {
+    "vida": 5,
+    "velocidad": 9,
+    "fuerza": 5,
+    "defensa": 3,
+    "alcance": 6
+   },
+   "provisional": {
+    "title": "Aang - Avatar: The Last Airbender",
+    "author": "Chechorams16",
+    "license": "CC-BY-4.0",
+    "url": "https://sketchfab.com/3d-models/aang-avatar-the-last-airbender-105b1ec30e00436e9f373ebe3f36ef78"
+   }
+  }
+ ]
+}

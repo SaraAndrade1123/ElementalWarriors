@@ -1,0 +1,48 @@
+{
+ "items": [
+  {
+   "id": "play",
+   "status": "ready"
+  },
+  {
+   "id": "story",
+   "status": "ready"
+  },
+  {
+   "id": "arcade",
+   "status": "ready"
+  },
+  {
+   "id": "versus",
+   "status": "ready"
+  },
+  {
+   "id": "challenges",
+   "status": "ready"
+  },
+  {
+   "id": "roster",
+   "status": "ready"
+  },
+  {
+   "id": "collection",
+   "status": "ready"
+  },
+  {
+   "id": "shop",
+   "status": "ready"
+  },
+  {
+   "id": "progress",
+   "status": "ready"
+  },
+  {
+   "id": "settings",
+   "status": "ready"
+  },
+  {
+   "id": "credits",
+   "status": "ready"
+  }
+ ]
+}

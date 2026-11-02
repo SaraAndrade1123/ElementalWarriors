@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laboratorio de animación · Elemental Warriors</title>
+<script type="importmap">{"imports":{"three":"../js/vendor/three/build/three.module.js","three/addons/":"../js/vendor/three/examples/jsm/"}}</script>
+<style>
+  html,body{margin:0;height:100%;background:#050a16;color:#e8e2cc;font:14px/1.3 system-ui,sans-serif;overflow:hidden}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #ui{position:fixed;top:10px;left:10px;display:grid;gap:8px;width:272px;padding:12px;background:rgba(8,14,30,.82);border:1px solid #6b5a2a;border-radius:8px;backdrop-filter:blur(4px);max-height:calc(100% - 20px);overflow:auto}
+  #ui h1{font-size:14px;margin:0;color:#f1dc9a;letter-spacing:.06em}
+  #ui label{display:grid;grid-template-columns:70px 1fr;align-items:center;gap:6px;font-size:12px;color:#aab}
+  #ui select,#ui input[type=range]{width:100%}
+  #ui select{background:#101a35;color:#fff;border:1px solid #4a4020;padding:3px}
+  .row{display:flex;flex-wrap:wrap;gap:5px}
+  button{background:#16244a;color:#f6efd2;border:1px solid #6b5a2a;border-radius:5px;padding:5px 9px;cursor:pointer;font:inherit;font-size:12px}
+  button:hover{background:#22366f} button.on{background:#7a5f18}
+  #hint{font-size:11px;color:#8d93a6}
+  kbd{background:#1a2650;border:1px solid #6b5a2a;border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:11px;color:#f1dc9a}
+  #err{color:#ff8d8d;font-size:12px;white-space:pre-wrap}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <h1>LABORATORIO DE ANIMACIÓN</h1>
+  <label>Guerrero<select id="p1"></select></label>
+  <label>Rival<select id="p2"></select></label>
+  <div class="row" id="moves"></div>
+  <label>Velocidad<input id="spd" type="range" min="0.05" max="1.5" step="0.05" value="1"></label>
+  <label>Cámara<select id="cam"><option value="game">Juego</option><option value="side">Perfil cercano</option><option value="three">Tres cuartos</option><option value="front">Frente</option><option value="back">Espalda</option></select></label>
+  <div class="row"><button id="skel">Ver esqueleto</button><button id="pause">Pausar</button></div>
+  <div id="hint">Teclado como en el juego: <kbd>A</kbd><kbd>D</kbd> mover · <kbd>W</kbd> saltar · <kbd>S</kbd> agacharse · <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> ligero/medio/pesado · <kbd>U</kbd> especial · <kbd>I</kbd> Resonancia · <kbd>Shift</kbd> guardia.<br>Los botones reproducen la secuencia solos.</div>
+  <div id="err"></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { SceneManager } from '../js/game/scene-manager.js';
+
+const $ = s => document.querySelector(s), err = $('#err');
+const fail = e => { err.textContent += String(e && e.stack || e) + '\n'; console.error(e); };
+addEventListener('error', e => fail(e.error || e.message));
+
+// Entrada con tiempo VIRTUAL (para avanzar fotograma a fotograma de forma determinista). Misma interfaz que Input.
+class LabInput {
+  constructor() { this.held = new Set(); this.shot = {}; this.vt = 0; }
+  press(k) { this.shot[k] = this.vt; }
+  read() { const h = k => this.held.has(k), o = { x: (h('right') ? 1 : 0) - (h('left') ? 1 : 0), down: h('down'), guard: h('guard') };
+    for (const b of ['jump', 'l', 'm', 'h', 's', 'r']) o[b] = b in this.shot; this.shot = {}; return o; }
+  consume() {}
+  clear() { this.held.clear(); this.shot = {}; }
+}
+const KEY = { KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right', KeyS: 'down', ArrowDown: 'down', KeyW: 'jump', ArrowUp: 'jump', Space: 'jump', KeyJ: 'l', KeyK: 'm', KeyL: 'h', KeyU: 's', KeyI: 'r', ShiftLeft: 'guard', ShiftRight: 'guard' };
+const HOLD = ['left', 'right', 'down', 'guard'];
+
+const P2 = () => ({ x: 0, down: false, guard: false, jump: false, l: false, m: false, h: false, s: false, r: false });
+const lab = window.lab = { ready: false, speed: 1, cam: 'game', draw: true, timeline: [], tl: 0, paused: false, focus: 0, p2: P2() };
+(async () => {
+  try {
+    const { roster } = await (await fetch('../data/characters.json')).json(); const moves = await (await fetch('../data/moves.json')).json(); roster.forEach(r => r.model = '../' + r.model);
+    const sm = lab.sm = new SceneManager($('#c'), { quality: 'medium', reduceMotion: false, lang: 'es' });
+    await sm.loadCharacters(roster);
+    sm.renderer.setAnimationLoop(null);
+    const input = lab.input = new LabInput();
+    for (const id of ['p1', 'p2']) $('#' + id).innerHTML = roster.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    $('#p2').value = roster[1].id;
+    const origRender = sm.renderer.render.bind(sm.renderer);
+    sm.renderer.render = (...a) => { if (lab.draw) origRender(...a); };
+    let skel = [];
+    lab.setSkeleton = on => { skel.forEach(h => h.removeFromParent()); skel = []; if (on) for (const c of [sm.match.v[0], sm.match.v[1]]) { const h = new THREE.SkeletonHelper(c.c.holder); h.material.depthTest = false; h.renderOrder = 9; sm.scene.add(h); skel.push(h); } };
+    const camTarget = new THREE.Vector3();
+    lab.start = (a, b) => {
+      lab.setSkeleton(false); sm.endMatch(); sm.startMatch(a, b, input, { moves, mode: 'training', onHud() {}, onResult() {} }); input.clear(); input.vt = 0; lab.timeline = []; lab.tl = 0;
+      const m = sm.match, upd = m.update.bind(m);
+      m.brain = { think: () => { const o = { ...lab.p2 }; for (const b of ['jump', 'l', 'm', 'h', 's', 'r']) lab.p2[b] = false; return o; } }; // el rival lo dirige el laboratorio
+      m.phase = 'fight';
+      m.update = (dt, cam) => { upd(dt, cam); lab.applyCam(cam); };
+      $('#p1').value = a; $('#p2').value = b;
+    };
+    lab.applyCam = cam => {
+      if (lab.cam === 'game') return; const f = sm.match.f[lab.focus], v = sm.match.v[lab.focus], face = f.facing;
+      const dist = lab.dist || 9.5, h = 1.9 + f.y * .5;
+      camTarget.set(f.x + (lab.lookX || 0), h, 0);
+      const ang = { side: 0, three: .75 * -face, front: -face * (Math.PI / 2 - .28), back: face * (Math.PI / 2 + .28) }[lab.cam] ?? 0;
+      // gira alrededor del guerrero; «front» = mirándole a la cara
+      const base = lab.cam === 'side' ? new THREE.Vector3(0, 0, 1) : lab.cam === 'three' ? new THREE.Vector3(Math.sin(.8 * face), 0, Math.cos(.8 * face)) : lab.cam === 'front' ? new THREE.Vector3(Math.sin(v.c.holder.rotation.y), 0, Math.cos(v.c.holder.rotation.y)) : new THREE.Vector3(-Math.sin(v.c.holder.rotation.y), 0, -Math.cos(v.c.holder.rotation.y));
+      cam.position.copy(camTarget).addScaledVector(base, dist); cam.position.y = h + 0.6; cam.lookAt(camTarget);
+    };
+    // avance determinista a 60 Hz
+    lab.step = (dt = 1 / 60) => {
+      input.vt += dt;
+      while (lab.timeline.length && lab.timeline[0].t <= lab.tl) { const e = lab.timeline.shift(); e.fn(); }
+      lab.tl += dt;
+      sm.clock.getDelta = () => dt; sm._frame();
+    };
+    lab.advance = (sec, draw = true) => { const n = Math.round(sec * 60); for (let i = 0; i < n; i++) { lab.draw = draw && i === n - 1; lab.step(); } lab.draw = true; };
+    lab.hold = (k, on) => on ? input.held.add(k) : input.held.delete(k);
+    lab.do = k => input.press(k);
+    // secuencias de demostración (t en segundos de simulación)
+    const at = (t, fn) => { lab.timeline.push({ t: lab.tl + t, fn }); lab.timeline.sort((a, b) => a.t - b.t); };
+    const hold = (t, k, d) => { at(t, () => lab.hold(k, true)); at(t + d, () => lab.hold(k, false)); };
+    const p2 = (t, k) => at(t, () => { lab.p2[k] = true; });
+    const close = () => lab.place(-.8, .8);
+    const tap = (t, k) => at(t, () => lab.do(k)), dbl = (t, k) => { hold(t, k, .05); hold(t + .1, k, 1.2); };
+    const SEQ = {
+      idle: () => {}, forward: () => hold(.2, 'right', 3), back: () => hold(.2, 'left', 3), run: () => dbl(.2, 'right'), backdash: () => dbl(.2, 'left'),
+      crouch: () => hold(.3, 'down', 1.6), jump: () => tap(.3, 'jump'), jumpf: () => { hold(.1, 'right', .15); tap(.1, 'jump'); }, jump2: () => { tap(.2, 'jump'); tap(.55, 'jump'); },
+      l: () => tap(.3, 'l'), m: () => tap(.3, 'm'), h: () => tap(.3, 'h'),
+      cl: () => { hold(.2, 'down', 1); tap(.4, 'l'); }, cm: () => { hold(.2, 'down', 1); tap(.4, 'm'); }, ch: () => { hold(.2, 'down', 1); tap(.4, 'h'); },
+      jl: () => { tap(.2, 'jump'); tap(.45, 'l'); }, jm: () => { tap(.2, 'jump'); tap(.45, 'm'); }, jh: () => { tap(.2, 'jump'); tap(.45, 'h'); },
+      s: () => tap(.3, 's'), ex: () => tap(.3, 'r'),
+      combo: () => { close(); tap(.3, 'l'); tap(.45, 'm'); tap(.68, 'h'); tap(1.0, 's'); },
+      launcher: () => { close(); hold(.2, 'down', .5); tap(.3, 'h'); tap(.62, 'jump'); hold(.6, 'right', .3); tap(.85, 'm'); tap(1.05, 'h'); },
+      throw: () => { lab.place(-.6, .6); at(.3, () => { lab.do('l'); lab.do('m'); }); },
+      guard: () => hold(.3, 'guard', 1.6), guardc: () => { hold(.2, 'down', 1.8); hold(.3, 'guard', 1.6); },
+      hit: () => { close(); lab.focus = 0; p2(.4, 'm'); p2(1.4, 'h'); },
+      block: () => { close(); lab.focus = 0; hold(.2, 'guard', 2); p2(.5, 'm'); p2(1.3, 'h'); },
+      thrown: () => { lab.place(-.6, .6); lab.focus = 0; at(.4, () => { lab.p2.l = lab.p2.m = true; }); },
+      knockdown: () => { close(); lab.focus = 0; at(.3, () => { lab.p2.down = true; }); p2(.35, 'h'); at(.8, () => { lab.p2.down = false; }); },
+      ko: () => { close(); lab.focus = 0; at(0, () => { sm.match.f[0].hp = 3; }); p2(.4, 'h'); },
+      intro: () => { at(.1, () => { sm.match.v[0].cel = { name: 'intro', t: 0 }; }); },
+      victory: () => { at(.3, () => { sm.match.v[0].cel = { name: 'win', t: 0 }; }); },
+    };
+    lab.seq = name => { lab.focus = 0; lab.reset(); SEQ[name](); };
+    lab.place = (x1, x2) => { sm.match.f[0].x = x1; sm.match.f[1].x = x2; };
+    lab.reset = () => { sm.match.restart(); sm.match.phase = 'fight'; sm.match.v.forEach(v => { v.cel = null; }); Object.assign(lab.p2, P2()); lab.timeline = []; lab.tl = 0; input.clear(); };
+    const LABEL = { idle: 'Reposo', forward: 'Adelante', back: 'Atrás', run: 'Correr', backdash: 'Retroceso', crouch: 'Agacharse', jump: 'Salto', jumpf: 'Salto adelante', jump2: 'Doble salto',
+      l: 'Ligero', m: 'Medio', h: 'Pesado', cl: '↓ Ligero', cm: '↓ Medio', ch: '↓ Pesado', jl: 'Aire L', jm: 'Aire M', jh: 'Aire H', s: 'Especial', ex: 'Reforzada (R)',
+      combo: 'Combo L·M·H·Esp', launcher: 'Lanzador + aire', throw: 'Lanzamiento', guard: 'Guardia', guardc: 'Guardia baja', hit: 'Recibir golpes', block: 'Bloquear', thrown: 'Ser lanzado', knockdown: 'Derribo', ko: 'K.O.', intro: 'Presentación', victory: 'Victoria' };
+    $('#moves').innerHTML = Object.keys(SEQ).map(k => `<button data-k="${k}">${LABEL[k]}</button>`).join('');
+    $('#moves').onclick = e => { const k = e.target.dataset.k; if (k) lab.seq(k); };
+    $('#p1').onchange = $('#p2').onchange = () => { const a = $('#p1').value, b = $('#p2').value; if (a !== b) lab.start(a, b); else fail('Elige dos guerreros distintos.'); };
+    $('#spd').oninput = e => lab.speed = +e.target.value;
+    $('#cam').onchange = e => { lab.cam = e.target.value; };
+    let skelOn = false; $('#skel').onclick = e => { skelOn = !skelOn; e.target.classList.toggle('on', skelOn); lab.setSkeleton(skelOn); };
+    $('#pause').onclick = e => { lab.paused = !lab.paused; e.target.textContent = lab.paused ? 'Reanudar' : 'Pausar'; };
+    addEventListener('keydown', e => { const k = KEY[e.code]; if (!k) return; e.preventDefault(); if (HOLD.includes(k)) lab.hold(k, true); else if (!e.repeat) lab.do(k); });
+    addEventListener('keyup', e => { const k = KEY[e.code]; if (HOLD.includes(k)) lab.hold(k, false); });
+    lab.start(roster[0].id, roster[1].id);
+    lab.ready = true;
+    if (!new URLSearchParams(location.search).has('manual')) { // bucle en vivo
+      let last = performance.now(), acc = 0;
+      const loop = now => { requestAnimationFrame(loop); if (lab.paused) { last = now; sm.renderer.render(sm.scene, sm.camera); return; }
+        acc += Math.min(.1, (now - last) / 1000) * lab.speed; last = now; let n = 0;
+        while (acc >= 1 / 60 && n++ < 6) { lab.draw = acc < 2 / 60; lab.step(); acc -= 1 / 60; } lab.draw = true; };
+      requestAnimationFrame(loop);
+    }
+  } catch (e) { fail(e); }
+})();
+</script></body></html>

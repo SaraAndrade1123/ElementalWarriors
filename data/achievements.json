@@ -1,0 +1,11 @@
+{"achievements":[
+ {"id":"first_win","stat":"wins","gte":1,"reward":50},
+ {"id":"first_combo","stat":"maxCombo","gte":3,"reward":25},
+ {"id":"combo_10","stat":"maxCombo","gte":10,"reward":100},
+ {"id":"first_transform","stat":"transformations","gte":1,"reward":50},
+ {"id":"win_all","stat":"charsWon","gte":4,"reward":200},
+ {"id":"ten_matches","stat":"matches","gte":10,"reward":75},
+ {"id":"first_purchase","stat":"purchases","gte":1,"reward":25},
+ {"id":"collector","stat":"palettesOwned","gte":4,"reward":100},
+ {"id":"arcade_clear","stat":"arcadeClears","gte":1,"reward":150}
+]}

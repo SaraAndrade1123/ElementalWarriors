@@ -1,0 +1,19 @@
+/* F7: pantallas de modos (Arcade, Supervivencia, Versus, Desafíos, Historia) y diálogos */
+.ladder{margin:6px 0 10px;padding-left:1.4rem;display:grid;gap:4px}
+.ladder li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:4px 8px;border:1px solid var(--gold-dim);background:rgba(5,9,20,.45)}
+.ladder.chapters{list-style:none;padding-left:0}.ladder.chapters li{padding:8px 10px}
+.ladder .lock{opacity:.55}.ladder .done{border-color:var(--gold)}
+.tag.ok{color:var(--gold-hi);border-color:var(--gold)}
+.note.rec{color:var(--gold-hi)}
+.ctl{display:grid;gap:4px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.item.lock{opacity:.6}.item .mark{width:1.4rem;text-align:center}.item.done{border-color:var(--gold)}
+.cta[aria-disabled=true]{opacity:.5}
+#story{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(3,5,14,.72);padding:16px}
+#story[hidden]{display:none}
+#story .panel{width:min(680px,94vw);max-height:90vh;overflow:auto}
+#story .line{margin:0 0 10px;line-height:1.5}
+#story .line b{display:block;font:600 .95rem var(--f-display);letter-spacing:.06em;color:var(--gold-hi)}
+#story .line.narr{font-style:italic;color:var(--muted)}
+.train-only[hidden]{display:none}
+.gr.vs span:last-child{display:flex;gap:4px;flex-wrap:wrap;align-items:center}

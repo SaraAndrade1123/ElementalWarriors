@@ -1,0 +1,73 @@
+{
+ "levels": [
+  "beginner",
+  "normal",
+  "hard",
+  "expert"
+ ],
+ "arcade": {
+  "continues": 3,
+  "continuePenalty": 300,
+  "wins": 2,
+  "maxRounds": 5
+ },
+ "story": {
+  "wins": 2,
+  "maxRounds": 5
+ },
+ "survival": {
+  "heal": 0.25,
+  "escalateEvery": 2,
+  "wins": 1,
+  "maxRounds": 3
+ },
+ "stageByElement": {
+  "fire": "cenizas",
+  "water": "mareas",
+  "earth": "bastion",
+  "wind": "viento"
+ },
+ "finalStage": "equilibrio",
+ "elementOf": {
+  "ignis": "fire",
+  "aqua": "water",
+  "terra": "earth",
+  "zephyr": "wind"
+ },
+ "order": {
+  "ignis": [
+   "zephyr",
+   "aqua",
+   "terra"
+  ],
+  "aqua": [
+   "ignis",
+   "terra",
+   "zephyr"
+  ],
+  "terra": [
+   "aqua",
+   "zephyr",
+   "ignis"
+  ],
+  "zephyr": [
+   "terra",
+   "ignis",
+   "aqua"
+  ]
+ },
+ "score": {
+  "win": 1000,
+  "hp": 500,
+  "flawless": 500,
+  "combo": 50,
+  "time": 600,
+  "timeStep": 10,
+  "mult": {
+   "beginner": 0.6,
+   "normal": 1,
+   "hard": 1.4,
+   "expert": 1.8
+  }
+ }
+}

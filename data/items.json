@@ -1,0 +1,494 @@
+{
+ "items": [
+  {
+   "id": "pal_ignis_azure",
+   "type": "palette",
+   "char": "ignis",
+   "price": 300,
+   "slots": {
+    "coat": "#0a1230",
+    "cloth": "#1e6bff",
+    "trim": "#9ff0ff",
+    "eyes": "#7df3ff"
+   },
+   "fx": {
+    "color": "#6fd8ff",
+    "light": "#2f7dff"
+   },
+   "swatch": [
+    "#0a1230",
+    "#1e6bff",
+    "#9ff0ff"
+   ],
+   "chroma": {
+    "kind": "ember",
+    "glow": "#6fe6ff",
+    "glow2": "#1e6bff",
+    "rim": "#7fe9ff",
+    "outline": "#0b2b66",
+    "aura": "embers"
+   }
+  },
+  {
+   "id": "pal_ignis_sun",
+   "type": "palette",
+   "char": "ignis",
+   "price": 200,
+   "slots": {
+    "coat": "#6b2a00",
+    "cloth": "#ffae00",
+    "trim": "#fff2a8",
+    "eyes": "#ffffff"
+   },
+   "fx": {
+    "color": "#ffd35a",
+    "light": "#ffa800"
+   },
+   "swatch": [
+    "#6b2a00",
+    "#ffae00",
+    "#fff2a8"
+   ],
+   "chroma": {
+    "kind": "gold",
+    "glow": "#fff0b0",
+    "glow2": "#ffb52e",
+    "rim": "#ffd35a",
+    "outline": "#5a2a00",
+    "aura": "sparkles",
+    "amount": 0.8
+   }
+  },
+  {
+   "id": "pal_ignis_amethyst",
+   "type": "palette",
+   "char": "ignis",
+   "price": 400,
+   "slots": {
+    "coat": "#190a2e",
+    "cloth": "#9b30ff",
+    "trim": "#ff7bd5",
+    "eyes": "#ff7bd5"
+   },
+   "fx": {
+    "color": "#d47bff",
+    "light": "#8a2be2"
+   },
+   "swatch": [
+    "#190a2e",
+    "#9b30ff",
+    "#ff7bd5"
+   ],
+   "chroma": {
+    "kind": "galaxy",
+    "glow": "#e6b3ff",
+    "glow2": "#ff7bd5",
+    "rim": "#c77bff",
+    "outline": "#2a0a4a",
+    "aura": "sparkles"
+   }
+  },
+  {
+   "id": "pal_aqua_blood",
+   "type": "palette",
+   "char": "aqua",
+   "price": 300,
+   "slots": {
+    "main": "#a30f1f",
+    "shade": "#3a0610",
+    "light": "#e8505f",
+    "white": "#f4e4de",
+    "eyes": "#ff2a2a"
+   },
+   "fx": {
+    "color": "#ff4d4d",
+    "light": "#c4161c"
+   },
+   "swatch": [
+    "#3a0610",
+    "#a30f1f",
+    "#e8505f"
+   ],
+   "chroma": {
+    "kind": "ember",
+    "glow": "#ff5a5a",
+    "glow2": "#8a0814",
+    "rim": "#ff4d4d",
+    "outline": "#3a0610",
+    "aura": "embers"
+   }
+  },
+  {
+   "id": "pal_aqua_abyss",
+   "type": "palette",
+   "char": "aqua",
+   "price": 400,
+   "slots": {
+    "main": "#0a1f4a",
+    "shade": "#040c22",
+    "light": "#00e5ff",
+    "white": "#b8f8ff",
+    "eyes": "#00e5ff"
+   },
+   "fx": {
+    "color": "#19e6ff",
+    "light": "#0aa0ff"
+   },
+   "swatch": [
+    "#040c22",
+    "#0a1f4a",
+    "#00e5ff"
+   ],
+   "chroma": {
+    "kind": "neon",
+    "glow": "#19f0ff",
+    "glow2": "#0a6cff",
+    "rim": "#19e6ff",
+    "outline": "#001a3a",
+    "aura": "bubbles"
+   }
+  },
+  {
+   "id": "pal_aqua_emerald",
+   "type": "palette",
+   "char": "aqua",
+   "price": 200,
+   "slots": {
+    "main": "#0f9e68",
+    "shade": "#043d2a",
+    "light": "#7dffc2",
+    "white": "#eafff4",
+    "eyes": "#b9ffe0"
+   },
+   "fx": {
+    "color": "#5dffb0",
+    "light": "#12c77d"
+   },
+   "swatch": [
+    "#043d2a",
+    "#0f9e68",
+    "#7dffc2"
+   ],
+   "chroma": {
+    "kind": "crystal",
+    "glow": "#9dffd0",
+    "glow2": "#12c77d",
+    "rim": "#5dffb0",
+    "outline": "#043d2a",
+    "aura": "sparkles",
+    "amount": 0.8
+   }
+  },
+  {
+   "id": "pal_terra_lava",
+   "type": "palette",
+   "char": "terra",
+   "price": 300,
+   "slots": {
+    "main": "#c4220d",
+    "shade": "#5a0e06",
+    "dark": "#1a0806",
+    "cream": "#ff9a1f",
+    "creamShade": "#b8520c",
+    "eyes": "#ffdd55"
+   },
+   "fx": {
+    "color": "#ff7a1a",
+    "light": "#ff3b00"
+   },
+   "swatch": [
+    "#1a0806",
+    "#c4220d",
+    "#ff9a1f"
+   ],
+   "chroma": {
+    "kind": "lava",
+    "glow": "#ffb02e",
+    "glow2": "#ff3b00",
+    "rim": "#ff7a1a",
+    "outline": "#2a0800",
+    "aura": "embers"
+   }
+  },
+  {
+   "id": "pal_terra_sapphire",
+   "type": "palette",
+   "char": "terra",
+   "price": 200,
+   "slots": {
+    "main": "#1d4fd8",
+    "shade": "#0a1f6b",
+    "dark": "#050b2a",
+    "cream": "#aee4ff",
+    "creamShade": "#5c9fd6",
+    "eyes": "#e8fbff"
+   },
+   "fx": {
+    "color": "#7fc8ff",
+    "light": "#2f7dff"
+   },
+   "swatch": [
+    "#0a1f6b",
+    "#1d4fd8",
+    "#aee4ff"
+   ],
+   "chroma": {
+    "kind": "crystal",
+    "glow": "#c8ecff",
+    "glow2": "#2f7dff",
+    "rim": "#7fc8ff",
+    "outline": "#0a1f6b",
+    "aura": "sparkles",
+    "amount": 0.8
+   }
+  },
+  {
+   "id": "pal_terra_obsidian",
+   "type": "palette",
+   "char": "terra",
+   "price": 400,
+   "slots": {
+    "main": "#2b1a4d",
+    "shade": "#130a26",
+    "dark": "#07030f",
+    "cream": "#9b6bff",
+    "creamShade": "#5a3aa8",
+    "eyes": "#c9a8ff"
+   },
+   "fx": {
+    "color": "#b48cff",
+    "light": "#7a3df0"
+   },
+   "swatch": [
+    "#130a26",
+    "#2b1a4d",
+    "#9b6bff"
+   ],
+   "chroma": {
+    "kind": "galaxy",
+    "glow": "#c9a8ff",
+    "glow2": "#7a3df0",
+    "rim": "#9b6bff",
+    "outline": "#130a26",
+    "aura": "motes"
+   }
+  },
+  {
+   "id": "pal_zephyr_avatar",
+   "type": "palette",
+   "char": "zephyr",
+   "price": 300,
+   "slots": {
+    "main": "#d4f1ff",
+    "red": "#3a9bff",
+    "brown": "#1c3f8f",
+    "trim": "#8fd0ff",
+    "arrow": "#ffffff",
+    "eyes": "#ffffff"
+   },
+   "fx": {
+    "color": "#e6faff",
+    "light": "#8fe3ff"
+   },
+   "swatch": [
+    "#1c3f8f",
+    "#3a9bff",
+    "#ffffff"
+   ],
+   "flat": [
+    "eyes"
+   ],
+   "chroma": {
+    "kind": "pulse",
+    "glow": "#a6f0ff",
+    "glow2": "#5ad1ff",
+    "rim": "#e6faff",
+    "outline": "#1c3f8f",
+    "aura": "motes"
+   }
+  },
+  {
+   "id": "pal_zephyr_storm",
+   "type": "palette",
+   "char": "zephyr",
+   "price": 200,
+   "slots": {
+    "main": "#b9a6ff",
+    "red": "#5b2bd6",
+    "brown": "#261052",
+    "trim": "#8f6bff",
+    "arrow": "#ffe86b",
+    "eyes": "#ffe86b"
+   },
+   "fx": {
+    "color": "#c9b3ff",
+    "light": "#7a4dff"
+   },
+   "swatch": [
+    "#261052",
+    "#5b2bd6",
+    "#ffe86b"
+   ],
+   "chroma": {
+    "kind": "storm",
+    "glow": "#d9c7ff",
+    "glow2": "#ffe86b",
+    "rim": "#a98bff",
+    "outline": "#261052",
+    "aura": "bolts",
+    "amount": 0.8
+   }
+  },
+  {
+   "id": "pal_zephyr_gold",
+   "type": "palette",
+   "char": "zephyr",
+   "price": 400,
+   "slots": {
+    "main": "#fff1c4",
+    "red": "#e0a21a",
+    "brown": "#7a5300",
+    "trim": "#ffcf5a",
+    "arrow": "#ff7a2a",
+    "eyes": "#ffcc33"
+   },
+   "fx": {
+    "color": "#ffe9a0",
+    "light": "#ffc233"
+   },
+   "swatch": [
+    "#7a5300",
+    "#e0a21a",
+    "#fff1c4"
+   ],
+   "chroma": {
+    "kind": "gold",
+    "glow": "#fff6cc",
+    "glow2": "#ffc233",
+    "rim": "#ffe9a0",
+    "outline": "#5a3d00",
+    "aura": "sparkles"
+   }
+  },
+  {
+   "id": "pal_ignis_gold",
+   "type": "palette",
+   "char": "ignis",
+   "price": 150,
+   "hue": 38,
+   "sat": 1.15,
+   "hidden": true
+  },
+  {
+   "id": "pal_ignis_violet",
+   "type": "palette",
+   "char": "ignis",
+   "price": 250,
+   "hue": -75,
+   "sat": 1,
+   "hidden": true
+  },
+  {
+   "id": "pal_aqua_jade",
+   "type": "palette",
+   "char": "aqua",
+   "price": 150,
+   "hue": -65,
+   "sat": 1,
+   "hidden": true
+  },
+  {
+   "id": "pal_aqua_dusk",
+   "type": "palette",
+   "char": "aqua",
+   "price": 250,
+   "hue": 70,
+   "sat": 1.1,
+   "hidden": true
+  },
+  {
+   "id": "pal_terra_amber",
+   "type": "palette",
+   "char": "terra",
+   "price": 150,
+   "hue": -35,
+   "sat": 1.1,
+   "hidden": true
+  },
+  {
+   "id": "pal_terra_frost",
+   "type": "palette",
+   "char": "terra",
+   "price": 250,
+   "hue": 95,
+   "sat": 1,
+   "hidden": true
+  },
+  {
+   "id": "pal_zephyr_aurora",
+   "type": "palette",
+   "char": "zephyr",
+   "price": 150,
+   "hue": 160,
+   "sat": 1.4,
+   "hidden": true
+  },
+  {
+   "id": "pal_zephyr_ember",
+   "type": "palette",
+   "char": "zephyr",
+   "price": 250,
+   "hue": -35,
+   "sat": 1.2,
+   "hidden": true
+  },
+  {
+   "id": "wp_cuchillos",
+   "type": "weapon",
+   "char": "*",
+   "price": 300
+  },
+  {
+   "id": "wp_boleadoras",
+   "type": "weapon",
+   "char": "*",
+   "price": 350
+  },
+  {
+   "id": "wp_bumeran",
+   "type": "weapon",
+   "char": "*",
+   "price": 450
+  },
+  {
+   "id": "wp_daga",
+   "type": "weapon",
+   "char": "*",
+   "price": 500
+  },
+  {
+   "id": "wp_maza",
+   "type": "weapon",
+   "char": "*",
+   "price": 550
+  },
+  {
+   "id": "wp_abanico",
+   "type": "weapon",
+   "char": "*",
+   "price": 600
+  },
+  {
+   "id": "wp_garfios",
+   "type": "weapon",
+   "char": "*",
+   "price": 650
+  },
+  {
+   "id": "wp_arco",
+   "type": "weapon",
+   "char": "*",
+   "price": 700
+  }
+ ]
+}

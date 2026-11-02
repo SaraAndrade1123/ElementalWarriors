@@ -1,0 +1,7 @@
+/* Bloque «Sonido» de Ajustes */
+fieldset.audio { display: grid; gap: 10px; }
+.vol { display: grid; grid-template-columns: 7rem 1fr 3.2rem; align-items: center; gap: 12px; }
+.vol input[type=range] { width: 100%; accent-color: var(--accent); height: 1.6rem; min-width: 0; }
+.vol output { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.vol input[type=range]:focus-visible, .check input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media (max-height: 480px) { .vol { grid-template-columns: 5rem 1fr 3rem; gap: 8px; } }

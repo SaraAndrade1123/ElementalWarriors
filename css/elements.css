@@ -1,0 +1,47 @@
+/* Triángulo elemental: insignias, panel de enfrentamiento, ficha del roster y avisos del HUD (lo carga js/elements/element-hook.js). */
+.elbadge{display:inline-flex;align-items:center;gap:5px;padding:1px 8px 1px 5px;border:1px solid color-mix(in srgb,var(--elc,#b5b9c2) 60%,transparent);background:color-mix(in srgb,var(--elc,#b5b9c2) 14%,rgba(6,10,22,.7));font:700 .72rem var(--f-body,system-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--text,#e9eef7);text-shadow:none;white-space:nowrap;vertical-align:middle}
+.elbadge .elico{font-size:.95rem;line-height:1}
+.elbadge .elrel{padding-left:6px;border-left:1px solid rgba(255,255,255,.18)}
+.rel-advantage .elrel,.elrel-mini.rel-advantage{color:#8dff9a}
+.rel-disadvantage .elrel,.elrel-mini.rel-disadvantage{color:#ff9a8a}
+.rel-neutral .elrel,.elrel-mini.rel-neutral{color:#c9cfdb}
+.elrel-mini{font-weight:700}
+.elchip{display:inline-flex;gap:4px;align-items:center;padding:0 6px;border-bottom:2px solid var(--elc,#888);white-space:nowrap}
+
+/* HUD: nombre + insignia en la misma línea */
+#hud .nameline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:1.4em}
+#hud .p2 .nameline{flex-direction:row-reverse}
+#hud .nameline .elbadge{font-size:.66rem}
+@media (max-width:640px){#hud .nameline .elbadge .elname{display:none}}
+.notes .elem-advantage{color:#8dff9a}.notes .elem-disadvantage{color:#ff9a8a}
+
+/* Panel de enfrentamiento (pantalla Jugar / Entrenamiento) */
+.elmatch{display:grid;gap:8px;padding:10px;border:1px solid var(--gold-dim,#4f4122);background:rgba(6,10,22,.45)}
+.elsum{font:700 1rem var(--f-display,serif);letter-spacing:.04em;color:#8dff9a}
+.elsum.neutral{color:#c9cfdb}
+.elmatch{min-width:0}
+.eltable{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 12px;align-items:center;font-size:.88rem}
+.elhead{display:grid;justify-items:end;gap:3px;padding-bottom:4px;border-bottom:2px solid #c9cfdb;text-align:right}
+.elhead.rel-advantage{border-bottom-color:#5fe06d}.elhead.rel-disadvantage{border-bottom-color:#ff7a6a}
+.elhead .elbadge{font-size:.62rem}
+.elk{color:var(--muted,#8f9bb3);line-height:1.15}
+.elv{justify-self:end;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--text,#e9eef7)}
+.elv.up{color:#8dff9a}.elv.down{color:#ff9a8a}
+.note.small{font-size:.8rem}
+
+/* Ficha del roster: triángulo + reglas */
+.elinfo{display:grid;gap:8px}
+.elinfo-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;justify-items:center}
+.elinfo-grid .eltri{max-width:210px}
+.elinfo-grid .elrules{justify-self:stretch}
+.elrules{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;align-items:center}
+.elrules dd{min-width:0}
+.elrules dt{color:var(--muted,#8f9bb3);font-size:.9rem}
+.eltri{width:100%;height:auto;color:#c9cfdb;overflow:visible}
+.eltri .elarr{stroke:currentColor;stroke-width:2;opacity:.75}
+.eltri .elnode circle{fill:rgba(6,10,22,.85);stroke:var(--elc,#888);stroke-width:2}
+.eltri .elnode.on circle{fill:color-mix(in srgb,var(--elc,#888) 35%,#060a16);stroke-width:3.5}
+.eltri .elti{font-size:17px}
+.eltri .eltn{font:700 11px var(--f-body,system-ui);letter-spacing:.06em;fill:var(--text,#e9eef7);text-transform:uppercase}
+.eltri .elnode.on .eltn{fill:var(--gold-hi,#f1dc9a)}
+.el .elico{font-size:1.05rem}

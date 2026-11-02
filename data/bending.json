@@ -1,0 +1,35 @@
+{
+ "_doc": "Técnicas de CONTROL ELEMENTAL (sin arma), 3 por guerrero. Mismo formato que data/moves.json (segundos; 1 fotograma = 0.0167 s). eb = proyección elemental (→+U o ↓↙←+golpe), eu = técnica ascendente / de zona (↓+U o →↓↘+golpe), ej = técnica aérea (U en el aire). Se cancelan desde los golpes normales igual que la especial. Campos extra que entiende js/game/bending.js: proj.vy (velocidad vertical: proyectil en diagonal), proj.hitWindow (segundos en los que puede golpear; después solo bloquea proyectiles), proj.wall (el rival no puede atravesarlo), proj.groundBurst (se deshace al tocar el suelo). Ver docs/CONTROL-ELEMENTAL.md.",
+ "version": 1,
+ "inputs": { "eb": ["→+U", "↓↙←+J/K/L"], "eu": ["↓+U", "→↓↘+J/K/L"], "ej": ["U (aire)"] },
+ "ignis": {
+  "eb": {"btn":"s","cat":"bending","name":"puno_fuego","startup":0.2,"active":0.05,"recovery":0.36,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"mid","lunge":1.2,
+         "proj":{"speed":12.5,"life":1.1,"w":0.85,"h":0.6,"y":1.78,"x0":1.15,"dmg":10,"chip":2,"hit":"mid","hitstun":0.4,"blockstun":0.25,"kb":3.5,"kbBlock":3,"kind":"fireball"},"cancel":[]},
+  "eu": {"btn":"s","cat":"bending","name":"arco_llamas","startup":0.13,"active":0.12,"recovery":0.45,"dmg":12,"chip":2,"hit":"mid","hitstun":0.5,"blockstun":0.28,"kb":2,"kbBlock":3.2,"range":2.3,"x0":0.1,"y0":0.9,"y1":4.1,"launch":14.5,"inv":[0,0.16],"guardDmg":18,"cancel":[]},
+  "ej": {"btn":"s","cat":"bending","name":"patada_cometa","air":true,"startup":0.15,"active":0.05,"recovery":0.3,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"high",
+         "proj":{"speed":10,"vy":-7.5,"life":1.0,"w":0.8,"h":0.7,"y":0.9,"x0":0.9,"dmg":9,"chip":1,"hit":"high","hitstun":0.42,"blockstun":0.24,"kb":3,"kbBlock":2.4,"groundBurst":true,"kind":"comet"},"cancel":[]}
+ },
+ "aqua": {
+  "eb": {"btn":"s","cat":"bending","name":"latigo_agua","startup":0.18,"active":0.12,"recovery":0.36,"dmg":8,"chip":1,"hit":"mid","hitstun":0.42,"blockstun":0.24,"kb":0,"pull":2.2,"kbBlock":2.4,"range":3.8,"x0":0.6,"y0":0.9,"y1":2.4,"multi":2,"gap":0.06,"guardDmg":11,"cancel":[]},
+  "eu": {"btn":"s","cat":"bending","name":"geiser","startup":0.3,"active":0.05,"recovery":0.38,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"mid",
+         "proj":{"speed":0,"life":0.62,"w":1.15,"h":3.8,"y":1.9,"x0":3.0,"dmg":7,"chip":1,"hit":"mid","hitstun":0.55,"blockstun":0.3,"kb":0.5,"kbBlock":2,"launch":12.5,"multi":2,"gap":0.2,"hitWindow":0.45,"kind":"geyser"},"cancel":[]},
+  "ej": {"btn":"s","cat":"bending","name":"agujas_hielo","air":true,"startup":0.16,"active":0.05,"recovery":0.3,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"high",
+         "proj":{"speed":11,"vy":-6,"life":1.0,"w":1.0,"h":0.8,"y":1.0,"x0":0.9,"dmg":4,"chip":1,"hit":"high","hitstun":0.3,"blockstun":0.18,"kb":1.5,"kbBlock":1.6,"multi":3,"gap":0.07,"groundBurst":true,"kind":"ice"},"cancel":[]}
+ },
+ "terra": {
+  "eb": {"btn":"s","cat":"bending","name":"roca_proyectil","startup":0.4,"active":0.05,"recovery":0.42,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"mid","armor":[0.08,0.36],
+         "proj":{"speed":10,"life":1.3,"w":1.15,"h":1.15,"y":1.45,"x0":1.25,"dmg":15,"chip":3,"hit":"mid","hitstun":0.5,"blockstun":0.32,"kb":6,"kbBlock":4,"kd":true,"guardDmg":30,"kind":"boulder"},"cancel":[]},
+  "eu": {"btn":"s","cat":"bending","name":"muro_piedra","startup":0.24,"active":0.05,"recovery":0.4,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"mid",
+         "proj":{"speed":0,"life":1.6,"w":0.85,"h":2.9,"y":1.45,"x0":1.55,"dmg":11,"chip":2,"hit":"mid","hitstun":0.5,"blockstun":0.3,"kb":3,"kbBlock":3,"launch":12,"hitWindow":0.2,"wall":true,"kind":"wall"},"cancel":[]},
+  "ej": {"btn":"s","cat":"bending","name":"lluvia_rocas","air":true,"startup":0.2,"active":0.05,"recovery":0.32,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"high",
+         "proj":{"speed":8.5,"vy":-8,"life":1.0,"w":0.9,"h":0.9,"y":0.8,"x0":0.85,"dmg":11,"chip":2,"hit":"high","hitstun":0.46,"blockstun":0.28,"kb":4,"kbBlock":3,"groundBurst":true,"kind":"rockshot"},"cancel":[]}
+ },
+ "zephyr": {
+  "eb": {"btn":"s","cat":"bending","name":"rafaga","startup":0.15,"active":0.05,"recovery":0.3,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"mid",
+         "proj":{"speed":15,"life":0.75,"w":1.2,"h":1.5,"y":1.6,"x0":1.0,"dmg":6,"chip":1,"hit":"mid","hitstun":0.38,"blockstun":0.22,"kb":9,"kbBlock":6,"kind":"gust"},"cancel":[]},
+  "eu": {"btn":"s","cat":"bending","name":"torbellino","startup":0.22,"active":0.05,"recovery":0.38,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"mid",
+         "proj":{"speed":4.2,"life":1.5,"w":1.0,"h":3.3,"y":1.65,"x0":1.0,"dmg":4,"chip":1,"hit":"mid","hitstun":0.5,"blockstun":0.2,"kb":0.5,"kbBlock":1.5,"launch":9.5,"multi":3,"gap":0.2,"kind":"tornado"},"cancel":[]},
+  "ej": {"btn":"s","cat":"bending","name":"bala_aire","air":true,"startup":0.12,"active":0.05,"recovery":0.26,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"high",
+         "proj":{"speed":12,"vy":-8.5,"life":0.9,"w":0.85,"h":0.85,"y":0.9,"x0":0.8,"dmg":7,"chip":1,"hit":"high","hitstun":0.36,"blockstun":0.2,"kb":5,"kbBlock":4,"groundBurst":true,"kind":"airball"},"cancel":[]}
+ }
+}

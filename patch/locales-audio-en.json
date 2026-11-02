@@ -1,0 +1,7 @@
+{
+ "set.audio": "Sound",
+ "set.music": "Music",
+ "set.sfx": "Effects",
+ "set.mute": "Mute all",
+ "set.audio.none": "Audio is not available in this browser."
+}

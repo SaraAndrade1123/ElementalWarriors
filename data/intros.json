@@ -1,0 +1,71 @@
+{
+ "_doc": "Diálogos de la cinemática previa al combate (estilo Mortal Kombat / Guilty Gear). pairs['a>b'] = líneas cuando A (izquierda) se enfrenta a B (derecha); who: 'a' o 'b'. mirror[id] = contra sí mismo. Si un par no existe (p. ej. un guerrero personalizado nuevo) se usan generic[id] (open = quien habla primero, reply = quien responde) y, si tampoco hay, generic['*'] con {name} / {foe}. Cada línea tiene es y en.",
+ "version": 1,
+ "pairs": {
+  "ignis>aqua": [
+   { "who": "a", "es": "Siempre tan tranquila… Veamos si tu marea aguanta un incendio de verdad.", "en": "Always so calm… let's see if your tide can hold back a real wildfire." },
+   { "who": "b", "es": "El agua no discute con el fuego, Ignis. Lo apaga.", "en": "Water doesn't argue with fire, Ignis. It puts it out." },
+   { "who": "a", "es": "¡Entonces tendrás que alcanzarme primero!", "en": "Then you'll have to catch me first!" }
+  ],
+  "ignis>terra": [
+   { "who": "a", "es": "Una montaña que no se mueve. Perfecto: así no fallo.", "en": "A mountain that won't move. Perfect, I can't miss." },
+   { "who": "b", "es": "Las montañas han visto arder mil bosques, muchacho. Y siguen en pie.", "en": "Mountains have watched a thousand forests burn, boy. And they still stand." }
+  ],
+  "ignis>zephyr": [
+   { "who": "b", "es": "¿Hace calor o eres tú, Ignis? Uy, creo que acabo de avivarte.", "en": "Is it hot in here or is that you, Ignis? Oops, I think I just fanned you." },
+   { "who": "a", "es": "Sigue soplando. Cada ráfaga me hace más grande.", "en": "Keep blowing. Every gust makes me bigger." },
+   { "who": "b", "es": "¡Eso pretendo! Las llamas grandes caen más rápido.", "en": "That's the plan! Big flames fall faster." }
+  ],
+  "aqua>ignis": [
+   { "who": "a", "es": "Respira, Ignis. Peleas mejor cuando no te quemas a ti mismo.", "en": "Breathe, Ignis. You fight better when you're not burning yourself." },
+   { "who": "b", "es": "¡No necesito consejos! Necesito que te apartes.", "en": "I don't need advice! I need you out of my way." }
+  ],
+  "aqua>terra": [
+   { "who": "a", "es": "Gota a gota, hasta la roca más dura cede.", "en": "Drop by drop, even the hardest rock gives way." },
+   { "who": "b", "es": "Entonces tendrás que esperar unos cuantos siglos.", "en": "Then you'll have to wait a few centuries." },
+   { "who": "a", "es": "Tengo paciencia. ¿Y tú?", "en": "I'm patient. Are you?" }
+  ],
+  "aqua>zephyr": [
+   { "who": "b", "es": "La última vez que discutimos hubo tormenta durante una semana.", "en": "Last time we argued it stormed for a week." },
+   { "who": "a", "es": "Esta vez no habrá discusión, Zephyr. Solo una lección.", "en": "There'll be no argument this time, Zephyr. Just a lesson." }
+  ],
+  "terra>ignis": [
+   { "who": "a", "es": "Tu fuego es valiente. Mi tierra es paciente. Veamos cuál dura más.", "en": "Your fire is brave. My earth is patient. Let's see which lasts longer." },
+   { "who": "b", "es": "¡No pienso esperar a averiguarlo!", "en": "I'm not waiting to find out!" }
+  ],
+  "terra>aqua": [
+   { "who": "b", "es": "Te mueves como una cordillera, Terra. Lento, pero inevitable.", "en": "You move like a mountain range, Terra. Slow, but inevitable." },
+   { "who": "a", "es": "Y tú como un río: hermosa, hasta que encuentras una presa.", "en": "And you like a river: graceful, until you meet a dam." }
+  ],
+  "terra>zephyr": [
+   { "who": "b", "es": "¡Eh, grandullón! ¿Me atrapas si puedes?", "en": "Hey, big guy! Catch me if you can?" },
+   { "who": "a", "es": "No necesito atraparte. El viento siempre vuelve al suelo.", "en": "I don't need to catch you. The wind always comes back down." },
+   { "who": "b", "es": "…Vale, eso ha sonado inquietante.", "en": "…Okay, that sounded ominous." }
+  ],
+  "zephyr>ignis": [
+   { "who": "a", "es": "Hagamos esto rápido. Tengo una siesta pendiente en una nube.", "en": "Let's make this quick. I've got a nap booked on a cloud." },
+   { "who": "b", "es": "¡Te bajaré de ella a llamaradas!", "en": "I'll blast you right off it!" }
+  ],
+  "zephyr>aqua": [
+   { "who": "a", "es": "¿Sabías que el viento levanta las olas? Técnicamente, trabajas para mí.", "en": "Did you know wind makes the waves? Technically, you work for me." },
+   { "who": "b", "es": "Y el mar decide hasta dónde llegan. Técnicamente, no.", "en": "And the sea decides how far they go. Technically, no." }
+  ],
+  "zephyr>terra": [
+   { "who": "a", "es": "Tranquilo, Terra, no voy a tocar el suelo en toda la pelea.", "en": "Relax, Terra, I won't touch the ground all fight." },
+   { "who": "b", "es": "Todos tocan el suelo al final.", "en": "Everyone touches the ground in the end." }
+  ]
+ },
+ "mirror": {
+  "ignis": [ { "who": "a", "es": "¿Un fuego de color jade? Eres una mala copia.", "en": "Jade-colored fire? You're a cheap copy." }, { "who": "b", "es": "Soy lo que arde cuando dejas de dudar.", "en": "I'm what burns when you stop doubting." } ],
+  "aqua": [ { "who": "a", "es": "Un reflejo en el agua no debería hablar.", "en": "A reflection in the water shouldn't talk." }, { "who": "b", "es": "Y sin embargo, aquí estoy. Igual de serena. Más fuerte.", "en": "And yet here I am. Just as calm. Stronger." } ],
+  "terra": [ { "who": "a", "es": "Dos montañas no pueden ocupar el mismo lugar.", "en": "Two mountains can't stand in the same place." }, { "who": "b", "es": "Entonces una tendrá que caer.", "en": "Then one of them must fall." } ],
+  "zephyr": [ { "who": "a", "es": "¡Ey, qué guapo soy en rojo!", "en": "Hey, I look great in red!" }, { "who": "b", "es": "Lo sé. Por eso voy a ganar yo.", "en": "I know. That's why I'm winning." } ]
+ },
+ "generic": {
+  "ignis": { "open": [ { "es": "No me contengo con nadie. Tampoco contigo.", "en": "I don't hold back for anyone. Not even you." } ], "reply": [ { "es": "¡Pues que arda!", "en": "Then let it burn!" } ] },
+  "aqua": { "open": [ { "es": "Fluye conmigo o ahógate intentándolo.", "en": "Flow with me or drown trying." } ], "reply": [ { "es": "Te leeré como a la marea.", "en": "I'll read you like the tide." } ] },
+  "terra": { "open": [ { "es": "Pelea con honor y caerás con honor.", "en": "Fight with honor and you'll fall with honor." } ], "reply": [ { "es": "La tierra no retrocede.", "en": "The earth does not retreat." } ] },
+  "zephyr": { "open": [ { "es": "¿Listo? Yo nací listo. Y rápido.", "en": "Ready? I was born ready. And fast." } ], "reply": [ { "es": "¡Atrápame si puedes!", "en": "Catch me if you can!" } ] },
+  "*": { "open": [ { "es": "Eres {foe}, ¿verdad? He oído hablar de ti.", "en": "You're {foe}, right? I've heard about you." } ], "reply": [ { "es": "Entonces sabrás que no pierdo.", "en": "Then you know I don't lose." } ] }
+ }
+}

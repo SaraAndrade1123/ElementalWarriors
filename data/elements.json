@@ -1,0 +1,16 @@
+{
+ "_doc": "Triángulo elemental. 'beats' = a qué elemento le gana. Un elemento con 'neutral': true no gana ni pierde contra nadie (100 %). Los multiplicadores se aplican al ATACANTE según su relación con el rival: damage = todo el daño que inflige (golpes, técnicas, proyectiles, lanzamientos y golpes absorbidos por armadura), chip = daño al bloquear, guard = desgaste de la barra de guardia del rival, resonance = toda la Resonancia que gana. El daño que RECIBES es el 'damage' de tu rival. No cambian tiempos, alcance ni aturdimiento (los combos siguen siendo los mismos). Ver docs/ELEMENTOS.md.",
+ "version": 1,
+ "neutral": "earth",
+ "elements": {
+  "water": { "icon": "💧", "color": "#5fd0ff", "beats": "fire" },
+  "fire":  { "icon": "🔥", "color": "#ff7a35", "beats": "wind" },
+  "wind":  { "icon": "🌪️", "color": "#cfe6ff", "beats": "water" },
+  "earth": { "icon": "🪨", "color": "#b5b9c2", "neutral": true }
+ },
+ "modifiers": {
+  "advantage":    { "damage": 1.2, "chip": 1.2, "guard": 1.2, "resonance": 1.1 },
+  "neutral":      { "damage": 1.0, "chip": 1.0, "guard": 1.0, "resonance": 1.0 },
+  "disadvantage": { "damage": 0.8, "chip": 0.8, "guard": 0.8, "resonance": 0.9 }
+ }
+}

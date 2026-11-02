@@ -1,0 +1,84 @@
+// Flujo de las partidas con modos (Arcade, Historia, Supervivencia, Versus, Desafíos y combates sueltos).
+// Decide qué pasa al acabar cada combate; no toca el DOM: la interfaz llega por `env` (se prueba con Node).
+//   env.fight(cfg)  inicia un combate       env.panel(spec)  muestra el panel de resultados     env.story(scenes, done)  diálogo
+//   env.record(result, cfg) → Rose Gold ganado (progression.recordMatch)   env.hint(text)  texto de objetivo en el HUD
+//   env.restart()   reinicia el combate actual   env.pauseMatch(on)   env.nameOf(id)   env.progression   env.cfg   env.t
+import { ChallengeTracker, CHALLENGES } from './challenges.js';
+
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+export function createFlow(env) {
+  const { t, progression } = env; let ses = null, tracker = null, last = null;
+  const run = fc => { last = fc; env.fight(fc); if (tracker) env.hint(progressText()); };
+  const hero = () => env.nameOf(last.a);
+  const side = i => env.sideName ? env.sideName(last, i) : env.nameOf(i ? last.b : last.a); // en un duelo espejo el J2 tiene otro nombre
+  const progressText = () => `${t(`ch.${tracker.def.id}.goal`)} · ${tracker.count}/${tracker.def.goal}`;
+  const story = (scenes, done) => (ses?.kind === 'story' && scenes.length ? env.story(scenes, done) : done());
+  const base = (r, gold) => [['result.rounds', `${r.wins[0]} - ${r.wins[1]}`], ['result.damage', `${Math.round(r.stats.dmg[0])} / ${Math.round(r.stats.dmg[1])}`], ['result.combo', `${r.stats.combo[0]} / ${r.stats.combo[1]}`], ['result.time', fmt(r.time)], ...(gold ? [['result.gold', `+${gold}`]] : [])];
+  const totals = (o, extra = []) => [['result.score', o.score.toLocaleString()], ['result.wins', o.wins], ['result.time', fmt(o.time)], ...extra];
+
+  function begin(session) {
+    ses = session; tracker = null; last = null;
+    switch (ses.kind) {
+      case 'arcade': case 'story': { const L = ses.obj; story(L.scenesBefore(), () => run(L.fight())); break; }
+      case 'survival': run(ses.obj.fight()); break;
+      case 'challenge': tracker = new ChallengeTracker(ses.def); run({ a: ses.hero, b: ses.rival, mode: 'training', rec: 'training', dummy: ses.def.dummy, infinite: ses.def.infinite }); break;
+      default: ses = { kind: 'plain', cfg: session.cfg }; run(session.cfg);
+    }
+  }
+
+  function onEvent(e) {
+    if (ses?.kind !== 'challenge' || !tracker || tracker.done) return;
+    const before = tracker.count, done = tracker.feed(e); if (tracker.count !== before) env.hint(progressText()); if (done) complete();
+  }
+  function complete() {
+    const d = tracker.def, r = progression.recordChallenge(d.id), live = CHALLENGES.filter(c => !c.locked), nxt = live[(live.indexOf(d) + 1) % live.length];
+    env.pauseMatch(true);
+    env.panel({ title: t('result.ch.done'), sub: t(`ch.${d.id}.name`), rows: r.ok ? [['result.gold', `+${r.gold}`]] : [['result.ch.again', '✓']],
+      again: { label: t('result.ch.keep'), run: () => env.pauseMatch(false) },
+      next: nxt !== d ? { label: t('result.ch.next'), run: () => begin({ kind: 'challenge', def: nxt, hero: ses.hero, rival: ses.rival }) } : null });
+  }
+
+  function onResult(r) {
+    const gold = env.record(r, last) || 0, kind = ses?.kind ?? 'plain', win = r.winner === 0;
+    const verdict = r.winner < 0 ? t('result.draw') : win ? t('result.win') : t('result.lose');
+    if (kind === 'plain' || kind === 'versus') {
+      return env.panel({ title: verdict, sub: r.winner < 0 ? '' : t('result.winner', { name: side(r.winner) }), rows: base(r, gold), again: { label: t('result.again'), run: () => env.restart() } });
+    }
+    if (kind === 'arcade' || kind === 'story') return ladderResult(r, gold, verdict);
+    if (kind === 'survival') return survivalResult(r, gold, verdict);
+  }
+
+  function ladderResult(r, gold, verdict) {
+    const L = ses.obj, i = L.i, rep = L.report(r), story = ses.kind === 'story', rows = base(r, gold);
+    if (rep.status === 'draw') return env.panel({ title: verdict, rows, again: { label: t('result.replay'), run: () => run(L.fight()) } });
+    if (rep.status === 'next') {
+      if (story) progression.setStory(L.hero, L.i);
+      return env.panel({ title: verdict, sub: t('result.next.rival', { name: env.nameOf(L.rivals[L.i]), n: L.i + 1, total: L.total }), rows: [...rows, ['result.score', L.score.toLocaleString()]],
+        next: { label: t('result.next'), run: () => envStory([...L.scenesAfter(i), ...L.scenesBefore()], () => run(L.fight())) } });
+    }
+    if (rep.status === 'lost') {
+      const left = L.continuesLeft; const label = story ? t('result.retry') : t('result.retry.left', { n: left });
+      return env.panel({ title: verdict, sub: t('result.lose.sub', { name: env.nameOf(L.rivals[L.i]) }), rows, again: { label, run: () => run(L.useContinue()) }, onMenu: () => L.giveUp() });
+    }
+    // clear / over: fin de la escalera
+    const S = L.summary(), cleared = rep.status === 'clear'; let record = false;
+    if (cleared) { if (story) { progression.setStory(L.hero, L.total); progression.recordEvent('story_clear'); } else progression.recordEvent('arcade_clear'); }
+    if (!story) record = !!progression.recordRun(S).record;
+    const fin = () => env.panel({ title: cleared ? t(story ? 'result.story.clear' : 'result.arcade.clear') : t('result.arcade.over'), sub: cleared ? t('result.hero.done', { name: hero() }) : '',
+      rows: [...totals(S, story ? [] : [['result.continues', S.continues], ['result.level', t('level.' + S.level)]]), ...(record ? [['result.record', '★']] : []), ...(gold ? [['result.gold', `+${gold}`]] : [])] });
+    if (cleared && story) envStory(L.scenesAfter(i), fin); else fin();
+  }
+  const envStory = (scenes, done) => story(scenes, done);
+
+  function survivalResult(r, gold, verdict) {
+    const S = ses.obj, rep = S.report(r), rows = base(r, gold);
+    if (rep.status === 'draw') return env.panel({ title: verdict, rows, again: { label: t('result.replay'), run: () => run(S.fight()) } });
+    if (rep.status === 'next') return env.panel({ title: verdict, sub: t('result.surv.next', { name: env.nameOf(S.rival), hp: Math.round(S.hp * 100) }), rows: [...rows, ['result.score', S.score.toLocaleString()], ['result.wins', S.wins]], next: { label: t('result.next'), run: () => run(S.fight()) } });
+    const sum = S.summary(), record = !!progression.recordRun(sum).record;
+    env.panel({ title: t('result.surv.over'), sub: t('result.surv.sub', { n: sum.wins }), rows: [...totals(sum), ['result.level', t('level.' + sum.level)], ...(record ? [['result.record', '★']] : []), ...(gold ? [['result.gold', `+${gold}`]] : [])] });
+  }
+
+  // Al salir al menú tras una derrota en arcade, la escalera termina (no cuenta como completada).
+  const abandon = () => { if (ses?.kind === 'arcade' && !ses.obj.done) ses.obj.giveUp(); ses = null; tracker = null; };
+  return { begin, onResult, onEvent, abandon, get kind() { return ses?.kind ?? null; }, get tracker() { return tracker; } };
+}
