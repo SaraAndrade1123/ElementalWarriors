@@ -43,8 +43,8 @@ export function createWeaponPreview({ scene, roster, moves, sfx = null, doc = gl
     const render = m.render;
     m.render = function (rdt, cam) {
       const r = render.call(this, rdt, cam), [a, b] = this.f, mx = (a.x + b.x) / 2, land = cam.aspect > 1.15;
-      const D = 8.6, half = D * Math.tan(cam.fov * Math.PI / 360) * cam.aspect, sh = land ? half * .36 : 0;
-      cam.position.set(mx - sh, land ? 2.2 : 3.6, D + (land ? 0 : 3)); cam.lookAt(mx - sh, land ? 1.55 : 2.4, 0); return r;
+      const D = land ? 12.5 : 15, half = D * Math.tan(cam.fov * Math.PI / 360) * cam.aspect, sh = land ? half * .3 : 0;
+      cam.position.set(mx - sh, land ? 2.4 : 3.8, D); cam.lookAt(mx - sh, land ? 1.7 : 2.6, 0); return r;
     };
     doc.body.classList.add('wpreview');
     const box = doc.createElement('div'); box.id = 'wprev'; box.setAttribute('role', 'status');

@@ -1,4 +1,4 @@
-# Elemental Warriors (v1.2.0 · chromas premium, manos y HUD arcade)
+# Elemental Warriors (v1.3.0 · cinemáticas, historia 3D y celular)
 
 ## Cómo abrirlo
 1. Instala Node.js (nodejs.org).
@@ -81,3 +81,14 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Chromas de la tienda**: cada uno trae un efecto animado propio sobre el modelo (llamas, destello dorado, galaxia, latido Avatar, relámpagos, cristal, lava, neón), contorno de su color y partículas en combate. La tienda lo describe.
 - **HUD arcade**: barras de vida doradas con marco, cortes cada 10 %, extremo en bisel, línea del color del elemento y aviso de vida baja.
 - **Créditos**: Sara Andrade Rodriguez y Claude.
+
+## v1.3.0 — Cinemáticas, historia en 3D, celular y Terra
+- **Celular**: el menú principal pasa a dos columnas en horizontal; el panel de resultados (VICTORIA / DERROTA) se reparte en dos columnas y ya no se corta; avisos arriba; botón «¡Combatir!» siempre visible (`css/mobile.css`).
+- **2 jugadores con teclado**: se habilita si el dispositivo tiene teclado físico (USB o Bluetooth), también en celular/tableta: basta pulsar una tecla (`js/systems/keyboard-detect.js`).
+- **Cinemática final** en cada combate (`js/game/cinematic-end.js`, `data/outros.json`): giro de cámara sobre el ganador con su elemento, cartel «NOMBRE · VICTORIA / VICTORIA PERFECTA», frase del ganador y respuesta del vencido (16 combinaciones, ES/EN) y plano final de retrato. Se salta con cualquier tecla o toque.
+- **Intro mejorada**: paneles diagonales con el color de cada guerrero, líneas de velocidad, cortes con destello, plano por encima del hombro y «choque de miradas» final con las auras.
+- **Historia cinematográfica** (`js/game/story-cine.js`): tarjeta de capítulo con el lugar de cada rival, narrador sobre plano general, primeros planos de quien habla con su gesto, 12 respuestas nuevas del héroe a cada rival y epílogo a contraluz. Toque/Enter avanza, «Saltar escena» lo salta.
+- **Vista previa de armas** en la tienda («▶ Ver en acción»): el guerrero elegido saca el arma, lanza su técnica contra un maniquí y la guarda, en bucle, con los modelos y efectos reales.
+- **Manos naturales**: la muñeca sigue la línea del antebrazo y solo gira para orientar la palma (puño: palma hacia dentro y abajo al estirar; mano abierta: palma al frente al empujar). Guardias con los antebrazos verticales y el pulgar cerrado sobre el puño.
+- **Vida infinita** (entrenamiento) arreglada: activada nadie cae y la vida se recupera al acabar cada combo; desactivada el daño se queda y hay K.O. real (luego ambos vuelven con la vida llena).
+- **Terra**: técnicas nuevas y distintas — *Fisura de Colmillos* (barrido bajo que hace brotar una hilera de colmillos de piedra) y *Ola Tectónica* (arranca el suelo y empuja una ola de losas que lanza al rival); *Meteorito* ahora levanta la roca con las palmas y la lanza a dos manos.

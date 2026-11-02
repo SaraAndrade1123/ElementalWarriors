@@ -67,3 +67,6 @@ de lejos (cuchillos, bumerán, arco), contra saltos (boleadoras), para contraata
 2. Objeto en `data/items.json` con su precio y `"char": "*"`.
 3. Textos `item.<id>`, `wpn.<id>.power`, `wpn.<id>.passive` en es/en.
 Para un modelo nuevo: añadir su constructor en `MODELS` y su animación en `buildArt` (weapon-art.js).
+
+## Vista previa en la tienda (v1.3)
+«▶ Ver en acción» abre un combate de demostración real (`js/ui/weapon-preview.js`): el guerrero seleccionado con el arma puesta contra un maniquí con vida infinita. Una entrada simulada pulsa el botón de arma cuando está listo (el enfriamiento se acorta a 0,9 s solo en la demo) y lo recoloca entre usos. La cámara encuadra a los dos a la derecha del panel. Se cierra al salir de la tienda, al cambiar a «Aspectos» o con «Cerrar vista previa»; al cambiar de guerrero la demo pasa a él. No cambia la música (`opts.preview`).

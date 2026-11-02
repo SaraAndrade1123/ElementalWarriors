@@ -91,15 +91,15 @@ export function installOutro({ scene, roster = [], data = null, doc = globalThis
       if (k >= shots.length) { finish(); return out; }
       const s = shots[k], u = st / s.dur, F = this.f[w], H = i => this.f[i].def.height || 3.3, dir = F.facing || 1;
       if (s.kind === 'slam') { // giro de grúa alrededor del ganador, de abajo a la altura del pecho
-        const e = ease(u), ang = (-.9 + 1.25 * e) * dir, r = 4.6 - 1.1 * e;
-        _p.set(F.x + Math.sin(ang) * r, .7 + 1.1 * e, Math.cos(ang) * r); _l.set(F.x, H(w) * (.48 + .1 * e), 0);
+        const e = ease(u), ang = (-.95 + 1.3 * e) * dir, r = 10.5 - 2.6 * e;
+        _p.set(F.x + Math.sin(ang) * r, 1.1 + 1.1 * e, Math.cos(ang) * r); _l.set(F.x, H(w) * (.6 + .04 * e), 0);
         if ((burst -= rdt) <= 0 && this.vfx) { burst = .12; this.vfx.aura?.({ x: F.x }, F.def.id); }
         if (st < rdt * 1.5) { this.vfx?.flash?.({ x: F.x, y: 1.6 }, new THREE.Color(cols[w]).getHex(), 4); this.shake = Math.max(this.shake || 0, .25); }
       } else if (s.kind === 'line') {
         const f = this.f[s.who], fd = f.facing || 1, h = H(s.who), e = ease(u);
-        if (!s.lose) { _p.set(f.x + fd * (2.4 - .4 * e), h * .32, 3.3 - .5 * e); _l.set(f.x + fd * .1, h * .7, 0); } // contrapicado heroico
-        else { const down = f.ko || f.down; _p.set(f.x + fd * 1.8, down ? 3.2 : h * 1.15, 3.4 - .3 * e); _l.set(f.x, down ? .3 : h * .55, 0); } // picado sobre el vencido
-      } else { const e = ease(u); _p.set(F.x + dir * (1.9 - .25 * e), H(w) * .62, 2.6 - .5 * e); _l.set(F.x + dir * .05, H(w) * .66, 0); } // retrato
+        if (!s.lose) { _p.set(f.x + fd * (3.1 - .4 * e), h * .3, 5.6 - .7 * e); _l.set(f.x + fd * .1, h * .64, 0); } // contrapicado heroico
+        else { const down = f.ko || f.down; _p.set(f.x + fd * 2.2, down ? 3.6 : h * 1.15, 4.4 - .4 * e); _l.set(f.x, down ? .3 : h * .55, 0); } // picado sobre el vencido
+      } else { const e = ease(u); _p.set(F.x + dir * (2.6 - .3 * e), H(w) * .58, 5.4 - .8 * e); _l.set(F.x - dir * .55, H(w) * .6, 0); } // retrato (el nombre queda a un lado)
       cam.position.copy(_p); cam.lookAt(_l);
       if (el) {
         el.dataset.shot = s.kind; if (cut) { el.classList.remove('cut'); void el.offsetWidth; el.classList.add('cut'); }

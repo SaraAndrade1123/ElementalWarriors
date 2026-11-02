@@ -25,9 +25,9 @@
 :is(#outro,#scine) .cskip{position:absolute;right:2vw;bottom:3.5vh;font:600 .8rem var(--f-body);letter-spacing:.14em;color:rgba(241,220,154,.75);text-transform:uppercase;z-index:3}
 
 /* ── INTRO: paneles diagonales con el color de cada guerrero, líneas de velocidad y choque final ── */
-#cine .cslash{position:absolute;top:-10%;bottom:-10%;width:62%;opacity:0;mix-blend-mode:screen;pointer-events:none}
-#cine .cslash.a{left:-12%;background:linear-gradient(100deg,transparent 8%,color-mix(in srgb,var(--ca) 55%,transparent) 30%,color-mix(in srgb,var(--ca) 12%,transparent) 75%,transparent);transform:skewX(-14deg)}
-#cine .cslash.b{right:-12%;background:linear-gradient(-100deg,transparent 8%,color-mix(in srgb,var(--cb) 55%,transparent) 30%,color-mix(in srgb,var(--cb) 12%,transparent) 75%,transparent);transform:skewX(-14deg)}
+#cine .cslash{position:absolute;top:30%;height:36%;width:58%;opacity:0;pointer-events:none}
+#cine .cslash.a{left:-6%;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--ca) 42%,transparent) 35%,color-mix(in srgb,var(--ca) 10%,transparent) 85%,transparent);transform:skewX(-14deg)}
+#cine .cslash.b{right:-6%;background:linear-gradient(-90deg,transparent,color-mix(in srgb,var(--cb) 42%,transparent) 35%,color-mix(in srgb,var(--cb) 10%,transparent) 85%,transparent);transform:skewX(-14deg)}
 #cine[data-shot="title"] .cslash.a{animation:slashA .7s cubic-bezier(.1,1,.3,1) both}
 #cine[data-shot="title"] .cslash.b{animation:slashB .7s .08s cubic-bezier(.1,1,.3,1) both}
 @keyframes slashA{from{opacity:0;transform:skewX(-14deg) translateX(-60%)}to{opacity:1;transform:skewX(-14deg)}}

@@ -11,7 +11,7 @@ import { t } from '../systems/localization.js';
 
 const ease = x => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
 export const readTime = text => Math.max(2.6, Math.min(6.5, 1.4 + String(text).length * .05));
-const _p = new THREE.Vector3(), _l = new THREE.Vector3();
+const _p = new THREE.Vector3(), _l = new THREE.Vector3(), _a = new THREE.Vector3(), _b = new THREE.Vector3();
 
 // Plan de planos a partir de las líneas del flujo ({who, key}); se prueba sin DOM.
 export function planStory(scenes, { hero, rival, chapter = 0, total = 0, card = true } = {}) {
@@ -98,9 +98,10 @@ export function createStoryCine({ scene, roster = [], doc = globalThis.document,
     scene.cineCam = (dt, cam) => {
       if (finished) return; st += dt; const s = shots[k]; if (!s) return;
       const u = Math.min(1, st / (s.kind === 'card' ? s.dur : 7)), e = ease(u), P = scene.pair;
-      const pos = i => P?.[i]?.holder?.position ?? _l.set(i ? 1.55 : -1.55, 0, -.2);
-      if (s.kind === 'card') { _p.set(0, 5.2 - 2.2 * e, 14 - 3 * e); _l.set(0, 1.5, 0); }
-      else if (s.kind === 'narr') { const a = -.3 + .6 * u; _p.set(Math.sin(a) * 10.5, 3.2, Math.cos(a) * 10.5); _l.set(0, 1.4, 0); }
+      const pos = i => P?.[i]?.holder ? P[i].holder.getWorldPosition(i ? _b : _a) : (i ? _b : _a).set(i ? 1.55 : -1.55, 0, -.2); // posición real (el escenario del menú puede estar desplazado)
+      const mid = (pos(0).x + pos(1).x) / 2;
+      if (s.kind === 'card') { _p.set(mid, 5.2 - 2.2 * e, 14 - 3 * e); _l.set(mid, 1.5, 0); }
+      else if (s.kind === 'narr') { const a = -.3 + .6 * u; _p.set(mid + Math.sin(a) * 10.5, 3.2, Math.cos(a) * 10.5); _l.set(mid, 1.4, 0); }
       else if (s.kind === 'ending') { _p.set(pos(0).x + .2, .9 + .5 * e, 6.5 - 1.6 * e); _l.set(pos(0).x, 2, 0); }
       else {
         const me = pos(s.side).clone(), other = pos(1 - s.side), dir = Math.sign(other.x - me.x) || 1;

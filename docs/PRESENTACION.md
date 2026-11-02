@@ -24,3 +24,9 @@ Todo es **presentación**: no cambia la simulación del combate (las 16 suites d
 - 16 diálogos propios (todas las parejas y los 4 espejos) en español e inglés; un guerrero nuevo usa líneas genéricas con el nombre del rival.
 - Cualquier tecla, clic o toque la salta. No aparece en Entrenamiento ni en Desafíos; un modo puede desactivarla con `cinematic: false`.
 - Para añadir diálogos: `pairs["a>b"] = [{ "who": "a", "es": "…", "en": "…" }, …]`.
+
+## v1.3 — Cinemáticas completas
+- **Final de combate** (`js/game/cinematic-end.js`): se engancha a `opts.onResult` del combate; el panel de resultados espera a que termine (o a que se salte). Planos: giro de grúa sobre el ganador (`slam`), frase del ganador en contrapicado y del vencido en picado (`line`), retrato final (`pose`). Diálogos en `data/outros.json` (`pairs['ganador>perdedor']`, `mirror`, `generic`). Opciones: `outro: false` en `startMatch` la desactiva; no se reproduce en entrenamiento.
+- **Intro**: paneles diagonales con el color de cada guerrero, líneas de velocidad, destello en cada corte, plano por encima del hombro (2.ª frase del mismo guerrero) y «choque» final con las auras.
+- **Historia** (`js/game/story-cine.js`): `createStoryCine({ scene, roster }).play(scenes, done, { hero, rival, chapter, total })`. Rueda las escenas en la escena del menú (`scene.showPair` + `scene.cineCam`). Planos: tarjeta de capítulo (con `story.place.<rival>`), narrador, primeros planos y epílogo. Con «reducir movimiento» se usa el diálogo clásico.
+- Guerreros personalizados: sin diálogos propios usan los genéricos; los planos se calculan con la altura (`def.height`) y la posición real de cada uno.

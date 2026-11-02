@@ -203,3 +203,15 @@ La F7 recibida partía de la F3 (sin F4 ni las animaciones de v0.6.0). Se hizo u
 - [x] 12 chromas premium (8 efectos animados, aura de partículas en combate, contorno de color); se quitan al desequipar.
 - [x] HUD con barras arcade; créditos con Claude.
 - [x] `npm test` = 16 suites OK.
+
+## v1.3.0
+- [x] Celular en horizontal: menú en dos columnas, resultados en dos columnas (sin cortes), avisos arriba, «¡Combatir!» fijo abajo (`css/mobile.css`, carga la última).
+- [x] 2 jugadores solo con teclado físico detectado (pulsación real con código físico, o puntero fino); se activa sin recargar.
+- [x] Cinemática final por pareja ganador/perdedor (16 + genéricas para guerreros nuevos), victoria perfecta, saltable; no en entrenamiento ni vista previa.
+- [x] Intro: paneles diagonales, líneas de velocidad, cortes con destello, plano sobre el hombro y choque final con auras.
+- [x] Historia en 3D: tarjeta de capítulo, narrador, primeros planos, respuestas del héroe (12), epílogo; fallback al diálogo clásico con «reducir movimiento».
+- [x] Vista previa de armas en vivo en la tienda (demo real con maniquí; se cierra al salir).
+- [x] Muñeca natural sin arma (marco de la palma desde la geometría del modelo); guardias con antebrazo vertical; pulgar cerrado.
+- [x] Vida infinita: con ella nadie cae y se regenera tras cada combo; sin ella hay K.O. real.
+- [x] Terra: Fisura de Colmillos (`fangs`), Ola Tectónica (`slabwave`), Meteorito con levitación y lanzamiento a dos manos.
+- [x] `npm test` = 17 suites OK (nueva `tools/test-v13.mjs`).
