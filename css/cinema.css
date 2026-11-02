@@ -127,3 +127,18 @@ body.story-cine #hud,body.story-cine #touch,body.story-cine #menu,body.story-cin
 }
 @media (max-width:760px),(max-aspect-ratio:1/1){#wprev{left:12px;right:12px;max-width:none;top:max(12px,env(safe-area-inset-top));bottom:auto}}
 @media (prefers-reduced-motion:reduce){#outro *,#scine *,#cine .cspeed,#cine .cslash,#cine .cclash *{animation:none!important}}
+
+/* ── TRANSFORMACIÓN: barra de duración sobre la Resonancia y aviso «lista» ── */
+#hud .tfbar{position:absolute;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 44px);width:min(34vw,330px);display:grid;grid-template-columns:1fr auto;align-items:end;gap:2px 10px;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
+#hud .tfbar.p1{left:max(14px,env(safe-area-inset-left))}#hud .tfbar.p2{right:max(14px,env(safe-area-inset-right));text-align:right}
+#hud .tfbar.on,#hud .tfbar.ready{opacity:1;transform:none}
+#hud .tfbar i{grid-column:1/-1;grid-row:2;display:block;height:7px;width:100%;background:linear-gradient(90deg,#fff,var(--c));box-shadow:0 0 12px var(--c),0 0 0 1px rgba(0,0,0,.6);transition:width .1s linear}
+#hud .tfbar.p2 i{justify-self:end}
+#hud .tfbar b{font:800 .86rem var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 0 10px var(--c),0 2px 4px #000}
+#hud .tfbar em{font:700 .78rem var(--f-body);font-style:normal;color:#fff3cc;text-shadow:0 2px 4px #000}
+#hud .tfbar.p2 b{order:2}#hud .tfbar.p2 em{order:1}
+#hud .tfbar.ready i{display:none}
+#hud .tfbar.ready b{animation:tfReady 1s ease-in-out infinite}
+@keyframes tfReady{50%{color:var(--c);text-shadow:0 0 18px var(--c),0 0 30px var(--c)}}
+#touch:not([hidden]) ~ #hud .tfbar,body:has(#touch:not([hidden])) #hud .tfbar{bottom:auto;top:calc(max(12px,env(safe-area-inset-top)) + 110px);width:min(28vw,220px)}
+@media (prefers-reduced-motion:reduce){#hud .tfbar.ready b{animation:none}}

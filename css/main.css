@@ -179,3 +179,5 @@ body[data-reduce="1"] *{animation:none!important;transition:none!important}
 .moves td{padding:4px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}.moves td:nth-child(5){color:var(--muted)}.moves kbd{font:600 .75rem var(--f-ui,inherit);color:#f1dc9a;white-space:nowrap}
 #touch .mh{right:calc(var(--e) + var(--g) * 1.5);bottom:calc(5% + var(--g) * 2);width:calc(var(--u) * .75);font-size:.8rem}
 #touch .w{right:calc(var(--e) + var(--g) * .3);bottom:calc(5% + var(--g) * 2);width:calc(var(--u) * .85);background:rgba(120,90,20,.55)}
+
+#touch .t{right:calc(var(--e) + var(--g) * .3);bottom:calc(5% + var(--g) * 3);width:calc(var(--u) * .85);background:radial-gradient(circle,rgba(255,226,140,.55),rgba(120,60,160,.55));font-size:1.2rem}

@@ -5,19 +5,19 @@ import { hasKeyboard } from '../systems/keyboard-detect.js';
 // Esquemas: 'solo' (1 jugador) y 'versus' (2 jugadores en el mismo teclado: J1 a la izquierda, J2 a la derecha + teclado numérico).
 export const KEYMAP = {
   left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], jump: ['KeyW', 'ArrowUp', 'Space'], down: ['KeyS', 'ArrowDown'],
-  l: ['KeyJ', 'KeyZ'], m: ['KeyK', 'KeyX'], h: ['KeyL', 'KeyC'], s: ['KeyU', 'KeyV'], r: ['KeyI', 'KeyB'], w: ['KeyO', 'KeyN'], guard: ['ShiftLeft', 'ShiftRight'],
+  l: ['KeyJ', 'KeyZ'], m: ['KeyK', 'KeyX'], h: ['KeyL', 'KeyC'], s: ['KeyU', 'KeyV'], r: ['KeyI', 'KeyB'], w: ['KeyO', 'KeyN'], t: ['KeyY', 'KeyM'], guard: ['ShiftLeft', 'ShiftRight'],
 };
 export const SCHEMES = {
   solo: [KEYMAP],
   versus: [
-    { left: ['KeyA'], right: ['KeyD'], jump: ['KeyW'], down: ['KeyS'], l: ['KeyF'], m: ['KeyG'], h: ['KeyH'], s: ['KeyR'], r: ['KeyT'], w: ['KeyE'], guard: ['ShiftLeft'] },
+    { left: ['KeyA'], right: ['KeyD'], jump: ['KeyW'], down: ['KeyS'], l: ['KeyF'], m: ['KeyG'], h: ['KeyH'], s: ['KeyR'], r: ['KeyT'], w: ['KeyE'], t: ['KeyQ'], guard: ['ShiftLeft'] },
     { left: ['ArrowLeft'], right: ['ArrowRight'], jump: ['ArrowUp'], down: ['ArrowDown'], l: ['Numpad1', 'Comma'], m: ['Numpad2', 'Period'], h: ['Numpad3', 'Slash'],
-      s: ['Numpad4', 'KeyL'], r: ['Numpad5', 'Semicolon'], w: ['Numpad6', 'KeyK'], guard: ['Numpad0', 'ShiftRight'] },
+      s: ['Numpad4', 'KeyL'], r: ['Numpad5', 'Semicolon'], w: ['Numpad6', 'KeyK'], t: ['Numpad7', 'Quote'], guard: ['Numpad0', 'ShiftRight'] },
   ],
 };
-const EDGE = ['jump', 'l', 'm', 'h', 's', 'r', 'w'];
-const PAD = [['left', '◀'], ['right', '▶'], ['down', '▼'], ['jump', '▲'], ['l', 'L'], ['m', 'M'], ['h', 'H'], ['s', '✦'], ['r', '◈'], ['guard', '🛡'], ['lm', 'L+M'], ['mh', 'M+H'], ['w', '✠']];
-const EMPTY = Object.freeze({ x: 0, down: false, guard: false, jump: false, l: false, m: false, h: false, s: false, r: false, w: false });
+const EDGE = ['jump', 'l', 'm', 'h', 's', 'r', 'w', 't'];
+const PAD = [['left', '◀'], ['right', '▶'], ['down', '▼'], ['jump', '▲'], ['l', 'L'], ['m', 'M'], ['h', 'H'], ['s', '✦'], ['r', '◈'], ['guard', '🛡'], ['lm', 'L+M'], ['mh', 'M+H'], ['w', '✠'], ['t', '✹']];
+const EMPTY = Object.freeze({ x: 0, down: false, guard: false, jump: false, l: false, m: false, h: false, s: false, r: false, w: false, t: false });
 
 export class Input {
   // keymap: mapa propio para un solo jugador (compatibilidad con v0.6); si no, se usan los esquemas.

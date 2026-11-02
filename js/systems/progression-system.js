@@ -54,9 +54,9 @@ export class Progression {
     if (unlocked.length) this.onUnlock?.(unlocked); return { ok: true, unlocked: unlocked.map(a => a.id) };
   }
   // Prueba de combate superada: paga Rose Gold UNA sola vez por prueba (operación atómica).
-  recordChallenge(id) {
+  recordChallenge(id, reward) {
     if (typeof id !== 'string' || !/^[\w-]{1,40}$/.test(id)) return { ok: false, error: 'invalid' };
-    const gold = Math.max(0, Math.floor(this.eco.challenge ?? 0));
+    const gold = Math.max(0, Math.min(400, Math.floor(Number.isFinite(reward) ? reward : this.eco.challenge ?? 0))); // cada desafío puede pagar lo suyo (tope 400)
     const res = this.save.commit(d => { if (d.challenges.includes(id)) return { ok: false, error: 'duplicate' }; d.challenges.push(id); d.gold.balance += gold; d.gold.earned += gold; return { ok: true }; });
     return res.ok ? { ok: true, gold } : res;
   }

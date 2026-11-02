@@ -102,8 +102,10 @@ const res = (winner, o = {}) => ({ winner, wins: winner === 0 ? [2, 0] : [0, 2],
   const s3 = S2.report(res(1)); ok(s3.status === 'over' && S2.done && S2.summary().wins === 2 && S2.summary().score > 0, 'la derrota termina la serie y resume victorias, puntuación y tiempo'); }
 
 // ---------- Desafíos
-{ const live = CHALLENGES.filter(c => !c.locked), locked = CHALLENGES.filter(c => c.locked); ok(live.length >= 13 && locked.length === 1 && locked[0].id === 'transform' && locked[0].locked === 'F5', `${live.length} pruebas jugables (incluidas las de F4 y control elemental) y la transformación bloqueada hasta F5`);
-  let threw = false; try { new ChallengeTracker(byId('transform')); } catch { threw = true; } ok(threw, 'una prueba bloqueada no se puede iniciar');
+{ const kinds = k => CHALLENGES.filter(c => (c.kind || 'train') === k).length; ok(CHALLENGES.length >= 50 && !CHALLENGES.some(c => c.locked) && kinds('train') >= 20 && kinds('fight') >= 15 && kinds('mode') >= 8 && kinds('pvp') >= 6, `${CHALLENGES.length} desafíos (técnica ${kinds('train')}, combate ${kinds('fight')}, modos ${kinds('mode')}, 2 jugadores ${kinds('pvp')}) y la transformación ya es jugable`);
+  ok(new Set(CHALLENGES.map(c => c.id)).size === CHALLENGES.length, 'sin ids repetidos');
+  let threw = false; try { new ChallengeTracker(byId('f_hard')); } catch { threw = true; } ok(threw && new ChallengeTracker(byId('transform')).feed({ type: 'transform', by: 0 }), 'los desafíos de combate no usan el contador de entrenamiento; la transformación sí se completa');
+  const T = new ChallengeTracker(byId('bendall')); ['eb', 'eb', 'eu'].forEach(m => T.feed({ type: 'hit', by: 0, move: m })); ok(T.count === 2 && T.feed({ type: 'hit', by: 0, move: 'ej' }), 'Dominio total cuenta técnicas DISTINTAS');
   const tr = new ChallengeTracker(byId('punch3')), H = (move, o = {}) => ({ type: 'hit', by: 0, move, combo: 1, dmg: 5, ko: false, ...o });
   ok(!tr.feed(H('h')) && !tr.feed({ type: 'hit', by: 1, move: 'l' }) && !tr.feed({ type: 'block', by: 0, move: 'l' }) && tr.count === 0, 'los golpes de otro tipo, del rival o bloqueados no cuentan');
   tr.feed(H('l')); tr.feed(H('cl')); ok(tr.count === 2 && !tr.done, 'cuenta 2/3 (ligero de pie y agachado)'); ok(tr.feed(H('jl')) === true && tr.done, 'se completa al tercero'); ok(tr.feed(H('l')) === false && tr.count === 3, 'una prueba completada no se vuelve a completar');

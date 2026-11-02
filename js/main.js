@@ -12,6 +12,7 @@ import { installAudio, ELEMENT_OF } from './audio/audio-hook.js';
 import { createFlow } from './modes/flow.js';
 import { installModes } from './ui/modes-ui.js';
 import { CpuBrain, DUMMIES } from './game/ai.js';
+import { CHALLENGES } from './modes/challenges.js';
 import { LEVEL_IDS } from './game/difficulty-config.js';
 import { mirrorName } from './systems/mirror-spec.js';
 import { installElements } from './elements/element-hook.js';
@@ -26,6 +27,8 @@ import { createStoryCine } from './game/story-cine.js';
 import { installFightReport } from './game/fight-report.js';
 import { renderResult } from './ui/result-screen.js';
 import { installPanelDock } from './ui/panel-dock.js';
+import { patchFighter as patchTransform, patchCpu as patchTransformCpu, installTransform } from './game/transform.js';
+import { Fighter, RULES } from './game/fighter.js';
 import { installOutro } from './game/cinematic-end.js';
 import { createWeaponPreview } from './ui/weapon-preview.js';
 
@@ -87,6 +90,7 @@ async function boot() {
     if (weaponData) installWeaponShop(menu, { meta, roster, data: weaponData, preview: wPreview });
     installFightFx({ scene, roster }); // impactos, congelado de técnica y K.O. con más producción (docs/PRESENTACION.md)
     installCinematic({ scene, roster, data: introData }); // cinemática con diálogo antes de cada combate
+    patchTransform(Fighter, RULES); patchTransformCpu(CpuBrain); installTransform({ scene, t, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color }); // transformación definitiva (F5)
     installFightReport({ scene }); // bonificaciones y rango de cada combate (pantalla de resultados)
     installOutro({ scene, roster, data: outroData }); // cinemática de victoria al terminar cada combate (antes del panel)
     if (dev) window.ewAudio = audio; // consola: ewAudio.sfx('hit_heavy', { element: 'fire' })
@@ -152,12 +156,22 @@ async function boot() {
       const id = globalThis.crypto?.randomUUID?.() ?? `m-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
       const rep = scene.__report?.build(r) || null, local = c.mode === 'versus', out = w => w < 0 ? 'draw' : w ? 'loss' : 'win';
       const rec = meta.progression.recordMatch({ matchId: id, mode: c.rec ?? 'versus_ai', outcome: out(r.winner),
-        characterId: c.a, roundsWon: r.wins[0], difficulty: c.level || 'normal', maxCombo: r.stats.combo[0], maxDamage: Math.round(r.stats.best[0]), durationSec: Math.round(r.time), transformations: 0,
+        characterId: c.a, roundsWon: r.wins[0], difficulty: c.level || 'normal', maxCombo: r.stats.combo[0], maxDamage: Math.round(r.stats.best[0]), durationSec: Math.round(r.time), transformations: rep?.sides[0].stats.tf || 0,
         bonusGold: rep?.sides[0].gold || 0, p2: local && rep ? { outcome: r.winner < 0 ? 'draw' : r.winner === 1 ? 'win' : 'loss', roundsWon: r.wins[1], bonusGold: rep.sides[1].gold } : null });
       const ok = rec.ok && !rec.ignored;
       pending = rep ? { rep, cfg: c, local, gold: ok ? [rec.base + rec.extra + (rec.bonus || 0), rec.p2] : [0, 0], result: r } : null;
+      if (local && rep) book('pvp', { res: r, rep, cfg: c, count: pvpCount() });
       return ok ? rec.gold + (rec.bonus || 0) : 0;
     };
+    // Desafíos que se cumplen jugando (modos y 2 jugadores): se comprueban al ocurrir el evento y pagan una sola vez.
+    const book = (on, ev) => { try {
+      const done = meta.save.data.challenges;
+      for (const c of CHALLENGES) if (c.on === on && !done.includes(c.id) && c.check(ev)) { const rc = meta.progression.recordChallenge(c.id, c.gold); if (rc.ok) setTimeout(() => menu.toast(t('challenge.toast', { name: t(`ch.${c.id}.name`), n: rc.gold })), 400); }
+    } catch (e) { console.warn('[desafíos]', e); } };
+    { const P = meta.progression, rr = P.recordRun.bind(P), re = P.recordEvent.bind(P);
+      P.recordRun = s => { const r = rr(s); if (s?.kind === 'arcade' || s?.kind === 'survival') book(s.kind, s); return r; };
+      P.recordEvent = n => { const r = re(n); if (n === 'story_clear') book('story', { all: roster.every(c => (meta.save.data.story?.[c.id] || 0) >= (modes.order[c.id]?.length || 3)) }); return r; }; }
+    const pvpCount = () => { try { const n = (+localStorage.getItem('ew.pvp') || 0) + 1; localStorage.setItem('ew.pvp', n); return n; } catch { return 1; } };
     const showPanel = p => {
       const rep = pending; pending = null;
       renderResult(p, rep, { t, roster, sideName, sideFx, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color });
@@ -186,7 +200,7 @@ async function boot() {
     const showHint = txt => { hintEl.textContent = txt; hintEl.classList.remove('fade'); void hintEl.offsetWidth; hintEl.classList.add('fade'); };
     flow = createFlow({
       cfg: modes, progression: meta.progression, t, nameOf, sideName, record, restart: () => { rz.hidden = true; scene.match.restart(); },
-      fight: c => fight(c), panel: showPanel, story: showStory, hint: txt => { hintEl.textContent = txt; hintEl.classList.remove('fade'); },
+      fight: c => fight(c), panel: showPanel, report: () => pending?.rep, story: showStory, hint: txt => { hintEl.textContent = txt; hintEl.classList.remove('fade'); },
       pauseMatch: on => { if (!scene.match) return; scene.match.paused = input.paused = on; input.clear(); }
     });
     const showResult = r => flow.onResult(r);

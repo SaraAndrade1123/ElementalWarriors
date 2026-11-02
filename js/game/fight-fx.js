@@ -30,6 +30,7 @@ export function installFightFx({ scene, roster = [], doc = globalThis.document, 
     b.innerHTML = `<b></b>${sub ? '<i></i>' : ''}`; b.querySelector('b').textContent = text; if (sub) b.querySelector('i').textContent = sub;
     layer.append(b); setTimeout(() => b.remove(), cls === 'super' ? 1300 : 1100);
   };
+  api.banner = (...a) => banner(...a); api.freeze = (d, at) => P()?.superFreeze(d, at);
   const setGrade = el => { const p = P(); if (!p) return; const g = GRADE[el] || GRADE.neutral; p.grade.sat = g.sat; p.grade.con = g.con; p.grade.bloom = g.bloom; p.grade.tint.setRGB(...g.tint); };
 
   const start = scene.startMatch.bind(scene), end = scene.endMatch.bind(scene);

@@ -17,3 +17,12 @@
 #story .line.narr{font-style:italic;color:var(--muted)}
 .train-only[hidden]{display:none}
 .gr.vs span:last-child{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+/* desafíos v1.5: categorías, nivel y recompensa */
+.ch-total{font-weight:700;color:#f1dc9a}
+.ch-list .item.ch .meta{display:grid;gap:3px}
+.ch-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.ch-tags .tag{font-style:normal;display:inline-flex;align-items:center;gap:5px;padding:1px 8px;font-size:.74rem}
+.ch-tags .tag.gold{color:#ffe1ea;border-color:rgba(224,138,166,.55);background:rgba(224,138,166,.12)}
+.ch-tags .tag.lvl{color:#ffd2a0;border-color:rgba(255,150,60,.5);background:rgba(255,150,60,.1)}
+.ch-list .item.ch.done{opacity:.78}
+.ch-list .item.ch.done .mark{color:#5fd38a}

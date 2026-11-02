@@ -2,7 +2,7 @@
 import { t } from '../systems/localization.js';
 import { Ladder } from '../modes/ladder.js';
 import { Survival } from '../modes/survival.js';
-import { CHALLENGES } from '../modes/challenges.js';
+import { CHALLENGES, kindOf, rivalFor } from '../modes/challenges.js';
 import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { RANDOM } from '../stages/stage-manager.js';
 import { hasKeyboard, onKeyboard } from '../systems/keyboard-detect.js';
@@ -68,17 +68,27 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
       h('button', { class: 'cta', 'aria-disabled': blocked ? 'true' : null, onclick: () => (blocked ? this.toast(t('versus.touch')) : go()) }, t('versus.start')));
   };
 
-  // ---------- Desafíos
+  // ---------- Desafíos: por categorías (técnica, combate contra la CPU, modos y 2 jugadores) con su recompensa
+  let chTab = 'train';
   menu.page_challenges = function () {
-    const m = me(), done = data().challenges, rival = roster[(menu.idx + 1) % roster.length];
-    this.panel(t('menu.challenges'), h('p', { class: 'lead' }, t('challenges.hero', { name: m.name })), heroTabs(), h('p', { class: 'note' }, t('challenges.intro', { n: meta.progression.eco.challenge ?? 0 })),
-      h('ul', { class: 'items' }, ...CHALLENGES.map(c => {
-        const locked = !!c.locked, ok = done.includes(c.id);
-        return h('li', { class: 'item' + (ok ? ' done' : '') + (locked ? ' lock' : '') },
-          h('span', { class: 'mark', 'aria-hidden': 'true' }, ok ? '✓' : locked ? '🔒' : '○'),
-          h('span', { class: 'meta' }, h('b', {}, t(`ch.${c.id}.name`)), h('span', {}, t(`ch.${c.id}.goal`))),
-          h('span', { class: 'acts' }, locked ? h('span', { class: 'tag' }, t('challenges.locked', { phase: c.locked })) : ok ? h('span', { class: 'tag ok' }, t('challenges.done')) : null,
-            locked ? null : h('button', { class: 'mini', onclick: () => flow.begin({ kind: 'challenge', def: c, hero: m.id, rival: rival.id }) }, t('challenges.start'))));
+    const m = me(), done = data().challenges, list = CHALLENGES.filter(c => kindOf(c) === chTab), eco = meta.progression.eco.challenge ?? 0;
+    const cats = ['train', 'fight', 'mode', 'pvp'].map(k => { const all = CHALLENGES.filter(c => kindOf(c) === k), n = all.filter(c => done.includes(c.id)).length; return [k, `${t('challenges.cat.' + k)} ${n}/${all.length}`]; });
+    const total = CHALLENGES.filter(c => done.includes(c.id)).length;
+    const start = c => kindOf(c) === 'train' || kindOf(c) === 'fight' ? flow.begin({ kind: 'challenge', def: c, hero: m.id, rival: kindOf(c) === 'fight' ? rivalFor(c, m.id, roster) : roster[(menu.idx + 1) % roster.length].id }) : this.go(c.go);
+    this.panel(t('menu.challenges'),
+      h('p', { class: 'lead' }, t('challenges.hero', { name: m.name })), heroTabs(),
+      h('p', { class: 'note ch-total' }, t('challenges.total', { n: total, of: CHALLENGES.length })),
+      tabs(cats, chTab, k => { chTab = k; rerender(); }, t('menu.challenges'), 'chcat'),
+      h('p', { class: 'note' }, t('challenges.desc.' + chTab)),
+      h('ul', { class: 'items ch-list' }, ...list.map(c => {
+        const ok = done.includes(c.id), kind = kindOf(c), lvl = kind === 'fight' && c.level !== 'normal' ? t('level.' + c.level) : null;
+        const act = kind === 'mode' || kind === 'pvp' ? t('challenges.go') : t('challenges.start');
+        return h('li', { class: 'item ch ' + kind + (ok ? ' done' : '') },
+          h('span', { class: 'mark', 'aria-hidden': 'true' }, ok ? '✓' : '◆'),
+          h('span', { class: 'meta' }, h('b', {}, t(`ch.${c.id}.name`)), h('span', {}, t(`ch.${c.id}.goal`)),
+            h('span', { class: 'ch-tags' }, lvl ? h('i', { class: 'tag lvl' }, lvl) : null, h('i', { class: 'tag gold' }, h('span', { class: 'gem', 'aria-hidden': 'true' }), `+${c.gold ?? eco}`))),
+          h('span', { class: 'acts' }, ok ? h('span', { class: 'tag ok' }, t('challenges.done')) : null,
+            h('button', { class: 'mini', onclick: () => start(c) }, ok && kind !== 'mode' && kind !== 'pvp' ? t('challenges.again') : act)));
       })));
   };
 

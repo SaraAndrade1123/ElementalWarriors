@@ -38,10 +38,14 @@ export function createWeaponPreview({ scene, roster, moves, sfx = null, doc = gl
     const want = melee ? Math.max(1.4, Math.min(3.2, (mv.range || 2) * .82)) : 3.4;
     const input = previewInput(() => scene.match, { want });
     try {
-      scene.startMatch(hero, foe, input, { moves, mode: 'training', dummy: parry ? 'attack' : 'still', infinite: true, weapon1: weaponId, weapon2: null, cinematic: false, outro: false, preview: true,
+      scene.startMatch(hero, foe, input, { moves, mode: 'training', dummy: 'still', infinite: true, weapon1: weaponId, weapon2: null, cinematic: false, outro: false, preview: true,
         onHud() {}, onResult() {}, onEvent() {}, onFx: (n, d) => { try { sfx?.(n, d); } catch { /* sin audio */ } }, onReact() {} });
     } catch (e) { console.warn('[vista previa] no se pudo iniciar', e); return false; }
-    const m = scene.match; m.phase = 'fight'; m.f[0].x = -want / 2; m.f[1].x = want / 2; m.prev = m.f.map(f => ({ x: f.x, y: f.y }));
+    const m = scene.match; m.phase = 'fight';
+    // daga de contraataque: el maniquí ataca JUSTO cuando la daga está en guardia, así se ve el bloqueo y la respuesta
+    if (parry) { let swung = false; const B = o => ({ x: 0, down: false, guard: false, jump: false, l: false, m: false, h: false, s: false, r: false, w: false, ...o });
+      m.brain = { reset() {}, think(dt, me, hero) { const a = hero.act; if (!a || a.name !== 'wp') { swung = false; return B(); }
+        const win = a.def?.parry; if (!swung && win && a.t >= win[0] + .02 && !me.act && !(me.stun > 0)) { swung = true; return B({ m: true }); } return B(); } }; } m.f[0].x = -want / 2; m.f[1].x = want / 2; m.prev = m.f.map(f => ({ x: f.x, y: f.y }));
     // cámara de exhibición: encuadra a los dos a la derecha del panel (en vertical, arriba)
     const render = m.render;
     m.render = function (rdt, cam) {

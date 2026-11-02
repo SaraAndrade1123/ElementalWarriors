@@ -21,7 +21,10 @@ export function createFlow(env) {
     switch (ses.kind) {
       case 'arcade': case 'story': { const L = ses.obj; story(L.scenesBefore(), () => run(L.fight())); break; }
       case 'survival': run(ses.obj.fight()); break;
-      case 'challenge': tracker = new ChallengeTracker(ses.def); run({ a: ses.hero, b: ses.rival, mode: 'training', rec: 'training', dummy: ses.def.dummy, infinite: ses.def.infinite }); break;
+      case 'challenge': {
+        const d = ses.def;
+        if (d.kind === 'fight') { ses.kind = 'challenge_fight'; run({ a: ses.hero, b: ses.rival, mode: 'cpu', rec: 'versus_ai', level: d.level, wins: d.wins, maxRounds: d.wins * 2 + 1, roundTime: d.roundTime ?? 60 }); break; }
+        tracker = new ChallengeTracker(d); run({ a: ses.hero, b: ses.rival, mode: 'training', rec: 'training', dummy: d.dummy, infinite: d.infinite }); break; }
       default: ses = { kind: 'plain', cfg: session.cfg }; run(session.cfg);
     }
   }
@@ -31,7 +34,7 @@ export function createFlow(env) {
     const before = tracker.count, done = tracker.feed(e); if (tracker.count !== before) env.hint(progressText()); if (done) complete();
   }
   function complete() {
-    const d = tracker.def, r = progression.recordChallenge(d.id), live = CHALLENGES.filter(c => !c.locked), nxt = live[(live.indexOf(d) + 1) % live.length];
+    const d = tracker.def, r = progression.recordChallenge(d.id, d.gold), live = CHALLENGES.filter(c => !c.locked && !c.kind), nxt = live[(live.indexOf(d) + 1) % live.length];
     env.pauseMatch(true);
     env.panel({ title: t('result.ch.done'), sub: t(`ch.${d.id}.name`), rows: r.ok ? [['result.gold', `+${r.gold}`]] : [['result.ch.again', '✓']],
       again: { label: t('result.ch.keep'), run: () => env.pauseMatch(false) },
@@ -45,6 +48,13 @@ export function createFlow(env) {
       return env.panel({ title: verdict, sub: r.winner < 0 ? '' : t('result.winner', { name: side(r.winner) }), rows: base(r, gold), again: { label: t('result.again'), run: () => env.restart() } });
     }
     if (kind === 'arcade' || kind === 'story') return ladderResult(r, gold, verdict);
+    if (kind === 'challenge_fight') { // desafío de combate: la condición se mira con el resumen del combate
+      const d = ses.def, rep = env.report?.(), c = { res: r, rep, s: rep?.sides?.[0], cfg: last }, ok = !!(c.s && d.check(c));
+      const rc = ok ? progression.recordChallenge(d.id, d.gold) : null, rows = base(r, gold);
+      if (rc?.ok) rows.push(['result.ch.reward', `+${rc.gold}`]);
+      return env.panel({ title: ok ? t('result.ch.done') : t('result.ch.fail'), sub: t(`ch.${d.id}.goal`), rows,
+        again: { label: t(ok ? 'result.ch.again2' : 'result.retry'), run: () => run(last) } });
+    }
     if (kind === 'survival') return survivalResult(r, gold, verdict);
   }
 

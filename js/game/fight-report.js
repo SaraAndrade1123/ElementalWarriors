@@ -17,6 +17,7 @@ export const BONUS = {
   bend:       { per: 60 },             // golpes de control elemental
   weapon:     { per: 100 },            // golpes con el arma
   parry:      { per: 200 },
+  tf:         { pts: 600 },            // transformación definitiva activada
   blocks:     { per: 15 },
   dmg:        { per: 2 },              // por punto de daño causado
   hp:         { per: 12 },             // por % de vida restante al ganar
@@ -26,7 +27,7 @@ export const RANKS = [['S', 85], ['A', 70], ['B', 52], ['C', 35], ['D', 0]];
 export const RANK_GOLD = { S: 40, A: 25, B: 15, C: 5, D: 0 };
 const BEND = new Set(['eb', 'eu', 'ej']);
 
-export const blankSide = () => ({ first: false, hits: 0, maxCombo: 0, exUse: 0, exHit: 0, exKO: false, perfect: 0, counter: 0, crush: 0, throws: 0, bend: 0, weapon: 0, parry: 0, blocks: 0, dmg: 0, taken: 0, rounds: 0, time: 0, kos: 0 });
+export const blankSide = () => ({ tf: 0, first: false, hits: 0, maxCombo: 0, exUse: 0, exHit: 0, exKO: false, perfect: 0, counter: 0, crush: 0, throws: 0, bend: 0, weapon: 0, parry: 0, blocks: 0, dmg: 0, taken: 0, rounds: 0, time: 0, kos: 0 });
 export function createTracker() {
   const T = { s: [blankSide(), blankSide()], firstDone: false, roundsLog: [] };
   T.reset = () => { T.s = [blankSide(), blankSide()]; T.firstDone = false; T.roundsLog = []; };
@@ -48,6 +49,7 @@ export function createTracker() {
       case 'crush': case 'guardbreak': me.crush++; break;
       case 'parry': me.parry++; break;
       case 'ex': me.exUse++; break;
+      case 'transform': me.tf++; break;
     }
   };
   // fin de ronda: w = ganador (−1 empate), why = 'ko' | 'time', hp = vida restante [0..1] de cada lado, left = segundos restantes
@@ -77,6 +79,7 @@ export function summarize(T, side, res) {
   if (s.bend) add('bend', s.bend * BONUS.bend.per, s.bend);
   if (s.weapon) add('weapon', s.weapon * BONUS.weapon.per, s.weapon);
   if (s.parry) add('parry', s.parry * BONUS.parry.per, s.parry);
+  if (s.tf) add('tf', BONUS.tf.pts);
   if (s.blocks) add('blocks', s.blocks * BONUS.blocks.per, s.blocks);
   if (s.dmg) add('dmg', s.dmg * BONUS.dmg.per, Math.round(s.dmg));
   const hpPct = Math.round((res.hp?.[side] ?? 0) * 100);
