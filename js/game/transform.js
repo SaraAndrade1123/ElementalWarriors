@@ -58,10 +58,11 @@ export function patchCpu(Brain) {
   const think = P.think;
   P.think = function (dt, me, foe) {
     const r = think.call(this, dt, me, foe);
-    if (me?.tfAI && canTransform(me)) {
+    if (me?.tfAI && me.meter >= TF.cost && !(me.tf > 0)) {
       const rate = { beginner: .15, normal: .5, hard: 1.2, expert: 3 }[this.level] ?? .5;
-      if (Math.random() < rate * dt) return { ...r, t: true, r: false, w: false };
-    }
+      if (!this.tfWant && Math.random() < rate * dt) this.tfWant = true; // decide transformarse…
+      if (this.tfWant) { if (canTransform(me)) { this.tfWant = false; return { ...r, t: true, r: false, w: false }; } return { ...r, l: false, m: false, h: false, s: false, r: false, w: false, t: false }; } // …y espera un momento libre
+    } else this.tfWant = false;
     return r;
   };
   P.__tf = true; return true;

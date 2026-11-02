@@ -63,6 +63,21 @@ const paint = {
   },
 };
 
+// cordillera con luz y sombra (cara iluminada / cara en sombra) y nieve opcional en las cumbres
+paint.range = function (x, w, h, R, light, dark, snow, n = 9, base = .95, top = .12) {
+  const peaks = []; for (let i = 0; i < n; i++) peaks.push({ cx: (i + .2 + R() * .6) / n * w, py: h * (top + R() * .38), bw: w / n * (.9 + R() * .7) });
+  peaks.sort((a, b) => a.py - b.py).reverse(); // las más bajas delante
+  for (const p of peaks) {
+    const L = p.cx - p.bw, Rr = p.cx + p.bw, sh = (R() - .5) * p.bw * .3;
+    x.fillStyle = dark; x.beginPath(); x.moveTo(L, h * base); x.lineTo(p.cx + sh, p.py); x.lineTo(Rr, h * base); x.fill();
+    x.fillStyle = light; x.beginPath(); x.moveTo(L, h * base); x.lineTo(p.cx + sh, p.py); x.lineTo(p.cx + sh + p.bw * .18, h * base); x.fill();
+    if (snow) { const sy = p.py + (h * base - p.py) * .22; x.fillStyle = snow; x.beginPath(); x.moveTo(p.cx + sh, p.py);
+      for (let k = 0; k <= 6; k++) { const tx = L + (Rr - L) * (.5 + (k / 6 - .5) * .44 * ((sy - p.py) / (h * base - p.py) * 4.5)); x.lineTo(tx, sy + (k % 2 ? 10 : -4)); }
+      x.closePath(); x.fill(); }
+  }
+  x.fillStyle = dark; x.fillRect(0, h * base - 2, w, h);
+};
+
 export function addExtras(cfg, K) {
   const { g, add, flame, anim, R, glow, accent } = K, ex = cfg.extras || [];
   if (!ex.length) return;
@@ -79,7 +94,68 @@ export function addExtras(cfg, K) {
   const lanternMat = new THREE.MeshBasicMaterial({ color: 0xffb35a }), poleMat = new THREE.MeshStandardMaterial({ color: gr.clone().multiplyScalar(.5), roughness: 1 });
   const rockMat = new THREE.MeshStandardMaterial({ color: gr.clone().lerp(new THREE.Color(cfg.slab), .5).multiplyScalar(.85), roughness: 1, flatShading: true });
 
+  const pts = (n, spread, size, col, op, blend = THREE.NormalBlending) => { const pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) pos.set([(R() * 2 - 1) * spread[0], R() * spread[1], spread[2][0] + R() * (spread[2][1] - spread[2][0])], i * 3);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); const p = new THREE.Points(geo, new THREE.PointsMaterial({ map: glow, color: col, size, transparent: true, opacity: op, depthWrite: false, blending: blend, fog: false })); p.frustumCulled = false; g.add(p); return p; };
+  const light = (k = 0) => hex(sky[Math.min(2, sky.length - 1)].clone().lerp(gr, .35 + k)), shade = (k = 0) => hex(gr.clone().multiplyScalar(.75 - k).lerp(sky[1], .25));
   const E = {
+    // ── cordilleras grandes y visibles detrás del ring (dos filas, con nieve si el clima es frío) ──
+    peaks() { const snow = cfg.weather === 'snow' || cfg.id === 'bosque' ? 'rgba(240,248,255,.95)' : null;
+      layer((x, W, H) => paint.range(x, W, H, R, light(.15), shade(.1), snow, 9, .97, .05), { w: 150, h: 26, y: 8.5, z: -23 });
+      layer((x, W, H) => paint.range(x, W, H, R, light(.35), shade(.25), null, 12, .98, .3), { w: 120, h: 16, y: 4, z: -17 }); },
+    // ── clima ──
+    rain() { const n = 360, pos = new Float32Array(n * 6), sp = [];
+      for (let i = 0; i < n; i++) { const x0 = (R() * 2 - 1) * 22, y0 = R() * 16, z0 = -10 + R() * 9; pos.set([x0, y0, z0, x0 - .08, y0 + .7, z0], i * 6); sp.push(14 + R() * 8); }
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const ln = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: 0xcfe6ff, transparent: true, opacity: .35, depthWrite: false, fog: false })); ln.frustumCulled = false; g.add(ln);
+      anim.push((t, dt) => { const a = geo.attributes.position.array; for (let i = 0; i < n; i++) { const j = i * 6, d = sp[i] * dt; a[j + 1] -= d; a[j + 4] -= d; a[j] -= d * .06; a[j + 3] -= d * .06; if (a[j + 1] < -.2) { const x0 = (R() * 2 - 1) * 22; a[j] = x0; a[j + 1] = 16; a[j + 3] = x0 - .08; a[j + 4] = 16.7; } } geo.attributes.position.needsUpdate = true; });
+      const rings = []; for (let i = 0; i < 10; i++) { const r = sprite(smokeMap, 0xdfefff, .5, 0, .05, 0, THREE.AdditiveBlending, 0); rings.push({ r, t: R() }); }
+      anim.push((t, dt) => { for (const o of rings) { o.t += dt * 2.2; if (o.t > 1) { o.t = 0; o.r.position.set((R() * 2 - 1) * 9, .05, -3 + R() * 5); } o.r.scale.set(.3 + o.t * 1.2, .08 + o.t * .2, 1); o.r.material.opacity = .5 * (1 - o.t); } }); },
+    lightning() { const fl = new THREE.Mesh(new THREE.PlaneGeometry(220, 90), new THREE.MeshBasicMaterial({ color: 0xdfe8ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })); add(fl, 0, 15, -39);
+      const bolt = new THREE.Mesh(new THREE.PlaneGeometry(3, 26), new THREE.MeshBasicMaterial({ map: tex(64, 512, (x, W, H) => { x.strokeStyle = '#fff'; x.lineWidth = 5; x.shadowColor = '#9fd0ff'; x.shadowBlur = 14; x.beginPath(); let px = W / 2; x.moveTo(px, 0); for (let y = 0; y < H; y += 32) { px = W / 2 + (R() - .5) * 40; x.lineTo(px, y); } x.stroke(); }), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })); add(bolt, 8, 14, -38);
+      let next = 3 + R() * 5, f = 0; anim.push((t, dt) => { next -= dt; if (next <= 0) { next = 4 + R() * 7; f = 1; bolt.position.x = (R() * 2 - 1) * 30; } f = Math.max(0, f - dt * 3.2); const flick = f > 0 ? f * (.6 + .4 * Math.sin(t * 90)) : 0; fl.material.opacity = flick * .5; bolt.material.opacity = flick; }); },
+    snow() { const p = pts(500, [24, 16, [-12, 3]], .16, 0xffffff, .9); const a = p.geometry.attributes.position.array, ph = new Float32Array(500).map(() => R() * 6);
+      anim.push((t, dt) => { for (let i = 0; i < 500; i++) { const j = i * 3; a[j + 1] -= dt * (.7 + ph[i] * .12); a[j] += Math.sin(t * .8 + ph[i]) * dt * .5 + dt * .6; if (a[j + 1] < 0) { a[j + 1] = 16; a[j] = (R() * 2 - 1) * 24; } if (a[j] > 24) a[j] = -24; } p.geometry.attributes.position.needsUpdate = true; }); },
+    mist() { for (let i = 0; i < 7; i++) { const sp = sprite(smokeMap, cfg.fog.color, 14 + R() * 8, (R() * 2 - 1) * 20, .8 + R() * 1.5, -5 - R() * 9, THREE.NormalBlending, .35), x0 = sp.position.x, ph = R() * 6; sp.scale.y *= .3;
+      anim.push(t => { sp.position.x = x0 + Math.sin(t * .07 + ph) * 4; sp.material.opacity = .25 + .12 * Math.sin(t * .3 + ph); }); } },
+    sandstorm() { const p = pts(420, [26, 7, [-10, 3]], .22, 0xd8c08a, .5); const a = p.geometry.attributes.position.array;
+      anim.push((t, dt) => { for (let i = 0; i < 420; i++) { const j = i * 3; a[j] += dt * (6 + (i % 5)); a[j + 1] += Math.sin(t * 3 + i) * dt * .4; if (a[j] > 26) { a[j] = -26; a[j + 1] = R() * 7; } } p.geometry.attributes.position.needsUpdate = true; }); this.mist(); },
+    meteors() { const ms = []; for (let i = 0; i < 3; i++) { const s2 = sprite(smokeMap, 0xff8a3a, 1.6, 0, 30, -34, THREE.AdditiveBlending, 0); ms.push({ s: s2, t: 1 + i, x0: 0 }); }
+      anim.push((t, dt) => { for (const m of ms) { m.t += dt * .5; if (m.t > 1.6) { m.t = 0; m.x0 = (R() * 2 - 1) * 40; } const k = Math.min(1, m.t); m.s.position.set(m.x0 + k * 14, 26 - k * 18, -34); m.s.material.opacity = m.t < 1 ? .9 : 0; m.s.scale.set(4, 1.2, 1); m.s.material.rotation = -.9; } }); },
+    // ── cascada del bosque: acantilado, caída de agua animada, espuma y río ──
+    cascade() {
+      const cliff = new THREE.Mesh(new THREE.PlaneGeometry(34, 16), new THREE.MeshBasicMaterial({ map: tex(1024, 512, (x, W, H) => { x.fillStyle = shade(.05); x.beginPath(); x.moveTo(0, H); x.lineTo(0, H * .12); for (let i = 0; i <= 20; i++) x.lineTo(i * W / 20, H * (.08 + R() * .1)); x.lineTo(W, H); x.fill();
+        x.fillStyle = 'rgba(0,0,0,.18)'; for (let i = 0; i < 40; i++) x.fillRect(R() * W, H * (.2 + R() * .7), 30 + R() * 80, 6 + R() * 10); paint.pines(x, W, H, R, shade(.15), 22, .16, .45); }), transparent: true, depthWrite: false, fog: false }));
+      cliff.renderOrder = -4; add(cliff, -9, 6, -15);
+      const wt = tex(128, 512, (x, W, H) => { const g2 = x.createLinearGradient(0, 0, W, 0); g2.addColorStop(0, 'rgba(160,215,255,.3)'); g2.addColorStop(.5, 'rgba(235,250,255,.95)'); g2.addColorStop(1, 'rgba(160,215,255,.3)'); x.fillStyle = g2; x.fillRect(0, 0, W, H); x.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < 80; i++) x.fillRect(R() * W, R() * H, 2 + R() * 3, 24 + R() * 60); });
+      wt.wrapT = THREE.RepeatWrapping; wt.repeat.set(1, 2.5);
+      const fall = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 13.5, 1, 8), new THREE.MeshBasicMaterial({ map: wt, transparent: true, opacity: .9, depthWrite: false, fog: false })); fall.renderOrder = -3; add(fall, -7, 6.3, -14.8);
+      anim.push((t, dt) => { wt.offset.y += dt * 1.1; });
+      for (let i = 0; i < 10; i++) { const sp = sprite(smokeMap, 0xffffff, 3, -7 + (R() - .5) * 3, -.2, -14.5, THREE.NormalBlending, .5), ph = R() * 6; anim.push(t => { const k = (t * .5 + ph) % 1; sp.position.y = -.2 + k * 2.5; sp.scale.setScalar(2 + k * 4); sp.material.opacity = .55 * (1 - k); }); }
+      const rt = tex(256, 64, (x, W, H) => { x.fillStyle = '#6fbde8'; x.fillRect(0, 0, W, H); x.strokeStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 30; i++) { x.beginPath(); const y = R() * H; x.moveTo(R() * W, y); x.lineTo(R() * W, y); x.stroke(); } }); rt.wrapS = THREE.RepeatWrapping; rt.repeat.set(6, 1);
+      const river = new THREE.Mesh(new THREE.PlaneGeometry(60, 2.4), new THREE.MeshBasicMaterial({ map: rt, transparent: true, opacity: .85, fog: false })); river.rotation.x = -Math.PI / 2; add(river, 0, -.35, -12.5); anim.push((t, dt) => { rt.offset.x += dt * .25; }); },
+    // ── símbolos de cada elemento ──
+    brazier() { // pebetero de la llama eterna
+      for (const sx of [-1, 1]) { const x0 = sx * 13; add(new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.5, 6, 8), K.stone), x0, 2.6, -11); add(new THREE.Mesh(new THREE.CylinderGeometry(2, 1, 1.2, 10), K.dark), x0, 6.2, -11);
+        const fl = []; for (let i = 0; i < 5; i++) fl.push(flame(x0 + (R() - .5), 7.2 + i * .5, -10.8, 4 - i * .5, i % 2 ? '#ffb347' : '#ff5a1f'));
+        anim.push(t => fl.forEach((f, i) => { f.scale.setScalar(f.userData.base * (1 + .2 * Math.sin(t * 9 + i * 2))); f.position.y = 7.2 + i * .5 + Math.sin(t * 6 + i) * .15; })); } },
+    waterspout() { // tromba de agua que gira en el mar
+      const wt = tex(256, 256, (x, W, H) => { x.fillStyle = 'rgba(120,200,255,.45)'; x.fillRect(0, 0, W, H); x.strokeStyle = 'rgba(235,250,255,.8)'; x.lineWidth = 3; for (let i = 0; i < 26; i++) { x.beginPath(); const y = R() * H; x.moveTo(0, y); x.bezierCurveTo(W * .3, y - 20, W * .6, y + 20, W, y - 10); x.stroke(); } });
+      wt.wrapS = wt.wrapT = THREE.RepeatWrapping; wt.repeat.set(2, 2);
+      const sp = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 3.2, 16, 24, 6, true), new THREE.MeshBasicMaterial({ map: wt, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: false })); add(sp, 16, 7, -30);
+      anim.push((t, dt) => { wt.offset.x += dt * .5; wt.offset.y -= dt * .3; sp.rotation.y += dt * .8; }); },
+    monolith() { // monolito con runas y rocas que orbitan
+      const m = add(new THREE.Mesh(new THREE.BoxGeometry(2.4, 9, 2), K.stone), 14, 4.1, -12); m.rotation.y = .3;
+      add(new THREE.Mesh(new THREE.BoxGeometry(.25, 6, .1), K.emis), 14.2, 4.4, -10.95).rotation.y = .3;
+      const rocks = []; for (let i = 0; i < 7; i++) { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(.35 + R() * .45, 0), rockMat); g.add(r); rocks.push({ r, a: i / 7 * 6.28, y: 2 + R() * 6, rad: 2.6 + R() * 1.2 }); }
+      anim.push(t => rocks.forEach(o => { const a = o.a + t * .35; o.r.position.set(14 + Math.cos(a) * o.rad, o.y + Math.sin(t + o.a) * .3, -12 + Math.sin(a) * o.rad * .5); o.r.rotation.x = t * .5 + o.a; })); },
+    tornado() { const tt = tex(256, 256, (x, W, H) => { x.fillStyle = 'rgba(230,240,255,.18)'; x.fillRect(0, 0, W, H); x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 2; for (let i = 0; i < 24; i++) { x.beginPath(); const y = R() * H; x.moveTo(0, y); x.lineTo(W, y - 30); x.stroke(); } });
+      tt.wrapS = tt.wrapT = THREE.RepeatWrapping; tt.repeat.set(3, 2);
+      const tw = new THREE.Mesh(new THREE.CylinderGeometry(4, .5, 20, 24, 8, true), new THREE.MeshBasicMaterial({ map: tt, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: false })); add(tw, -18, 9, -32);
+      const b = tw.geometry.attributes.position.array.slice(); anim.push((t, dt) => { tt.offset.x += dt * .9; const p = tw.geometry.attributes.position; for (let i = 0; i < p.count; i++) { const y = b[i * 3 + 1]; p.setX(i, b[i * 3] + Math.sin(t * 1.3 + y * .25) * (10 - y) * .06); } p.needsUpdate = true; }); },
+    orbs() { // los cuatro elementos orbitando alrededor del Sello
+      const cols = [0xff7a35, 0x5fd0ff, 0xb9d86a, 0xe6f4ff], orbs = cols.map(c => ({ s: flame(0, 9, -14, 2.4, '#' + new THREE.Color(c).getHexString()), m: add(new THREE.Mesh(new THREE.SphereGeometry(.45, 16, 12), new THREE.MeshBasicMaterial({ color: c })), 0, 9, -14) }));
+      anim.push(t => orbs.forEach((o, i) => { const a = t * .5 + i * Math.PI / 2, x = Math.cos(a) * 6, y = 8 + Math.sin(a) * 2.2, z = -14 + Math.sin(a) * 2; o.s.position.set(x, y, z); o.m.position.set(x, y, z); })); },
+
     // capas de bosque: pinos lejanos azulados y pinos medios
     forestback() {
       layer((x, W, H) => { paint.hills(x, W, H, R, tone(.75), .2, .62, 2); paint.pines(x, W, H, R, tone(.7), 90, .64, .7); }, { w: 170, h: 40, y: 12, z: -34 });

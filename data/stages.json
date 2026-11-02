@@ -34,12 +34,17 @@
     "size": 0.16
    },
    "extras": [
+    "peaks",
     "forestback",
+    "cascade",
     "temples",
+    "mist",
+    "rain",
     "birds",
     "lanterns",
     "rocks"
-   ]
+   ],
+   "weather": "rain"
   },
   {
    "id": "cenizas",
@@ -74,12 +79,16 @@
     "size": 0.12
    },
    "extras": [
+    "peaks",
     "volcano",
     "castle",
     "lavaflow",
+    "brazier",
+    "meteors",
     "banners",
     "rocks"
-   ]
+   ],
+   "weather": "embers"
   },
   {
    "id": "mareas",
@@ -117,10 +126,15 @@
    "extras": [
     "moon",
     "waves",
+    "peaks",
     "spires",
+    "waterspout",
+    "rain",
+    "lightning",
     "floatlanterns",
     "lanterns"
-   ]
+   ],
+   "weather": "storm"
   },
   {
    "id": "bastion",
@@ -156,12 +170,16 @@
     "size": 0.1
    },
    "extras": [
+    "peaks",
     "canyon",
     "arches",
+    "monolith",
+    "sandstorm",
     "lanterns",
     "rocks",
     "birds"
-   ]
+   ],
+   "weather": "sandstorm"
   },
   {
    "id": "viento",
@@ -197,11 +215,15 @@
     "size": 0.14
    },
    "extras": [
+    "peaks",
     "islands",
+    "tornado",
     "cloudsea",
+    "snow",
     "kites",
     "birds"
-   ]
+   ],
+   "weather": "snow"
   },
   {
    "id": "equilibrio",
@@ -239,9 +261,12 @@
    "extras": [
     "stars",
     "aurora",
+    "peaks",
     "islands",
+    "orbs",
     "floatlanterns"
-   ]
+   ],
+   "weather": "motes"
   }
  ]
 }

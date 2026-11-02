@@ -155,7 +155,7 @@ export function buildStage(cfg, { half = 8.2, particles = 300 } = {}) {
     }
   };
   for (const p of cfg.props) P[p]?.();
-  addExtras(cfg, { g, add, flame, anim, R, glow, accent }); // fondos ricos por escenario (js/stages/stage-extras.js)
+  addExtras(cfg, { g, add, flame, anim, R, glow, accent, stone, dark, emis }); // fondos ricos por escenario (js/stages/stage-extras.js)
 
   // --- Partículas ambientales (la cantidad respeta la calidad gráfica) ---
   const N = Math.max(0, Math.min(cfg.fx.count, particles)), pos = new Float32Array(N * 3), seed = new Float32Array(N);
