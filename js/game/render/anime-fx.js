@@ -41,7 +41,7 @@ void main(){
   vec3 c = mix(uC * 1.8, vec3(2.4), max(core, star * .35));
   gl_FragColor = vec4(c, al);
 }`;
-const SKIP = new Set(['wall', 'rock', 'geyser', 'tornado']);
+const SKIP = new Set(['wall', 'rock', 'geyser', 'tornado', 'fangs', 'slabwave']);
 // Estallido elemental al golpear (dibujo cel con 3 bandas): fuego = lenguas de llama hacia fuera y arriba,
 // agua = corona de salpicaduras con picos, viento = cortes en media luna, tierra = esquirlas y polvo.
 const BURST_FS = `uniform float uK, uKind, uSeed; uniform vec3 uC1, uC2, uC3; varying vec2 vUv; ${NOISE}

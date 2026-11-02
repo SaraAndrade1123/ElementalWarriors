@@ -24,6 +24,8 @@ const rot = (axis, ang, out) => out.setFromAxisAngle(axis, ang);
 // rotación compuesta yaw(Y) · pitch(X) · roll(Z) en ejes del personaje
 const ypr = (yaw, pitch, roll, out) => { rot(Y, yaw, _a); rot(X, pitch, _b); rot(Z, roll, _c); return out.copy(_a).multiply(_b).multiply(_c); };
 
+const _h1 = new THREE.Vector3(), _n1 = new THREE.Vector3(), _pT = new THREE.Vector3(), _t3 = new THREE.Vector3(), _np = new THREE.Vector3(), _hD = new THREE.Vector3(), _nD = new THREE.Vector3(), _b1 = new THREE.Vector3(), _b2 = new THREE.Vector3();
+const _m1 = new THREE.Matrix4(), _m2 = new THREE.Matrix4(), _q1 = new THREE.Quaternion();
 export class Rig {
   constructor(root, holder, { onlyLegacy = false } = {}) {
     holder.updateMatrixWorld(true);
@@ -75,7 +77,7 @@ export class Rig {
     // Eje de curvatura de cada dedo calculado con la geometría de la mano en reposo (sirve para cualquier modelo):
     // la palma es el plano entre la muñeca y las bases de los dedos; su normal apunta hacia donde se cierra el puño
     // (el pulgar queda ligeramente hacia ese lado). Cada falange gira alrededor de (dirección del dedo × normal de la palma).
-    this.curl = new Map();
+    this.curl = new Map(); this.handFrame = {};
     for (const hs of [1, -1]) {
       const hi = I(hs > 0 ? 'haL' : 'haR'), H = this.P0[hi];
       const roots = this.fingers.filter(i => this.side[i] === hs && this.kind[this.parent[i]] !== K.FINGER);
@@ -89,6 +91,8 @@ export class Rig {
       const across = rest.length > 1 ? rest[0].base.clone().sub(rest[rest.length - 1].base).normalize() : new THREE.Vector3(0, 0, 1);
       const n = new THREE.Vector3().crossVectors(along, across).normalize();
       const thOff = th.base.clone().addScaledVector(along, -th.base.dot(along)); if (thOff.dot(n) < 0) n.negate();
+      // marco de la mano en reposo (dirección de los dedos y normal de la palma, ortonormales) para orientar la muñeca sin torcerla
+      const a0 = along.clone(), n0 = n.clone().addScaledVector(a0, -n.dot(a0)).normalize(); this.handFrame[hs] = { a0, n0 };
       const walk = (i, depth, thumb) => {
         const dir = chainDir(i), axis = new THREE.Vector3().crossVectors(dir, n); if (axis.lengthSq() < 1e-6) axis.crossVectors(dir, across);
         this.curl.set(i, { axis: axis.normalize(), depth, thumb });
@@ -135,7 +139,7 @@ export class Rig {
         case K.UARM: this._arm(i, side[i], fr(side[i]), P, Dp); d = dq[i]; break;
         case K.FINGER: {
           const s = side[i], f = fr(s), fist = Math.max(0, Math.min(1, c('hn' + f + 'fist'))), cv = this.curl.get(i);
-          const base = cv.thumb ? [.35, .5, .45] : [1.35, 1.5, 1.1], ang = base[Math.min(cv.depth, 2)] * fist;
+          const base = cv.thumb ? [.55, .75, .6] : [1.4, 1.55, 1.15], ang = base[Math.min(cv.depth, 2)] * fist;
           _w.copy(cv.axis).applyQuaternion(Dp); d = dq[i].setFromAxisAngle(_w, ang);
           break; }
         case K.SEC: if (this.springs && this.springsOn) d = this.springs.solve(i, Pn[i], Dp, ctx, dq[i]); break;
@@ -180,6 +184,27 @@ export class Rig {
     dq[L.C].copy(_a).multiply(D2.invert()); has[L.C] = 1;
   }
 
+  // Muñeca natural (sin arma en la mano): la mano sigue la línea del antebrazo y solo gira sobre él para que la palma mire
+  // a donde tiene sentido. Puño: palma hacia dentro (guardia) que rota a palma abajo al extender el brazo (directo); muñeca recta.
+  // Mano abierta: con pitch > 0 la palma mira al frente (empujes de control elemental) y la muñeca se extiende lo justo.
+  // El canal roll añade un giro limitado sobre el antebrazo. Todo es relativo al pecho, así acompaña los giros del torso.
+  _wristNatural(L, s, f, c, chest, D2, HF, out) {
+    const fist = Math.max(0, Math.min(1, c('hn' + f + 'fist'))), pitch = c('hn' + f + 'pitch'), roll = Math.max(-.6, Math.min(.6, c('hn' + f + 'roll')));
+    const h1 = _h1.copy(HF.a0).applyQuaternion(D2), n1 = _n1.copy(HF.n0).applyQuaternion(D2); // marco actual si la muñeca no hiciera nada
+    const ext = Math.max(0, Math.min(1, (_T.distanceTo(this.Pn[L.A]) / this.armLen - .55) / .4)); // 0 = brazo recogido · 1 = estirado
+    const open = Math.max(0, Math.min(1, (Math.abs(pitch) - .15) / .8)) * (1 - fist), up = pitch >= 0 ? -.3 : .3; // pitch > 0 = dedos arriba · < 0 = dedos abajo
+    // palma objetivo en el espacio del pecho: hacia dentro y algo abajo · abajo al estirar el puño · al frente con la mano abierta empujando
+    _pT.set(-s * (1 - ext * .75), -.35 - ext * .8, .1).normalize().lerp(_t3.set(-s * .15, up, 1).normalize(), open).normalize().applyQuaternion(chest);
+    // tramo de palma perpendicular a los dedos rectos → giro sobre el antebrazo; lo que sobra → extensión de muñeca (limitada)
+    let np = _np.copy(_pT).addScaledVector(h1, -_pT.dot(h1)); if (np.lengthSq() < 1e-6) np.copy(n1); np.normalize();
+    _q1.setFromAxisAngle(h1, roll * s); np.applyQuaternion(_q1);
+    const lim = .12 + (1 - fist) * 1.05, beta = Math.max(-lim * .5, Math.min(lim, Math.asin(Math.max(-1, Math.min(1, _pT.dot(h1))))));
+    const hD = _hD.copy(h1).multiplyScalar(Math.cos(beta)).addScaledVector(np, -Math.sin(beta)), nD = _nD.copy(np).multiplyScalar(Math.cos(beta)).addScaledVector(h1, Math.sin(beta));
+    // rotación que lleva el marco (h1, n1) al deseado (hD, nD)
+    _m1.makeBasis(h1, n1, _b1.crossVectors(h1, n1)); _m2.makeBasis(hD, nD, _b2.crossVectors(hD, nD));
+    _m2.multiply(_m1.transpose()); out.setFromRotationMatrix(_m2);
+  }
+
   _arm(i, s, f, P, Dp) {
     const L = this.limb[s > 0 ? 'armL' : 'armR'], c = k => P[IDX[k]], { dq, has, D } = this, chest = D[this.I.sp2];
     _T.set(s * c('hn' + f + 'x'), c('hn' + f + 'y'), c('hn' + f + 'z')).multiplyScalar(this.armLen).applyQuaternion(chest).add(this.Pn[L.A]);
@@ -189,6 +214,8 @@ export class Rig {
     // muñeca: giro sobre el antebrazo (roll) y luego inclinación sobre el eje lateral del cuerpo.
     // Con arma «apuntable» (espada, lanza) el canal pitch es el ÁNGULO ABSOLUTO de la hoja en el plano de pantalla
     // (0 = hacia delante, +π/2 = arriba, −π/2 = abajo); si no, es una flexión relativa.
+    const HF = this.handFrame[s];
+    if (HF && !this.blade && !this.legacyWrist) { this._wristNatural(L, s, f, c, chest, D2, HF, dq[L.C]); has[L.C] = 1; return; }
     const rl = this.rollMax && !this.blade ? Math.max(-this.rollMax, Math.min(this.rollMax, c('hn' + f + 'roll'))) : c('hn' + f + 'roll');
     _c.setFromAxisAngle(_w, s * rl); const pitch = c('hn' + f + 'pitch'), bl = this.blade?.[s > 0 ? 'L' : 'R'];
     // sin arma: flexión de muñeca suave y limitada (una mano de verdad no se dobla 90°)

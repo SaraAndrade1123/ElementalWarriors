@@ -86,19 +86,19 @@ export function buildBending(S) {
 
     // ══════════ TERRA · tierra: raíz en el suelo; cada técnica nace de un pisotón y se empuja con todo el peso ══════════
     terra: () => ({
-      // Roca Proyectil: rodilla arriba, pisotón que arranca una roca del suelo, la sube con los dos puños y la dispara de un directo
+      // Meteorito: se hunde con las palmas hacia arriba y «levanta» una roca del suelo con las dos manos, la sube por
+      // encima de la cabeza y la lanza con un empuje a dos manos dando un paso largo (nada de pisotones: es la técnica que levita)
       eb: mk('eb', 1.12, [
-        { t: .1, e: 'out2', comY: .02, spPitch: -.08, hdPitch: -.1, ftFy: .58, ftFz: .22, ftFpitch: -.2, hnFx: .05, hnFy: -.25, hnFz: .45, hnBx: .02, hnBy: -.2, hnBz: .38, shFup: .1 },
-        { t: .21, e: 'in3', comY: -.48, comZ: .06, spPitch: .52, hdPitch: .2, ftFy: 0, ftFz: .48, ftFpitch: 0, ftBz: -.32,
-          hnFx: -.05, hnFy: -.82, hnFz: .55, hnFfist: 1, hnBx: -.05, hnBy: -.84, hnBz: .48, hnBfist: 1 },
-        { t: .38, e: 'out2', comY: -.2, spPitch: .02, hdPitch: -.05, hnFx: .0, hnFy: .5, hnFz: .52, hnBx: -.02, hnBy: .45, hnBz: .45, shFup: .25, shBup: .25 },
-        { t: .44, e: 'in2', comY: -.24, comZ: -.06, spYaw: sy - .3, hnFx: .12, hnFy: .3, hnFz: .1, hnBx: -.05, hnBy: .35, hnBz: .55, shFup: 0, shBup: 0 },
-        { t: .52, e: 'in3', comY: -.3, comZ: .34, spYaw: sy + .5, pelYaw: hy + .25, spPitch: .32, hdPitch: .05,
-          hnFx: -.06, hnFy: .2, hnFz: 1.1, hnFfist: 1, shFfwd: .5, hnBx: .2, hnBy: .02, hnBz: -.15, ftFz: .66, ftBz: -.5, ftBpitch: -.6 },
-        { t: .66, e: 'lin', comZ: .36, hnFz: 1.08 },
-        { t: .9, e: 'io', comY: -.14, comZ: .14, spYaw: sy, hnFz: .6, hnFy: .1, shFfwd: .1 },
-      ], { hit: [.5, .55], trails: [['wF', .46, .62]], fx: [{ t: .1, kind: 'b_stone_wake', at: 'body' }, { t: .21, kind: 'b_stomp', at: 'fF' }, { t: .52, kind: 'b_rock_punch', at: 'wF' }],
-        sfx: [{ kind: 'boulder_rise', t0: .21, t1: .5, at: 'body' }] }),
+        { t: .12, e: 'out2', comY: -.5, comZ: -.04, spPitch: .45, hdPitch: .2, ftFz: .34, ftBz: -.34, ftFx: .12, ftBx: .12,
+          hnFx: .12, hnFy: -.78, hnFz: .55, hnFfist: 0, hnFflare: .45, hnFpitch: .9, hnBx: .08, hnBy: -.8, hnBz: .45, hnBfist: 0, hnBflare: .45, hnBpitch: .9 },
+        { t: .3, e: 'io', comY: -.1, spPitch: -.08, hdPitch: -.25, hnFx: .05, hnFy: .35, hnFz: .55, hnBx: .02, hnBy: .3, hnBz: .5, shFup: .2, shBup: .2 },
+        { t: .42, e: 'out2', comY: .02, comZ: -.12, spPitch: -.3, hdPitch: -.42, hnFx: .04, hnFy: 1.0, hnFz: .3, hnBx: .02, hnBy: .98, hnBz: .25, shFup: .55, shBup: .55, ftBz: -.45 },
+        { t: .52, e: 'in3', comY: -.32, comZ: .36, spPitch: .42, hdPitch: .05, spYaw: sy * .4,
+          hnFx: -.02, hnFy: .25, hnFz: 1.08, hnFpitch: .9, hnBx: .02, hnBy: .2, hnBz: 1.02, hnBpitch: .9, shFup: 0, shBup: 0, shFfwd: .5, shBfwd: .5, ftFz: .66, ftBz: -.5, ftBpitch: -.6 },
+        { t: .66, e: 'lin', comZ: .38, hnFz: 1.06 },
+        { t: .9, e: 'io', comY: -.14, comZ: .14, spYaw: sy, spPitch: .1, hnFz: .6, hnFy: .1, hnBz: .45, hnBy: .05, shFfwd: .1, shBfwd: .1, hnFfist: 1, hnBfist: 1, hnFpitch: 0, hnBpitch: 0 },
+      ], { hit: [.5, .55], trails: [['hF', .46, .62], ['hB', .46, .62]], fx: [{ t: .1, kind: 'b_stone_wake', at: 'body' }, { t: .12, kind: 'b_stomp', at: 'fF' }, { t: .52, kind: 'b_rock_punch', at: 'hF' }],
+        sfx: [{ kind: 'boulder_rise', t0: .12, t1: .5, at: 'body' }] }),
 
       // Muro de Piedra: se hunde con las palmas hacia arriba y levanta de golpe una pared de roca delante de él
       eu: mk('eu', .92, [

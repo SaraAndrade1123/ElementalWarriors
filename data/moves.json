@@ -38,8 +38,8 @@
   "ch": {"startup":0.2,"dmg":13,"launch":13},
   "jh": {"dmg":14,"startup":0.17},
   "throw": {"dmg":18},
-  "s":  {"btn":"s","cat":"special","name":"falla","startup":0.32,"active":0.05,"recovery":0.45,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"low","proj":{"speed":7.5,"life":1.4,"w":1.0,"h":0.7,"y":0.35,"x0":1.0,"dmg":12,"chip":2,"hit":"low","hitstun":0.5,"blockstun":0.3,"kb":5,"kbBlock":3.5,"kd":true,"groundOnly":true,"kind":"rock"},"cancel":[]},
-  "ex": {"btn":"r","cat":"ex","name":"falla_ex","meter":25,"startup":0.28,"active":0.05,"recovery":0.4,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"low","armor":[0,0.3],"proj":{"speed":9,"life":1.4,"w":1.4,"h":1.4,"y":0.6,"x0":1.0,"dmg":16,"chip":3,"hit":"low","hitstun":0.6,"blockstun":0.34,"kb":2,"kbBlock":4,"launch":13,"groundOnly":true,"kind":"rock"},"cancel":[]}
+  "s":  {"btn":"s","cat":"special","name":"fisura_colmillos","startup":0.32,"active":0.05,"recovery":0.45,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"low","proj":{"speed":7.5,"life":1.4,"w":1.0,"h":0.7,"y":0.35,"x0":1.0,"dmg":12,"chip":2,"hit":"low","hitstun":0.5,"blockstun":0.3,"kb":5,"kbBlock":3.5,"kd":true,"groundOnly":true,"kind":"fangs"},"cancel":[]},
+  "ex": {"btn":"r","cat":"ex","name":"ola_tectonica","meter":25,"startup":0.28,"active":0.05,"recovery":0.4,"dmg":0,"range":0,"y0":0,"y1":0,"hit":"low","armor":[0,0.3],"proj":{"speed":9,"life":1.4,"w":1.4,"h":1.4,"y":0.6,"x0":1.0,"dmg":16,"chip":3,"hit":"low","hitstun":0.6,"blockstun":0.34,"kb":2,"kbBlock":4,"launch":13,"groundOnly":true,"kind":"slabwave"},"cancel":[]}
  },
  "zephyr": {
   "traits": {"airJumps":1},

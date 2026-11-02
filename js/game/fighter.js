@@ -270,7 +270,7 @@ function land(a, b, { src, def: m, dir, pos }) {
   const counter = !!(ba && ba.t < ba.def.startup + ba.def.active && !ba.def.throw);
   const scale = Math.max(RULES.minScale, Math.pow(RULES.comboScale, b.combo));
   const dmg = m.dmg * a.atk * b.dmul * scale * (counter ? 1.1 : 1);
-  b.hp = Math.max(0, b.hp - dmg); b.combo++; b.act = null; b.chain = 0; b.guarding = false; b.crouching = false; b.flash = 1; b.run = false; b.bdash = 0;
+  b.hp = Math.max(b.immortal ? 1 : 0, b.hp - dmg); b.combo++; b.act = null; b.chain = 0; b.guarding = false; b.crouching = false; b.flash = 1; b.run = false; b.bdash = 0;
   const decay = b.combo > 3 ? Math.max(.55, 1 - (b.combo - 3) * .07) : 1;
   b.stun = b.stunMax = m.hitstun * (counter ? 1.25 : 1) * decay; b.stunType = 'hit'; b.hitN++; b.hitKb = Math.abs(m.kb || m.pull || 3);
   b.kv = m.pull ? -dir * m.pull : dir * m.kb;
@@ -316,7 +316,7 @@ export function resolveThrows(a, b) {
       if (x.backThrow) { const nx = clamp(x.x - x.facing * 1.1, -WORLD.half, WORLD.half); y.x = nx; }
       const dir = Math.sign(y.x - x.x) || x.facing;
       Object.assign(y, { stunType: 'hit', stun: .1, stunMax: .4, thrower: null, air: true, vy: 8.5, kv: dir * 5, launched: true, flash: 1 }); y.hitN++; y.hitKb = 6;
-      y.hp = Math.max(0, y.hp - dmg); y.combo++; x.gain(10); y.gain(4);
+      y.hp = Math.max(y.immortal ? 1 : 0, y.hp - dmg); y.combo++; x.gain(10); y.gain(4);
       act.grab = false; act.done = true; act.end = act.t + .28;
       const ko = y.hp <= 0; if (ko) { y.ko = true; y.vy = 7; y.kv = dir * 6; y.stun = 0; y.launched = false; }
       out.push({ type: 'throw', a: x, b: y, dmg, ko, back: x.backThrow, pos: { x: y.x, y: 1.6 } });

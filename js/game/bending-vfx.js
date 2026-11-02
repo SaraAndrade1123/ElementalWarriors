@@ -18,6 +18,7 @@ const C = {
 const E3 = k => ({ a: C[k][0], b: C[k][2], c: C[k][1] });
 const rnd = (a, b) => a + Math.random() * (b - a);
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _u = new THREE.Vector3();
+const _q = new THREE.Quaternion();
 
 // ───────── sombreador común (fuego / agua / aire) con ruido animado ─────────
 const NOISE = `
@@ -108,13 +109,28 @@ function rockColors(g, strata = 0) {
 }
 const GRAD = (() => { const t = new THREE.DataTexture(new Uint8Array([70, 150, 230]), 3, 1, THREE.RedFormat); t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true; return t; })();
 
-export const BEND_KINDS = ['fireball', 'comet', 'geyser', 'ice', 'boulder', 'wall', 'gust', 'tornado', 'airball', 'rockshot'];
+export const BEND_KINDS = ['fireball', 'comet', 'geyser', 'ice', 'boulder', 'wall', 'gust', 'tornado', 'airball', 'rockshot', 'fangs', 'slabwave'];
+// colmillo de piedra (base en y = 0, punta afilada e irregular) y losa tectónica (bloque partido con estratos)
+function spikeGeo() {
+  const g = new THREE.ConeGeometry(.26, 1, 6, 4), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { _v.fromBufferAttribute(p, i); const k = 1 + .28 * Math.sin(_v.y * 11 + _v.x * 17) * Math.cos(_v.z * 13); p.setXYZ(i, _v.x * k, _v.y + .5, _v.z * k * .8); }
+  return rockColors(g.index ? g.toNonIndexed() : g, 9);
+}
+function slabGeo() {
+  const g = new THREE.BoxGeometry(.5, 2, 1.5, 2, 6, 3), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { _v.fromBufferAttribute(p, i); const j = Math.sin(_v.y * 5.1 + _v.z * 4) * .06 + Math.cos(_v.z * 9 + _v.y * 2.3) * .05;
+    p.setXYZ(i, _v.x * (1 + j * 2), _v.y + 1 + (_v.y > .9 ? Math.sin(_v.z * 7 + 1) * .22 : 0), _v.z * (1 + j)); }
+  return rockColors(g.index ? g.toNonIndexed() : g, 7.5);
+}
 
 export class BendingVfx {
   constructor(vfx, scene, match) {
     this.v = vfx; this.scene = scene; this.m = match; this.t = 0; this.proj = new Map(); this.live = new Map(); this.dying = [];
     this.rock = { geo: rockGeo(.55, 1, 1.3), geoS: rockGeo(.36, 0, 2.1), wall: this.#wallGeo(), mat: new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: .95, metalness: 0, emissive: 0x0c0d08 }) };
     this.iceGeo = new THREE.ConeGeometry(.09, .62, 5); this.iceGeo.rotateZ(-Math.PI / 2);
+    this.spikeGeo = spikeGeo(); this.slabGeo = slabGeo(); this.stones = []; // colmillos y losas sueltas que brotan, aguantan y se hunden
+    this.crackMat = new THREE.MeshBasicMaterial({ color: 0xc8f06a, transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+    this.crackGeo = new THREE.PlaneGeometry(1, .16); this.crackGeo.rotateX(-Math.PI / 2);
     this.iceMat = new THREE.MeshToonMaterial({ color: 0xcff6ff, gradientMap: GRAD, emissive: 0x2a6a9a, transparent: true, opacity: .92 });
   }
   #wallGeo() { // losa de roca irregular, con la base en y = 0
@@ -142,6 +158,26 @@ export class BendingVfx {
   }
   ring(x, y, color, size = .6, grow = 4, life = .3, flat = false, stretch = 1) { this.v.shapes.sprite('ring', _w.set(x, y, .55), { color, size, grow, life, flat, stretch, opacity: .85 }); }
 
+  // piedra que brota del suelo: crece con un rebote, aguanta y se hunde (colmillo o losa)
+  stone(x, z, h, { geo = this.spikeGeo, w = 1, tilt = 0, yaw = rnd(0, 6.28), life = .7, delay = 0 } = {}) {
+    if (this.stones.length > 90) return null;
+    const m = new THREE.Mesh(geo, this.rock.mat); m.castShadow = true; m.position.set(x, -.05, z); m.rotation.set(0, yaw, tilt); m.scale.set(w, .01, w); m.visible = delay <= 0; this.scene.add(m);
+    const o = { m, t: -delay, life, h, w }; this.stones.push(o); return o;
+  }
+  crack(x0, x1, life = .7) { // grieta brillante en el suelo entre dos puntos
+    const m = new THREE.Mesh(this.crackGeo, this.crackMat.clone()), len = Math.abs(x1 - x0) + .1; m.position.set((x0 + x1) / 2, .03, rnd(-.12, .12)); m.scale.set(len, 1, rnd(.6, 1.3)); m.rotation.y = rnd(-.12, .12); this.scene.add(m);
+    this.dying.push({ t: 0, life, crack: m });
+  }
+  #stones(dt) {
+    for (let i = this.stones.length - 1; i >= 0; i--) {
+      const o = this.stones[i]; o.t += dt; if (o.t < 0) continue; o.m.visible = true; const k = o.t / o.life;
+      if (k >= 1) { o.m.removeFromParent(); this.stones.splice(i, 1); continue; }
+      const a = Math.min(1, k / .14), up = k < .14 ? 1 + 2.7 * Math.pow(a - 1, 3) + 1.7 * Math.pow(a - 1, 2) : 1; // sale con rebote
+      const sink = k > .72 ? (k - .72) / .28 : 0;
+      o.m.scale.set(o.w * (1 + sink * .2), Math.max(.01, o.h * up * (1 - sink * .35)), o.w * (1 + sink * .2)); o.m.position.y = -.05 - sink * o.h * .9;
+    }
+  }
+
   // ── efectos puntuales que piden los clips ──
   cue(c, who, at, facing, root) {
     const x = at.x, y = at.y, d = facing;
@@ -162,6 +198,14 @@ export class BendingVfx {
         const sx = x; this.ring(sx, .05, 0xb9d86a, .8, 6, .4, true); this.v.dust(sx, 1.2); this.pebbles(sx, .1, 3);
         if (!this.v.reduce) this.m.shake = Math.max(this.m.shake || 0, .14);
         for (let i = 0; i < 3; i++) this.v.shapes.rock(sx + d * (.4 + i * .35) + rnd(-.1, .1), rnd(-.4, .2), rnd(.25, .5), .45); break; }
+      case 'b_ground_rip': { // Terra rasga el suelo con la mano: grieta y astillas hacia delante
+        this.crack(x, x + d * 1.4, .6); this.pebbles(x + d * .4, .15, 2, d * 2); this.emitDust(x + d * .3, 0, 1.5);
+        for (let i = 0; i < 3; i++) this.stone(x + d * (.35 + i * .3), rnd(-.3, .2), .35 + i * .18, { tilt: -d * .5, life: .45, delay: i * .03 });
+        if (!this.v.reduce) this.m.shake = Math.max(this.m.shake || 0, .08); break; }
+      case 'b_heave': { // arranca el suelo: anillo de losas que se levantan a su alrededor
+        this.ring(root.x, .05, 0xb9d86a, 1, 7, .5, true); this.v.dust(root.x, 1.5); this.pebbles(root.x, .2, 4);
+        for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; this.stone(root.x + Math.cos(a) * 1.1, Math.sin(a) * .7, rnd(.5, .9), { geo: this.slabGeo, w: .45, tilt: -Math.cos(a) * .5, yaw: a, life: .6, delay: i * .02 }); }
+        if (!this.v.reduce) this.m.shake = Math.max(this.m.shake || 0, .2); break; }
       case 'b_rock_punch': this.v.shapes.sprite('flash', _w.set(x + d * .2, y, .6), { color: 0xffffff, size: .8, grow: 1.6, life: .12 }); this.emitDust(x + d * .3, y - .3, 2); this.pebbles(x + d * .3, y, 1.5, d * 3); break;
       case 'b_air_push':
         this.ring(x + d * .4, y, 0xeaf4ff, .5, 4, .26, false, .45); this.ring(x + d * .9, y, 0xeaf4ff, .4, 3.2, .3, false, .4);
@@ -269,7 +313,24 @@ export class BendingVfx {
       case 'boulder': case 'rockshot': {
         const sp = p.kind === 'boulder' ? 9 : 14; o.rock.rotation.z -= d * sp * .016; o.rock.rotation.x += .05;
         if (p.kind === 'rockshot') g.rotation.z = Math.atan2(p.def.vy || 0, p.vx);
+        else { if (Math.random() < .6) this.emitDust(p.x - d * .5, p.y - .3, .35, .2); if (Math.random() < .3) this.pebbles(p.x - d * .3, p.y, .3, -d * 1.5); } // estela de polvo y esquirlas
         if (Math.random() < .5) this.emitDust(p.x - d * .5, p.y - .2, .4); if (Math.random() < .3) this.pebbles(p.x, p.y, .2, -d);
+        break; }
+      case 'fangs': { // Fisura de Colmillos: hileras de colmillos que brotan inclinados hacia el rival
+        if (p.t >= (o.next ?? 0)) {
+          o.next = p.t + (this.v.reduce ? .09 : .05); const n = (o.n = (o.n ?? 0) + 1);
+          for (let j = 0; j < 2; j++) this.stone(p.x + rnd(-.12, .12), j ? rnd(.05, .35) : rnd(-.4, -.05), rnd(.75, 1.15) * (1 + Math.min(n, 12) * .025), { tilt: -d * rnd(.18, .42), life: .62 });
+          if (o.lx !== undefined) this.crack(o.lx, p.x, .55); o.lx = p.x;
+          this.pebbles(p.x, .2, .6, d * 1.5); if (n % 2) this.emitDust(p.x, 0, .7);
+        }
+        break; }
+      case 'slabwave': { // Ola Tectónica: losas que ruedan como una ola de piedra
+        o.slabs.forEach((sl, j) => { const ph = p.t * 15 - j * 1.25, h = sl.userData.h * (.78 + .22 * Math.sin(ph)) * Math.min(1, p.t / .08);
+          sl.scale.set(1, Math.max(.01, h / 2), 1); sl.rotation.z = -d * (.42 + .16 * Math.sin(ph + .6)); sl.position.y = -p.y - .1; });
+        if (p.t >= (o.next ?? 0)) { o.next = p.t + (this.v.reduce ? .12 : .07);
+          this.stone(p.x - d * 1.7, rnd(-.35, .35), rnd(.5, .85), { geo: this.slabGeo, w: .7, tilt: -d * rnd(.6, 1.1), life: .5 });
+          this.crack(p.x - d * 2, p.x, .8); this.pebbles(p.x + d * .3, 1, 1.4, d * 3); }
+        this.emitDust(p.x - d * .4, 0, 1); if (!this.v.reduce) this.m.shake = Math.max(this.m.shake || 0, .07);
         break; }
       case 'wall': {
         const up = Math.min(1, p.t / .14);
@@ -310,6 +371,10 @@ export class BendingVfx {
       case 'ice': o.shards = [0, 1, 2].map(j => { const s = new THREE.Mesh(this.iceGeo, this.iceMat); s.position.set(-j * .22, (j - 1) * .2, (j - 1) * .1); g.add(s); return s; }); break;
       case 'boulder': o.rock = new THREE.Mesh(this.rock.geo, this.rock.mat); o.rock.castShadow = true; g.add(o.rock); break;
       case 'rockshot': o.rock = new THREE.Mesh(this.rock.geoS, this.rock.mat); o.rock.castShadow = true; g.add(o.rock); break;
+      case 'fangs': this.v.dust(p.x, .8); break;
+      case 'slabwave': {
+        o.slabs = [0, 1, 2, 3].map(j => { const sl = new THREE.Mesh(this.slabGeo, this.rock.mat); sl.castShadow = true; sl.position.set(-p.dir * j * .55, -p.y, (j % 2 ? .25 : -.2)); sl.userData.h = [2.4, 2, 1.55, 1.1][j]; sl.rotation.y = rnd(-.2, .2); g.add(sl); return sl; });
+        this.ring(p.x, .05, 0xb9d86a, 1.2, 6, .5, true); this.v.dust(p.x, 1.6); break; }
       case 'wall': o.slab = new THREE.Mesh(this.rock.wall, this.rock.mat); o.slab.castShadow = o.slab.receiveShadow = true; o.slab.position.y = -p.y - 2.9; g.add(o.slab); break;
       case 'gust': case 'airball': {
         const am = elemMat('air', { shell: true, scale: [6, 2], flow: [-5, 1] }); o.ball = add(new THREE.Mesh(withAlpha(new THREE.SphereGeometry(p.kind === 'gust' ? .62 : .42, 20, 14)), am), am);
@@ -328,6 +393,7 @@ export class BendingVfx {
     const o = this.proj.get(p); if (!o) return; this.proj.delete(p);
     const x = p.x, y = p.y, d = p.dir;
     if (p.kind === 'wall') { this.dying.push({ t: 0, life: .45, g: o.g, mats: o.mats, sink: true }); this.v.dust(x, 1.2); this.pebbles(x, 1.5, 3); return; }
+    if (p.kind === 'slabwave') for (const sl of o.slabs) { sl.getWorldPosition(_v); sl.getWorldQuaternion(_q); sl.removeFromParent(); sl.position.copy(_v); sl.quaternion.copy(_q); this.scene.add(sl); this.dying.push({ t: 0, life: .55, mesh: sl, vy: 0, crumble: true }); }
     if (p.kind === 'geyser') { this.dying.push({ t: 0, life: .2, g: o.g, mats: o.mats, sink: true }); for (let j = 0; j < 4; j++) this.emitDrops(x, 1 + j * .7, 1.5, rnd(-2, 2), 1); return; }
     this.#disposeGroup(o.g, o.mats); if (o.tail) this.dying.push({ t: 0, life: .12, rb: o.tail });
     if (!how) return;
@@ -344,29 +410,36 @@ export class BendingVfx {
         this.pebbles(x, low, big ? 5 : 3, d * 1.5); this.emitDust(x, Math.max(0, low - .4), big ? 3 : 2); this.v.dust(x, big ? 1.1 : .7);
         if (p.landed) for (let j = 0; j < 3; j++) this.v.shapes.rock(x + rnd(-.5, .5), rnd(-.3, .3), rnd(.3, .6), .5);
         break; }
+      case 'fangs': this.pebbles(x, .3, 3, d * 2); this.emitDust(x, 0, 2); this.v.shapes.sprite('flash', _w.set(x, .8, .6), { color: 0xf2ffd0, size: 1, grow: 1.6, life: .14 });
+        for (let j = 0; j < 3; j++) this.stone(x + d * j * .25, rnd(-.3, .3), 1.3 + j * .25, { tilt: -d * .3, life: .55, delay: j * .03 }); break;
+      case 'slabwave':
+        this.ring(x, .05, 0xb9d86a, 1.3, 7, .5, true); this.v.dust(x, 1.8); this.pebbles(x, 1.2, 6, d * 2); this.emitDust(x, 0, 3);
+        this.v.shapes.sprite('flash', _w.set(x, 1.2, .6), { color: 0xf2ffd0, size: 1.6, grow: 1.8, life: .16 }); break;
       case 'gust': case 'airball': case 'tornado': this.ring(x, low, 0xeaf4ff, .6, 4, .3, false, .7); this.v.burst(_w.set(x, low, .5), E3('air'), { n: 18, speed: 6, life: .3, size: .16, drag: 4 }); if (p.landed) this.v.dust(x, 1); break;
     }
   }
   #disposeGroup(g, mats = []) {
-    g.removeFromParent(); const shared = new Set([this.rock.geo, this.rock.geoS, this.rock.wall, this.rock.mat, this.iceGeo, this.iceMat]);
+    g.removeFromParent(); const shared = new Set([this.rock.geo, this.rock.geoS, this.rock.wall, this.rock.mat, this.iceGeo, this.iceMat, this.slabGeo, this.spikeGeo]);
     g.traverse(o => { if (o.isMesh || o.isSprite) { if (!shared.has(o.geometry)) o.geometry?.dispose?.(); if (!shared.has(o.material)) o.material.dispose(); } });
   }
   hasProjectile(p) { return this.proj.has(p); }
 
   update(dt) {
-    this.t += dt; this.sustained(dt);
+    this.t += dt; this.sustained(dt); this.#stones(dt);
     for (let i = this.dying.length - 1; i >= 0; i--) {
       const z = this.dying[i]; z.t += dt; const k = z.t / z.life;
       if (z.rb) { z.rb.mesh.material.uniforms.uA.value = Math.max(0, 1 - k); z.rb.mat.uniforms.uT.value = this.t; }
       if (z.mesh && z.crumble) { z.vy -= 20 * dt; z.mesh.position.y = Math.max(-.6, z.mesh.position.y + z.vy * dt); z.mesh.scale.setScalar(Math.max(.01, 1 - k)); if (Math.random() < .5) this.pebbles(z.mesh.position.x, Math.max(.1, z.mesh.position.y), .4); }
       if (z.g && z.sink) { z.g.position.y -= dt * 7; for (const m of z.mats || []) m.uniforms.uA.value = Math.max(0, 1 - k); }
-      if (k >= 1) { if (z.rb) z.rb.dispose(); if (z.mesh) z.mesh.removeFromParent(); if (z.g) this.#disposeGroup(z.g, z.mats); this.dying.splice(i, 1); }
+      if (z.crack) z.crack.material.opacity = .9 * Math.max(0, 1 - k) * (k < .1 ? k / .1 : 1);
+      if (k >= 1) { if (z.crack) { z.crack.removeFromParent(); z.crack.material.dispose(); } if (z.rb) z.rb.dispose(); if (z.mesh) z.mesh.removeFromParent(); if (z.g) this.#disposeGroup(z.g, z.mats); this.dying.splice(i, 1); }
     }
   }
   dispose() {
     for (const p of [...this.proj.keys()]) { const o = this.proj.get(p); this.#disposeGroup(o.g, o.mats); o.tail?.dispose(); } this.proj.clear();
     for (const st of this.live.values()) for (const k of Object.keys(st)) { const o = st[k]; if (o?.rb) o.rb.dispose(); if (o?.mesh) o.mesh.removeFromParent(); }
-    this.live.clear(); for (const z of this.dying) { if (z.rb) z.rb.dispose(); if (z.mesh) z.mesh.removeFromParent(); if (z.g) this.#disposeGroup(z.g, z.mats); } this.dying = [];
+    for (const o of this.stones) o.m.removeFromParent(); this.stones = []; this.spikeGeo.dispose(); this.slabGeo.dispose(); this.crackGeo.dispose(); this.crackMat.dispose();
+    this.live.clear(); for (const z of this.dying) { if (z.crack) { z.crack.removeFromParent(); z.crack.material.dispose(); } if (z.rb) z.rb.dispose(); if (z.mesh) z.mesh.removeFromParent(); if (z.g) this.#disposeGroup(z.g, z.mats); } this.dying = [];
     this.rock.geo.dispose(); this.rock.geoS.dispose(); this.rock.wall.dispose(); this.rock.mat.dispose(); this.iceGeo.dispose(); this.iceMat.dispose(); this._soft?.dispose();
   }
 }

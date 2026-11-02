@@ -291,18 +291,31 @@ export function buildAttacks(S) {
         { t: .55, e: 'io', hnFz: .45, hnBz: .45, spPitch: .1, hdPitch: 0, comZ: 0, ftFy: .4, ftFz: .35 },
         { t: .66, e: 'in3', hnFx: -.1, hnFy: .2, hnFz: 1.05, hnBx: -.15, hnBy: .15, hnBz: 1.02, hnFfist: 0, hnBfist: 0, hnFflare: .1, hnBflare: .1, comZ: .32, ftFy: 0, ftFz: .55, spPitch: .3 },
       ], { hit: [.1, .55], fx: [{ t: .4, kind: 'impact', at: 'head' }, { t: .66, kind: 'quake', at: 'fF' }] }),
-      // técnica especial: Falla Primordial — puños arriba, pisotón y golpe al suelo
+      // técnica especial: Fisura de Colmillos — se hunde girando la cadera, arrastra la mano adelantada por el suelo
+      // en un barrido bajo y la clava hacia delante: una hilera de colmillos de piedra corre hacia el rival
       s: mk('s', .95, [
-        { t: .3, e: 'io', hnFx: -.15, hnFy: 1.0, hnFz: .15, hnBx: -.18, hnBy: 1.0, hnBz: .1, spPitch: -.25, comY: .03, ftFy: .5, ftFz: .35, hdPitch: -.2, shFup: .5, shBup: .5 },
-        { t: .4, e: 'in3', hnFx: -.1, hnFy: -.82, hnFz: .55, hnBx: -.14, hnBy: -.82, hnBz: .5, spPitch: .85, comY: -.62, comZ: .2, ftFy: 0, ftFz: .5, ftBz: -.35, hdPitch: .25, shFup: 0, shBup: 0 },
-        { t: .6, e: 'lin', comY: -.64, spPitch: .85 },
-      ], { hit: [.36, .42], trails: [['wF', .3, .42], ['wB', .3, .42]], fx: [{ t: .2, kind: 'stone_glow', at: 'body' }, { t: .4, kind: 'quake', at: 'wF' }] }),
-      // técnica reforzada: rodilla al suelo y doble golpe (más grande, con armadura)
-      ex: mk('ex', 1.0, [
-        { t: .2, e: 'io', hnFx: -.15, hnFy: 1.0, hnFz: .15, hnBx: -.18, hnBy: 1.0, hnBz: .1, spPitch: -.3, comY: .08, ftFy: .55, ftFz: .4, hdPitch: -.3, shFup: .55, shBup: .55 },
-        { t: .32, e: 'in3', hnFx: -.1, hnFy: -.85, hnFz: .5, hnBx: -.14, hnBy: -.85, hnBz: .45, spPitch: .9, comY: -.75, comZ: .15, ftFy: 0, ftFz: .45, ftBz: -.5, ftBpitch: -.9, hdPitch: .3, shFup: 0, shBup: 0 },
-        { t: .62, e: 'lin', comY: -.76 },
-      ], { hit: [.3, .36], trails: [['wF', .2, .34], ['wB', .2, .34]], fx: [{ t: .05, kind: 'stone_glow', at: 'body' }, { t: .32, kind: 'quake_big', at: 'wF' }] }),
+        { t: .14, e: 'out2', comY: -.42, comZ: -.08, spYaw: sy + .75, pelYaw: hy + .3, spPitch: .35, spRoll: -.1, hdPitch: .05, hdYaw: -.2,
+          hnFx: .32, hnFy: -.55, hnFz: -.18, hnFfist: .2, hnFflare: .6, hnBx: -.1, hnBy: .02, hnBz: .38, ftFz: .3, ftBz: -.42, ftBx: .1 },
+        { t: .26, e: 'in2', comY: -.6, spYaw: sy + .2, hnFx: .15, hnFy: -.92, hnFz: .35, spPitch: .62 },
+        { t: .34, e: 'in3', comY: -.66, comZ: .3, spYaw: sy - .4, pelYaw: hy - .2, spPitch: .78, spRoll: .05, hdPitch: .1, hdYaw: 0,
+          hnFx: -.02, hnFy: -.98, hnFz: 1.02, hnFfist: .55, hnFflare: .2, hnFpitch: -.4, hnBx: .25, hnBy: -.1, hnBz: -.1, shFfwd: .55, ftFz: .78, ftFpitch: -.1, ftBz: -.62, ftBpitch: -.7 },
+        { t: .5, e: 'lin', comY: -.66, comZ: .32, hnFz: 1.0 },
+        { t: .78, e: 'io', comY: -.28, comZ: .1, spYaw: sy, spPitch: .3, hnFy: -.2, hnFz: .55, shFfwd: .1, ftFz: .45, ftBz: -.35 },
+      ], { hit: [.32, .38], trails: [['wF', .18, .4]], fx: [{ t: .12, kind: 'stone_glow', at: 'body' }, { t: .26, kind: 'dust', at: 'wF' }, { t: .34, kind: 'b_ground_rip', at: 'wF' }] }),
+      // técnica reforzada: Ola Tectónica — se agacha y agarra el suelo con las dos manos, lo arranca de un tirón
+      // arqueando la espalda y lo empuja con las palmas: una ola de losas de piedra rueda hacia el rival y lo lanza
+      ex: mk('ex', 1.05, [
+        { t: .12, e: 'out2', comY: -.72, comZ: -.05, spPitch: .82, hdPitch: .35, spYaw: sy * .4, pelYaw: hy * .4,
+          hnFx: .32, hnFy: -.98, hnFz: .42, hnFfist: 1, hnFflare: .5, hnBx: .36, hnBy: -.98, hnBz: .32, hnBfist: 1, hnBflare: .5, ftFx: .18, ftBx: .18, ftFz: .32, ftBz: -.3 },
+        { t: .2, e: 'in2', comY: -.78, hnFy: -1.0, hnBy: -1.0, spPitch: .86 },
+        { t: .32, e: 'io', comY: .06, comZ: -.12, spPitch: -.32, hdPitch: -.34, spYaw: 0, pelYaw: 0,
+          hnFx: .12, hnFy: 1.02, hnFz: .28, hnBx: .14, hnBy: 1.0, hnBz: .22, shFup: .6, shBup: .6, ftFz: .25, ftBz: -.25 },
+        { t: .42, e: 'out2', comY: -.42, comZ: .38, spPitch: .5, hdPitch: .1, spYaw: sy * .3,
+          hnFx: -.04, hnFy: -.25, hnFz: 1.08, hnFfist: 0, hnFpitch: -.9, hnFflare: .15, hnBx: .02, hnBy: -.3, hnBz: 1.02, hnBfist: 0, hnBpitch: -.9, hnBflare: .15,
+          shFup: 0, shBup: 0, shFfwd: .55, shBfwd: .55, ftFz: .7, ftBz: -.55, ftBpitch: -.6 },
+        { t: .62, e: 'lin', comY: -.44, comZ: .4 },
+        { t: .87, e: 'io', comY: -.2, comZ: .12, spPitch: .25, hnFy: .0, hnFz: .55, hnBy: -.05, hnBz: .45, shFfwd: .1, shBfwd: .1, hnFfist: 1, hnBfist: 1, hnFpitch: 0, hnBpitch: 0 },
+      ], { hit: [.4, .46], trails: [['wF', .3, .46], ['wB', .3, .46]], fx: [{ t: .05, kind: 'stone_glow', at: 'body' }, { t: .28, kind: 'b_heave', at: 'body' }, { t: .42, kind: 'quake_big', at: 'wF' }] }),
       // presentación: choca los guanteletes y planta los pies
       intro: mk('intro', 1.6, [
         { t: .3, e: 'io', hnFx: .3, hnFy: .3, hnFz: .45, hnBx: .3, hnBy: .3, hnBz: .45, comY: .02, spPitch: -.1 },

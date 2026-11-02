@@ -323,7 +323,7 @@
  "versus.start": "Fight!",
  "versus.controls": "Same keyboard — P1: A/D move · W jump · S crouch · F G H light/medium/heavy · R special (→+R / ↓+R / R in the air: elemental bending) · T Resonance · F+G throw · walk back or left Shift = guard. P2: arrows · numpad 1 2 3 (or , . -) light/medium/heavy · 4 (or L) special and elemental bending · 5 (or ;) Resonance · 0 or right Shift = guard.",
  "versus.ghost": "Some keyboards cannot register several keys at once (ghosting). If a hit does not come out, use the alternative keys (, . - L ;) or an anti-ghosting keyboard.",
- "versus.touch": "2-player mode needs a physical keyboard and is not available on this touch screen.",
+ "versus.touch": "Connect a keyboard (USB or Bluetooth) and press any key: 2-player mode unlocks instantly.",
  "versus.same": "Pick the same warrior for a mirror match: the second fighter wears an exclusive chroma.",
  "challenges.intro": "Practise against a dummy. Each challenge can be cleared once and pays {n} Rose Gold.",
  "challenges.hero": "You practise with {name}",
@@ -547,5 +547,10 @@
  "chroma.a.bubbles": "Bubbles in battle",
  "chroma.a.motes": "Light motes in battle",
  "chroma.a.bolts": "Electric sparks in battle",
- "cr.ai": "AI-assisted development (Anthropic)"
+ "cr.ai": "AI-assisted development (Anthropic)",
+ "versus.kbd.title": "No physical keyboard yet",
+ "versus.kbd.found": "Physical keyboard detected: ready for 2 players.",
+ "versus.kbd.ok": "Keyboard detected. 2-player mode is ready!",
+ "mv.fisura_colmillos": "Fang Fissure",
+ "mv.ola_tectonica": "Tectonic Wave"
 }

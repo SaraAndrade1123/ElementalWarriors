@@ -23,7 +23,8 @@ export class Match {
     Object.assign(this, { sm, input, o, mode: o.mode || 'cpu', t: 0, acc: 0, lastSteps: 0, lastEv: null, prev: null, dbgOverlay: null, cx: 0, cy: 0, cd: 12, shake: 0, stop: 0, zoom: 0, paused: false, sparks: [], cb: null, glowMap: glow(), proj: [], notes: [] });
     this.f = [new Fighter(c1.def, -2.2, 1, o.moves), new Fighter(c2.def, 2.2, -1, o.moves)];
     this.winsNeeded = o.wins ?? 2; this.maxRounds = o.maxRounds ?? 5; this.roundTime = o.roundTime ?? 60; this.timed = this.mode !== 'training';
-    this.infinite = !!o.infinite; this.regen = this.mode === 'training' && o.infinite !== false; // vida infinita (nunca cae) · regeneración entre combos (entrenamiento)
+    // Vida infinita (entrenamiento / desafíos): nadie cae y la vida se recupera al terminar cada combo; desactivada, el daño se acumula y hay K.O. de verdad.
+    this.infinite = !!o.infinite;
     this.dummy = this.mode === 'training' ? DUMMY_ALIAS[o.dummy] || o.dummy || 'still' : null;
     this.brain = this.mode === 'cpu' ? makeBrain('cpu', Math.random, o.level) : this.mode === 'training' ? makeBrain(this.dummy, Math.random, o.level) : null;
     try { this.vfx = sm.scene ? new Vfx(sm.scene, sm.q, sm.reduce) : null; } catch (e) { console.warn('[vfx]', e); this.vfx = null; }
@@ -37,6 +38,9 @@ export class Match {
     this.lastTick = -1;
     this.restart();
   }
+
+  get infinite() { return this._inf; }
+  set infinite(v) { this._inf = !!v; this.regen = this.mode === 'training' && this._inf; this.koT = 0; for (const f of this.f || []) { f.immortal = this._inf; f.calm = 0; } }
 
   // Avisos hacia fuera (sonido, escenario…): o.onFx(nombre, {who, x, vol}) y o.onReact({power, color}). Un fallo ahí nunca rompe el combate.
   fx(name, f, extra) { try { this.o.onFx?.(name, { who: f?.def?.id, x: f?.x, ...extra }); } catch (e) { console.warn('[fx]', e); } }
@@ -145,7 +149,7 @@ export class Match {
       const vs = this.mode === 'versus', i1 = live ? this.input.read(0) : (this.input.read(0), IDLE); // fuera de combate se vacían las pulsaciones
       const i2 = vs ? (live ? this.input.read(1) : (this.input.read(1), IDLE)) : !live ? IDLE : this.brain ? this.brain.think(gdt, b, a) : this.o.input2 ? this.o.input2.read() : IDLE;
       a.update(gdt, i1, b); b.update(gdt, i2, a); separate(a, b);
-      if (this.infinite) for (const f of this.f) if (f.ko || f.hp < f.maxHp * .15) { if (f.ko) f.revive(); f.hp = f.maxHp; } // vida infinita (entrenamiento / desafíos)
+      if (this.infinite) for (const f of this.f) { if (f.ko) { f.revive(); f.hp = f.maxHp; } else if (f.hp < 1) f.hp = 1; } // vida infinita: nunca llega a 0
       if (live) {
         for (const e of resolveThrows(a, b)) this.onThrow(e, e.a === a ? 0 : 1);
         for (const e of resolveBoth(a, b)) this.onHit(e, e.a === a ? 0 : 1); // golpes simultáneos = intercambio
@@ -166,9 +170,11 @@ export class Match {
         for (const f of this.f) { const ac = f.act; if (ac && !ac.snd && ac.t >= ac.def.startup && !ac.def.throw) { ac.snd = true; this.fx(/^(h|ch|jh|s|ex)$/.test(ac.name) ? 'whiff_heavy' : 'whiff_light', f); } }
         if (this.timed) { const n = Math.ceil(this.timer); if (n !== this.lastTick) { this.lastTick = n; if (n > 0 && n <= 5) this.fx('countdown_tick'); } }
         if (this.mode === 'training') {
-          if (a.ko || b.ko) { this.koT += dt; if (this.koT > 1.6) { a.revive(); b.revive(); this.koT = 0; } }
+          // Sin vida infinita: K.O. real (cámara lenta y aviso) y, al poco, los dos vuelven con la vida llena a su sitio.
+          if (a.ko || b.ko) { this.koT += dt; if (this.koT > 2.4) { a.revive(); b.revive(); this.koT = 0; this.resetPositions(); } }
           for (const f of this.f) if (f.combo === 0 && !(f.act?.name === 'ex')) f.meter = Math.min(RULES.meterMax, f.meter + dt * 40); // barra recargable en entrenamiento
-          if (this.regen && b.combo === 0 && b.stun <= 0 && !b.down && !b.getup && !b.ko) b.hp = Math.min(b.maxHp, b.hp + dt * 60); // el maniquí se recupera entre combos
+          // Con vida infinita, cada luchador recupera la vida en cuanto el rival deja de combearle (a los 0,6 s sin recibir golpes).
+          if (this.regen) for (const [i, f] of this.f.entries()) { f.calm = f.combo === 0 && f.stun <= 0 && !f.down && !f.getup && !f.ko ? (f.calm || 0) + dt : 0; if (f.calm > .6 || (f.combo === 0 && f.hp < f.maxHp * .15)) f.hp = f.calm > .6 ? Math.min(f.maxHp, f.hp + dt * f.maxHp * 1.6) : f.maxHp; }
         }
         else if (a.ko || b.ko) this.endRound(a.ko && b.ko ? -1 : a.ko ? 1 : 0, 'ko');
         else if (this.timer <= 0) { const ra = a.hp / a.maxHp, rb = b.hp / b.maxHp; this.endRound(Math.abs(ra - rb) < .001 ? -1 : ra > rb ? 0 : 1, 'time'); }
@@ -201,7 +207,7 @@ export class Match {
   render(rdt, cam) {
     const [a, b] = this.f, alpha = clamp(this.acc / STEP, 0, 1);
     const ix = (f, i) => this.prev[i].x + (f.x - this.prev[i].x) * alpha, iy = (f, i) => this.prev[i].y + (f.y - this.prev[i].y) * alpha;
-    const vdt = this.stop > 0 ? 0 : rdt * (this.phase === 'ko' ? .35 : 1); // tiempo de animación: el hit-stop congela la pose y el KO va en cámara lenta
+    const vdt = this.stop > 0 ? 0 : rdt * (this.phase === 'ko' || this.koT > 0 && this.koT < 1.2 ? .35 : 1); // tiempo de animación: el hit-stop congela la pose y el KO va en cámara lenta
 
     this.v.forEach((v, i) => {
       const f = this.f[i], k = 1 - Math.exp(-rdt * 16), anim = v.c.anim;

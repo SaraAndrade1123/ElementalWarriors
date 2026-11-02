@@ -323,7 +323,7 @@
  "versus.start": "¡Combatir!",
  "versus.controls": "Mismo teclado — J1: A/D mover · W saltar · S agacharse · F G H ligero/medio/pesado · R especial (→+R / ↓+R / R en el aire: control elemental) · T Resonancia · F+G lanzamiento · retroceder o Shift izq. = guardia. J2: flechas · 1 2 3 del teclado numérico (o , . -) ligero/medio/pesado · 4 (o L) especial y control elemental · 5 (o Ñ) Resonancia · 0 o Shift der. = guardia.",
  "versus.ghost": "Algunos teclados no registran varias teclas a la vez (ghosting). Si un golpe no sale, usa las teclas alternativas (, . - L Ñ) o un teclado con anti-ghosting.",
- "versus.touch": "El modo de 2 jugadores necesita teclado físico y no está disponible en esta pantalla táctil.",
+ "versus.touch": "Conecta un teclado (USB o Bluetooth) y pulsa cualquier tecla: el modo de 2 jugadores se activará al instante.",
  "versus.same": "Elige al mismo guerrero para un duelo espejo: el segundo luchador lleva un chroma exclusivo.",
  "challenges.intro": "Practica contra un maniquí. Cada prueba se supera una vez y da {n} Rose Gold.",
  "challenges.hero": "Practicas con {name}",
@@ -547,5 +547,10 @@
  "chroma.a.bubbles": "Burbujas en combate",
  "chroma.a.motes": "Motas de luz en combate",
  "chroma.a.bolts": "Chispas eléctricas en combate",
- "cr.ai": "Desarrollo asistido por IA (Anthropic)"
+ "cr.ai": "Desarrollo asistido por IA (Anthropic)",
+ "versus.kbd.title": "Falta un teclado físico",
+ "versus.kbd.found": "Teclado físico detectado: listo para 2 jugadores.",
+ "versus.kbd.ok": "Teclado detectado. ¡Ya podéis jugar 2 jugadores!",
+ "mv.fisura_colmillos": "Fisura de Colmillos",
+ "mv.ola_tectonica": "Ola Tectónica"
 }

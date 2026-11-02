@@ -1,3 +1,4 @@
+import { hasKeyboard } from '../systems/keyboard-detect.js';
 // Teclado + botones táctiles → estado de entrada por jugador y por paso de simulación:
 //   { x, down, guard } se leen mantenidos; { jump, l, m, h, s, r } son PULSACIONES (se guardan hasta que la simulación las lee).
 // El búfer de tolerancia (6 fotogramas) vive en Fighter, así es determinista e independiente de los FPS.
@@ -47,7 +48,7 @@ export class Input {
   // Cambia el esquema de teclas (antes de empezar un combate). Limpia lo pulsado.
   setScheme(name) { this.scheme = SCHEMES[name] ? name : 'solo'; this.clear(); }
   #hits(code) { const out = []; this.maps.forEach((m, p) => { for (const [k, codes] of Object.entries(m)) if (codes.includes(code)) out.push([p, k]); }); return out; }
-  attach() { addEventListener('keydown', this.kd); addEventListener('keyup', this.ku); addEventListener('blur', this.clear); if (this.root) this.root.hidden = this.scheme !== 'solo' || !matchMedia('(pointer:coarse)').matches; }
+  attach() { addEventListener('keydown', this.kd); addEventListener('keyup', this.ku); addEventListener('blur', this.clear); if (this.root) this.root.hidden = this.scheme !== 'solo' || !matchMedia('(pointer:coarse)').matches || hasKeyboard(); } // con teclado físico no estorban los botones táctiles
   detach() { removeEventListener('keydown', this.kd); removeEventListener('keyup', this.ku); removeEventListener('blur', this.clear); this.clear(); if (this.root) this.root.hidden = true; }
   // Un paso de simulación del jugador p (0 = J1, 1 = J2): devuelve lo mantenido y sus pulsaciones pendientes (y las vacía).
   read(p = 0) {

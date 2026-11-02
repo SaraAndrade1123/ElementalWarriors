@@ -83,6 +83,7 @@ async function boot() {
     if (dev) window.ewAudio = audio; // consola: ewAudio.sfx('hit_heavy', { element: 'fire' })
     if (dev) window.ewStages = stages; // consola: ewStages.react({ power: 1 })
     if (dev) window.ewScene = scene; // consola: ewScene.match.f[1].hp = 1
+    if (dev) window.ewMenu = menu; // consola: ewMenu.go('versus')
     let paused = false;
     const QS = ['low', 'medium', 'high'], pz = $('#pause'), rz = $('#result');
     const label = () => { optText($('#p-quality .lbl'), t('pause.quality', { q: t('set.q.' + settings.get().quality) })); };
@@ -187,6 +188,7 @@ async function boot() {
     };
     installModes(menu, { cfg: modes, roster, stages, meta, flow });
     installVersusPreview(menu, { scene, roster }); // Versus: los dos elegidos frente a frente
+    { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'css/mobile.css'; document.head.append(l); } // ajustes de celular: siempre la última hoja
     // Pausa: maniquí, vida infinita y reinicio de posiciones (entrenamiento) · dificultad de la CPU (combate contra la CPU)
     const optLabels = () => {
       const m = scene.match;

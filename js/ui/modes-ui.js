@@ -5,6 +5,7 @@ import { Survival } from '../modes/survival.js';
 import { CHALLENGES } from '../modes/challenges.js';
 import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { RANDOM } from '../stages/stage-manager.js';
+import { hasKeyboard, onKeyboard } from '../systems/keyboard-detect.js';
 
 const h = (tag, props = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -21,7 +22,9 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
   const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'css/modes.css'; document.head.append(css);
   const S = { tab: 'arcade', level: 'normal', vs: 'cpu', rival: 1, wins: 3, time: 60 }, MY = ['arcade', 'versus', 'challenges', 'story'];
   const data = () => meta.save.data, name = id => roster.find(r => r.id === id)?.name ?? id, me = () => roster[menu.idx];
-  const touch = () => { try { return matchMedia('(pointer:coarse)').matches; } catch { return false; } };
+  // 2 jugadores en el mismo dispositivo necesitan un teclado físico: se habilita en cuanto se detecta uno (aunque sea un celular con teclado Bluetooth).
+  const noKeys = () => !hasKeyboard();
+  onKeyboard(() => { if (menu.page === 'versus' && S.vs === 'local') { rerender(); menu.toast?.(t('versus.kbd.ok')); } });
   const rerender = () => menu['page_' + menu.page]();
   const sel = menu.select.bind(menu); menu.select = i => { sel(i); if (MY.includes(menu.page)) rerender(); }; // cambiar de guerrero actualiza la pantalla
 
@@ -48,7 +51,7 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
   menu.page_versus = function () {
     const m = me(); if (!roster[S.rival]) S.rival = (menu.idx + 1) % roster.length;
     menu.rival = S.rival; // la tabla de enfrentamiento elemental (y otras ayudas) leen el rival elegido aquí
-    const local = S.vs === 'local', blocked = local && touch(), cur = stages.selected;
+    const local = S.vs === 'local', blocked = local && noKeys(), cur = stages.selected;
     const st = [...stages.list.filter(s => stages.isUnlocked(s)).map(s => [s.id, t(`stage.${s.id}.name`)]), [RANDOM, t('stage.random')]];
     const go = () => flow.begin({ kind: 'plain', cfg: { a: m.id, b: roster[S.rival].id, mode: local ? 'versus' : 'cpu', rec: local ? 'versus_local' : 'versus_ai', level: S.level, wins: (S.wins + 1) / 2, maxRounds: S.wins + 2, roundTime: S.time } });
     this.panel(t('menu.versus'),
@@ -61,7 +64,7 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
       note('versus.time'), tabs(TIMES.map(n => [n, Number.isFinite(n) ? `${n} s` : t('versus.time.inf')]), S.time, n => { S.time = n; rerender(); }, t('versus.time')),
       note('versus.stage'), tabs(st, cur, id => { stages.select(id); rerender(); }, t('versus.stage')),
       local ? h('div', { class: 'ctl' }, h('p', { class: 'note' }, t('versus.controls')), h('p', { class: 'note' }, t('versus.ghost'))) : null,
-      blocked ? h('p', { class: 'note warn' }, t('versus.touch')) : null,
+      blocked ? h('p', { class: 'note warn kbd' }, h('b', {}, t('versus.kbd.title')), h('span', {}, t('versus.touch'))) : local ? h('p', { class: 'note ok kbd' }, t('versus.kbd.found')) : null,
       h('button', { class: 'cta', 'aria-disabled': blocked ? 'true' : null, onclick: () => (blocked ? this.toast(t('versus.touch')) : go()) }, t('versus.start')));
   };
 

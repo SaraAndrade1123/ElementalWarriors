@@ -25,7 +25,7 @@ export const STYLES = {
   ignis: mix(base, {
     atkSpeed: .92,
     stance: { z: .26, x: .07, knee: .16, hipYaw: .42, spYaw: .6, lean: .16, head: -.14 },
-    guard: { F: { x: -.06, y: -.04, z: .62 }, B: { x: -.12, y: -.12, z: .44 }, flareF: .18, flareB: .2, rollF: .25, rollB: .35, pitchF: 0, pitchB: 0, fist: 1, fistB: 1 }, // sin arma: puños de boxeador de fuego (adelantado a la altura del pecho, el otro protege la barbilla)
+    guard: { F: { x: -.05, y: .04, z: .58 }, B: { x: -.1, y: .08, z: .38 }, flareF: .06, flareB: .08, rollF: 0, rollB: 0, pitchF: 0, pitchB: 0, fist: 1, fistB: 1 }, // sin arma: puños de boxeador de fuego (adelantado a la altura del pecho, el otro protege la barbilla)
     shield: { F: { x: -.28, y: .22, z: .5 }, B: { x: -.36, y: .3, z: .3 }, rollF: 0, pitchF: 1.45, flareF: .4 },
     bounce: { freq: 2.7, amp: .035 },
     breath: { rate: 2.4, amp: 1.2 },
@@ -52,7 +52,7 @@ export const STYLES = {
   terra: mix(base, {
     atkSpeed: 1.25,
     stance: { z: .2, x: .2, knee: .26, hipYaw: .18, spYaw: .28, lean: .14, head: -.18 },
-    guard: { F: { x: -.1, y: -.1, z: .58 }, B: { x: -.16, y: -.2, z: .44 }, flareF: .35, flareB: .4, shF: .22, shB: .2, rollF: .5, rollB: .5, fist: 1, fistB: 1 }, // puños firmes, postura baja
+    guard: { F: { x: -.03, y: -.02, z: .56 }, B: { x: -.08, y: -.04, z: .4 }, flareF: .12, flareB: .14, shF: .18, shB: .16, rollF: 0, rollB: 0, fist: 1, fistB: 1 }, // puños firmes, postura baja
     breath: { rate: 1.05, amp: 1.7 },
     shield: { F: { x: -.48, y: .3, z: .44 }, B: { x: -.5, y: .22, z: .38 }, flareF: .1, flareB: .12, fist: 1 },
     walk: { stepZ: .34, lift: .14, bob: .09, swing: .04, lean: .1, hip: .1, sp: .12, stride: 1.0 },

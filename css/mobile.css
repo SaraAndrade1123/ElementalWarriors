@@ -1,0 +1,60 @@
+/* ════════════ Celular y pantallas bajas (v1.3) ════════════
+   Se carga la última: solo ajusta tamaños y distribución cuando la pantalla es baja (celular en horizontal)
+   o estrecha (celular en vertical). Nada se corta: lo que no cabe se reparte en dos columnas o se desplaza. */
+
+/* ── Celular en horizontal / ventanas bajas ── */
+@media (max-height:520px){
+  .left{top:max(8px,env(safe-area-inset-top));bottom:max(8px,env(safe-area-inset-bottom));left:max(12px,env(safe-area-inset-left));gap:6px;width:min(430px,calc(100vw - 24px))}
+  .brand{font-size:1.02rem}
+  /* menú principal: dos columnas de botones, todos visibles sin desplazar */
+  #view>.nav{grid-template-columns:1fr 1fr;gap:6px 8px}
+  #view>.nav .nav-item{height:clamp(34px,10.6vh,44px);font-size:.86rem;padding:0 12px 0 44px}
+  #view>.nav .nav-item .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #view .panel{padding:12px 14px 14px;gap:9px}
+  #view .panel h2{font-size:1.15rem}
+  #view .panel h2::after{margin-top:6px}
+  #view .panel .back{font-size:.82rem}
+  #view .tabs button{padding:5px 10px;font-size:.8rem;min-height:30px}
+  #view .note,#view .lead{font-size:.8rem;margin:0}
+  #view .cta{padding:9px 24px;font-size:.95rem;position:sticky;bottom:0;z-index:2;box-shadow:0 -10px 18px rgba(4,7,16,.85)}
+  .toast{top:max(10px,env(safe-area-inset-top));bottom:auto;transform:translate(-50%,-12px);font-size:.85rem;padding:8px 16px;max-width:min(70vw,520px)}
+  .toast.on{transform:translate(-50%,0)}
+
+  /* resultado: título y datos a la izquierda, botones a la derecha (cabe en 360 px de alto) */
+  #result{padding:8px;overflow:auto;place-items:center}
+  #result .panel{width:min(96vw,820px);min-width:0;padding:14px 20px 14px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);
+    grid-template-areas:"t n" "s n" "d n" "x n";column-gap:22px;row-gap:4px;align-items:start;text-align:left}
+  #result h2{grid-area:t;font-size:clamp(1.5rem,7vh,2rem);letter-spacing:.12em}
+  #result h2::after{display:none}
+  #r-sub{grid-area:s;margin:0;font-size:.95rem}
+  #r-stats{grid-area:d;margin:2px 0 0}
+  #r-stats dt,#r-stats dd{padding:3px 2px;font-size:.86rem}
+  #result .rx{grid-area:x}
+  #result .nav{grid-area:n;align-self:center;margin:0;gap:8px}
+  #result .nav-item{height:40px}
+  #result .r-portrait{display:none}
+
+  /* diálogo de historia y desafíos */
+  #story{padding:8px}
+  #story .panel{max-height:calc(100dvh - 16px);overflow:auto;padding:12px 16px;gap:8px}
+  #story .line{padding:7px 12px;margin-bottom:6px;font-size:.88rem}
+
+  /* versus: placas más bajas para no tapar a los luchadores */
+  #vsprev .vsp{padding:4px 12px}
+  #vsprev .vsp b{font-size:1.05rem}
+  #vsprev .vsp i{font-size:.62rem}
+}
+
+/* ── Muy bajo (celulares pequeños en horizontal) ── */
+@media (max-height:400px){
+  #view>.nav .nav-item{height:clamp(30px,10vh,38px);font-size:.8rem}
+  #r-stats dt,#r-stats dd{padding:2px;font-size:.8rem}
+  #result .nav-item{height:36px}
+}
+
+/* ── Celular en vertical ── */
+@media (max-width:560px) and (min-height:521px){
+  #result .panel{padding:20px 16px 16px}
+  #result h2{font-size:2rem}
+  .left{width:calc(100vw - 24px);left:12px}
+}
