@@ -725,5 +725,11 @@
  "set.song.lofi": "Brisa del Templo",
  "set.song.drums": "Tambores del Volcán",
  "set.song.shuffle": "Aleatoria",
- "set.song.now": "Suena: {name}"
+ "set.song.now": "Suena: {name}",
+ "story.arrive.cenizas": "La Fortaleza de las Cenizas arde bajo un cielo de brasas. Ríos de lava cruzan el patio, caen meteoros y el volcán ruge sin descanso.",
+ "story.arrive.mareas": "En el Santuario de las Mareas la tormenta no cesa: los relámpagos iluminan el mar y una tromba de agua gira en el horizonte.",
+ "story.arrive.bastion": "El Bastión Primordial se alza entre cañones y arena. El viento arrastra la tormenta de polvo y las rocas flotan alrededor del monolito.",
+ "story.arrive.viento": "Sobre los Jardines del Viento cae la nieve. Las islas flotan entre nubes y un tornado vigila desde lejos.",
+ "story.arrive.equilibrio": "La Arena del Equilibrio. Los cuatro elementos giran alrededor del Sello agrietado y la aurora tiembla en el cielo.",
+ "story.arrive.bosque": "El Bosque de Entrenamiento: la cascada ruge entre los pinos y la lluvia no deja de caer."
 }

@@ -77,7 +77,7 @@ const I = o => ({ x: 0, down: false, guard: false, jump: false, l: false, m: fal
 { const Lh = new Ladder(modes, { kind: 'story', hero: 'ignis', level: 'normal' }), sc = Lh.scenesBefore();
   const p = planStory(sc, { hero: 'ignis', rival: Lh.rivals[0], chapter: 0, total: 3 });
   ok(p[0].kind === 'card' && p[0].rival === Lh.rivals[0], 'cada capítulo empieza con su tarjeta («Capítulo 1 · Ignis contra …»)');
-  ok(p.filter(s => s.kind === 'narr').length === 2 && p.some(s => s.kind === 'line' && s.who === Lh.rivals[0] && s.side === 1) && p.some(s => s.kind === 'line' && s.who === 'ignis' && s.side === 0), 'narrador en plano general y cada guerrero en su lado');
+  ok(p.filter(s => s.kind === 'world').length === 3 && p.some(s => s.kind === 'line' && s.who === Lh.rivals[0] && s.side === 1) && p.some(s => s.kind === 'line' && s.who === 'ignis' && s.side === 0), 'narrador en plano general y cada guerrero en su lado');
   ok(p.filter(s => s.ots).length === 1, 'si un guerrero vuelve a hablar, plano por encima del hombro');
   const endP = planStory(Lh.scenesAfter(2), { hero: 'ignis', rival: Lh.rivals[2], chapter: 2, total: 3 }); ok(endP.some(s => s.kind === 'ending'), 'el desenlace tiene su plano final (contraluz y gesto de victoria)');
   let keys = true; for (const h of ids) for (const r of ids) if (h !== r) keys &&= !!es[`story.${h}.vs.${r}`] && !!en[`story.${h}.vs.${r}`];

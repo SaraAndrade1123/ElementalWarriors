@@ -725,5 +725,11 @@
  "set.song.lofi": "Temple Breeze",
  "set.song.drums": "Volcano Drums",
  "set.song.shuffle": "Shuffle",
- "set.song.now": "Now playing: {name}"
+ "set.song.now": "Now playing: {name}",
+ "story.arrive.cenizas": "The Fortress of Ashes burns under a sky of embers. Rivers of lava cross the courtyard, meteors fall and the volcano never stops roaring.",
+ "story.arrive.mareas": "At the Sanctuary of Tides the storm never ends: lightning lights up the sea and a waterspout spins on the horizon.",
+ "story.arrive.bastion": "The Primordial Bastion rises among canyons and sand. The wind drags the dust storm and boulders float around the monolith.",
+ "story.arrive.viento": "Snow falls over the Gardens of the Wind. Islands float among the clouds and a tornado keeps watch from afar.",
+ "story.arrive.equilibrio": "The Arena of Balance. The four elements orbit the cracked Seal and the aurora trembles in the sky.",
+ "story.arrive.bosque": "The Training Forest: the waterfall roars among the pines and the rain never stops."
 }

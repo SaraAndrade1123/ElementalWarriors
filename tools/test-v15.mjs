@@ -55,5 +55,14 @@ TFm.patchFighter(Fighter, RULES); TFm.patchCpu(CpuBrain);
   ok(byId('m_arcade_nocont').check({ cleared: true, continues: 0 }) && !byId('m_arcade_hard').check({ cleared: true, level: 'normal' }) && byId('m_surv6').check({ wins: 6 }), 'los desafíos de modos se cumplen con el resultado de Arcade / Supervivencia');
   ok(byId('p_tf').check({ rep: { sides: [{ stats: { tf: 1 } }, { stats: { tf: 2 } }] } }) && byId('p_close').check({ res: { winner: 1, wins: [1, 2] } }), 'los desafíos de 2 jugadores también'); }
 
+// 4 · historia: los mundos
+{ const { planStory, TOUR } = await import('../js/game/story-cine.js'); const { Ladder } = await import('../js/modes/ladder.js'); const cfg = rd('data/modes.json');
+  const L = new Ladder(cfg, { kind: 'story', hero: 'ignis', level: 'normal' }), sc = L.scenesBefore();
+  const p = planStory(sc, { hero: 'ignis', rival: L.rivals[0], world: L.stageAt(0), home: 'cenizas', final: cfg.finalStage, total: 3 });
+  ok(p.find(s => s.key === 'story.prologue.1').world === 'equilibrio' && p.find(s => s.key === 'story.prologue.2').tour.join() === TOUR.join(), 'el prólogo muestra el Sello y recorre los cuatro mundos');
+  ok(p.find(s => s.key === 'story.ignis.intro').world === 'cenizas' && p.find(s => s.key.startsWith('story.arrive.')).world === L.stageAt(0) && p.find(s => s.kind === 'line' && s.side === 1).world === L.stageAt(0), 'el héroe habla en su mundo y el capítulo ocurre en el del rival');
+  ok(['cenizas', 'mareas', 'bastion', 'viento', 'equilibrio'].every(w => es['story.arrive.' + w] && en['story.arrive.' + w]), 'cada mundo tiene su llegada narrada');
+  const st = rd('data/stages.json').stages; ok(st.every(s => s.extras.includes('peaks') || s.id === 'mareas') && st.every(s => s.weather) && st.find(s => s.id === 'bosque').extras.includes('cascade'), 'todos los escenarios tienen cordillera, clima propio y el bosque su cascada'); }
+
 console.log(bad ? `\n${bad} prueba(s) fallaron` : '\nTodas las pruebas v1.5 pasaron');
 process.exit(bad ? 1 : 0);

@@ -142,3 +142,11 @@ body.story-cine #hud,body.story-cine #touch,body.story-cine #menu,body.story-cin
 @keyframes tfReady{50%{color:var(--c);text-shadow:0 0 18px var(--c),0 0 30px var(--c)}}
 #touch:not([hidden]) ~ #hud .tfbar,body:has(#touch:not([hidden])) #hud .tfbar{bottom:auto;top:calc(max(12px,env(safe-area-inset-top)) + 110px);width:min(28vw,220px)}
 @media (prefers-reduced-motion:reduce){#hud .tfbar.ready b{animation:none}}
+
+/* historia: planos de MUNDO (el escenario real con su clima) */
+#scine[data-shot="world"]::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(2,3,8,.7) 85%);z-index:1}
+#scine[data-shot="world"] .snarr{top:auto;bottom:calc(12vh + 3.5vh);transform:none;font-size:clamp(1rem,2vw,1.4rem)}
+#scine .sworld{position:absolute;left:max(4vw,env(safe-area-inset-left));top:calc(12vh + 2.2vh);margin:0;z-index:3;font:800 clamp(1.1rem,2.6vw,2rem)/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#fff;text-shadow:0 0 18px var(--c),0 3px 6px #000;opacity:0;transition:opacity .4s}
+#scine[data-shot="world"] .sworld:not(:empty){opacity:1;animation:slamL .6s cubic-bezier(.1,1.3,.3,1) both}
+#scine .sworld::after{content:"";display:block;height:2px;width:60%;margin-top:8px;background:linear-gradient(90deg,var(--gilt),transparent)}
+@media (max-height:520px){#scine[data-shot="world"] .snarr{bottom:calc(9vh + 2vh)}#scine .sworld{top:calc(9vh + 1vh)}}

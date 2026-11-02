@@ -182,7 +182,7 @@ async function boot() {
     };
     // Diálogo de historia: lista de {who, key}; «Continuar» sigue con el flujo.
     // Historia: escenas rodadas en 3D (js/game/story-cine.js); si algo falla, el diálogo clásico de siempre.
-    const storyCine = createStoryCine({ scene, roster, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color });
+    const storyCine = createStoryCine({ scene, roster, stages, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color });
     const showStory = (scenes, done, ctx) => {
       if (!settings.get().reduceMotion) try {
         const wasMenu = $('#menu').hidden, en = menu.enabled; rz.hidden = true; $('#hud').hidden = true; $('#menu').hidden = true; menu.enabled = false; input.detach?.();
