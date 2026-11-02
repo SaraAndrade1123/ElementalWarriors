@@ -86,9 +86,9 @@ const res = (winner, o = {}) => ({ winner, wins: winner === 0 ? [2, 0] : [0, 2],
   ok(scoreFight(res(0), 'expert', cfg) > scoreFight(res(0), 'normal', cfg) && scoreFight(res(0), 'normal', cfg) > scoreFight(res(0), 'beginner', cfg), 'más dificultad, más puntos'); }
 
 // ---------- Historia
-{ const L = new Ladder(cfg, { kind: 'story', hero: 'aqua', level: 'normal' }); const b0 = L.scenesBefore(); ok(b0.length === 4 && b0[0].key === 'story.prologue.1' && b0.at(-1).key === `story.rival.${L.rivals[0]}.pre`, 'el primer capítulo abre con el prólogo, la intro de la heroína y el rival');
+{ const L = new Ladder(cfg, { kind: 'story', hero: 'aqua', level: 'normal' }); const b0 = L.scenesBefore(); ok(b0.length === 5 && b0[0].key === 'story.prologue.1' && b0.at(-2).key === `story.rival.${L.rivals[0]}.pre` && b0.at(-1).key === `story.aqua.vs.${L.rivals[0]}`, 'el primer capítulo abre con el prólogo, la intro de la heroína y el rival');
   ok(L.report(res(1)).status === 'lost' && L.continuesLeft === Infinity && L.useContinue().b === L.rivals[0] && L.continues === 0, 'en la historia perder permite reintentar sin límite ni penalización');
-  L.report(res(0)); const a0 = L.scenesAfter(); ok(a0.length === 1 && a0[0].key === `story.rival.${L.rivals[0]}.post` && L.scenesBefore().length === 1, 'tras cada victoria hay un diálogo y el siguiente capítulo solo trae su diálogo previo');
+  L.report(res(0)); const a0 = L.scenesAfter(); ok(a0.length === 1 && a0[0].key === `story.rival.${L.rivals[0]}.post` && L.scenesBefore().length === 2, 'tras cada victoria hay un diálogo y el siguiente capítulo solo trae su diálogo previo');
   L.report(res(0)); L.report(res(0)); const end = L.scenesAfter(2); ok(end.at(-1).key === 'story.fin' && end.some(s => s.key === 'story.aqua.ending'), 'el último capítulo cierra con el final de la heroína');
   const from = new Ladder(cfg, { kind: 'story', hero: 'aqua', from: 2 }); ok(from.fight().index === 2 && from.fight().final, 'se puede empezar desde un capítulo desbloqueado'); }
 

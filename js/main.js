@@ -22,6 +22,9 @@ import { installCinematic } from './game/cinematic.js';
 import { installFightFx } from './game/fight-fx.js';
 import { installVersusPreview } from './ui/versus-preview.js';
 import { startTitle } from './ui/title.js';
+import { createStoryCine } from './game/story-cine.js';
+import { installOutro } from './game/cinematic-end.js';
+import { createWeaponPreview } from './ui/weapon-preview.js';
 
 const $ = s => document.querySelector(s);
 const stopTitle = (() => { try { return startTitle(document.getElementById('tfx')); } catch { return () => {}; } })(); // chispas de la pantalla de título
@@ -43,7 +46,7 @@ async function boot() {
   if (location.protocol === 'file:') return fail(L.file);
   try {
     await loadLocale(lang);
-    const [{ roster }, { items }, shopData, achData, economy, stageData, moves, modes, mirrorData, weaponData, introData] = await Promise.all([json('data/characters.json'), json('data/menu.json'), json('data/items.json'), json('data/achievements.json'), json('data/economy.json'), json('data/stages.json'), json('data/moves.json'), json('data/modes.json'), optional('data/mirror.json'), optional('data/weapons.json'), optional('data/intros.json')]);
+    const [{ roster }, { items }, shopData, achData, economy, stageData, moves, modes, mirrorData, weaponData, introData, outroData] = await Promise.all([json('data/characters.json'), json('data/menu.json'), json('data/items.json'), json('data/achievements.json'), json('data/economy.json'), json('data/stages.json'), json('data/moves.json'), json('data/modes.json'), optional('data/mirror.json'), optional('data/weapons.json'), optional('data/intros.json'), optional('data/outros.json')]);
     const scene = new SceneManager($('#stage'), settings.get()); scene.mirrorData = mirrorData;
     settings.subscribe(s => {
       scene.apply(s); document.body.dataset.reduce = s.reduceMotion ? '1' : '0';
@@ -77,9 +80,11 @@ async function boot() {
     const elements = installElements({ menu, scene, roster }); // triángulo elemental (docs/ELEMENTOS.md)
     const bending = installBending({ menu, scene, roster }); // control elemental (docs/CONTROL-ELEMENTAL.md)
     installWeapons({ scene, roster, save: meta.save, data: weaponData }); // armas de la tienda y rompeguardia (docs/ARMAS.md)
-    if (weaponData) installWeaponShop(menu, { meta, roster, data: weaponData });
+    const wPreview = createWeaponPreview({ scene, roster, moves, sfx: (n, d = {}) => audio.sfx(n, { ...d, element: ELEMENT_OF[d.who] }) });
+    if (weaponData) installWeaponShop(menu, { meta, roster, data: weaponData, preview: wPreview });
     installFightFx({ scene, roster }); // impactos, congelado de técnica y K.O. con más producción (docs/PRESENTACION.md)
     installCinematic({ scene, roster, data: introData }); // cinemática con diálogo antes de cada combate
+    installOutro({ scene, roster, data: outroData }); // cinemática de victoria al terminar cada combate (antes del panel)
     if (dev) window.ewAudio = audio; // consola: ewAudio.sfx('hit_heavy', { element: 'fire' })
     if (dev) window.ewStages = stages; // consola: ewStages.react({ power: 1 })
     if (dev) window.ewScene = scene; // consola: ewScene.match.f[1].hp = 1
@@ -152,7 +157,16 @@ async function boot() {
       pz.hidden = true; paused = false; rz.hidden = false; input.clear(); ($('#r-next').hidden ? $('#r-again').hidden ? $('#r-menu') : $('#r-again') : $('#r-next')).focus();
     };
     // Diálogo de historia: lista de {who, key}; «Continuar» sigue con el flujo.
-    const showStory = (scenes, done) => {
+    // Historia: escenas rodadas en 3D (js/game/story-cine.js); si algo falla, el diálogo clásico de siempre.
+    const storyCine = createStoryCine({ scene, roster, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color });
+    const showStory = (scenes, done, ctx) => {
+      if (!settings.get().reduceMotion) try {
+        const wasMenu = $('#menu').hidden, en = menu.enabled; rz.hidden = true; $('#hud').hidden = true; $('#menu').hidden = true; menu.enabled = false; input.detach?.();
+        storyCine.play(scenes, () => { $('#menu').hidden = wasMenu; menu.enabled = en; done(); }, ctx); return;
+      } catch (e) { console.warn('[historia] escena 3D no disponible', e); }
+      return showStoryPanel(scenes, done);
+    };
+    const showStoryPanel = (scenes, done) => {
       const box = $('#story-lines'); box.replaceChildren(...scenes.map(s => { const p = document.createElement('p'), who = s.who === 'narrator' ? t('story.narrator') : nameOf(s.who);
         p.className = 'line' + (s.who === 'narrator' ? ' narr' : ''); if (s.who !== 'narrator') { const b = document.createElement('b'); b.textContent = who; p.append(b); } p.append(t(s.key)); return p; }));
       const go = $('#story-next'); rz.hidden = true; $('#story').hidden = false; go.focus();
@@ -188,7 +202,7 @@ async function boot() {
     };
     installModes(menu, { cfg: modes, roster, stages, meta, flow });
     installVersusPreview(menu, { scene, roster }); // Versus: los dos elegidos frente a frente
-    { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'css/mobile.css'; document.head.append(l); } // ajustes de celular: siempre la última hoja
+    for (const href of ['css/cinema.css', 'css/mobile.css']) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.append(l); } // cinemáticas v1.3 y ajustes de celular: siempre las últimas hojas
     // Pausa: maniquí, vida infinita y reinicio de posiciones (entrenamiento) · dificultad de la CPU (combate contra la CPU)
     const optLabels = () => {
       const m = scene.match;

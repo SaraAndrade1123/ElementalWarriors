@@ -46,10 +46,10 @@ const last = a => a[a.length - 1];
 
 // Historia
 { const { flow, log, save } = setup(); const L = new Ladder(cfg, { kind: 'story', hero: 'terra' }); flow.begin({ kind: 'story', obj: L });
-  ok(log.stories.length === 1 && log.stories[0].length === 4 && log.fights.length === 1 && log.fights[0].rec === 'story', 'historia: prólogo y diálogo antes del primer combate');
+  ok(log.stories.length === 1 && log.stories[0].length === 5 && log.fights.length === 1 && log.fights[0].rec === 'story', 'historia: prólogo y diálogo antes del primer combate');
   flow.onResult(res(1)); ok(/result.retry/.test(last(log.panels).again.label) && !/\d/.test(last(log.panels).again.label.replace(/result\.retry/, '')), 'perder en la historia: reintentar sin límite');
   last(log.panels).again.run(); flow.onResult(res(0)); ok(save.data.story.terra === 1, 'tras el primer capítulo queda guardado el progreso (1/3)');
-  last(log.panels).next.run(); ok(log.stories.length === 2 && log.stories[1].length === 2 && last(log.fights).b === L.rivals[1], 'continuar: diálogo de cierre + diálogo previo y siguiente combate');
+  last(log.panels).next.run(); ok(log.stories.length === 2 && log.stories[1].length === 3 && last(log.fights).b === L.rivals[1], 'continuar: diálogo de cierre + diálogo previo y siguiente combate');
   flow.onResult(res(0)); last(log.panels).next.run(); flow.onResult(res(0)); const p = last(log.panels);
   ok(log.stories.length === 4 && log.stories.at(-1).some(s => s.key === 'story.terra.ending') && /story.clear/.test(p.title), 'al terminar: epílogo del personaje y pantalla de historia completada');
   ok(save.data.story.terra === 3 && save.data.stats.storyClears === 1, 'queda guardado: 3 capítulos y 1 historia completada'); }

@@ -309,6 +309,7 @@ export class SceneManager {
       c.holder.scale.setScalar(.92 + .08 * a); c.holder.position.y = (1 - a) * -.35;
       this.animate(c, dt);
     }
+    if (this.cineCam) { try { this.cineCam(dt, this.camera); } catch (e) { console.warn('[cine]', e); this.cineCam = null; } } // cinemáticas del menú (historia, vista previa)
     this.post.update(dt); this.post.render(this.scene, this.camera);
   }
 

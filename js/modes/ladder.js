@@ -45,7 +45,7 @@ export class Ladder {
   scenesBefore() {
     const r = this.rivals[this.i], out = [];
     if (this.i === 0) out.push({ who: 'narrator', key: 'story.prologue.1' }, { who: 'narrator', key: 'story.prologue.2' }, { who: this.hero, key: `story.${this.hero}.intro` });
-    out.push({ who: r, key: `story.rival.${r}.pre` }); return out;
+    out.push({ who: r, key: `story.rival.${r}.pre` }, { who: this.hero, key: `story.${this.hero}.vs.${r}` }); return out; // el héroe responde (diálogo por pareja)
   }
   scenesAfter(i = this.i - 1) { const r = this.rivals[i], out = [{ who: r, key: `story.rival.${r}.post` }]; if (i === this.total - 1) out.push({ who: 'narrator', key: `story.${this.hero}.ending` }, { who: 'narrator', key: 'story.fin' }); return out; }
 }

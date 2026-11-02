@@ -12,7 +12,7 @@ export function createFlow(env) {
   const hero = () => env.nameOf(last.a);
   const side = i => env.sideName ? env.sideName(last, i) : env.nameOf(i ? last.b : last.a); // en un duelo espejo el J2 tiene otro nombre
   const progressText = () => `${t(`ch.${tracker.def.id}.goal`)} · ${tracker.count}/${tracker.def.goal}`;
-  const story = (scenes, done) => (ses?.kind === 'story' && scenes.length ? env.story(scenes, done) : done());
+  const story = (scenes, done) => (ses?.kind === 'story' && scenes.length ? env.story(scenes, done, { hero: ses.obj.hero, rival: ses.obj.rivals?.[Math.min(ses.obj.i, ses.obj.total - 1)], chapter: Math.min(ses.obj.i, ses.obj.total - 1), total: ses.obj.total }) : done());
   const base = (r, gold) => [['result.rounds', `${r.wins[0]} - ${r.wins[1]}`], ['result.damage', `${Math.round(r.stats.dmg[0])} / ${Math.round(r.stats.dmg[1])}`], ['result.combo', `${r.stats.combo[0]} / ${r.stats.combo[1]}`], ['result.time', fmt(r.time)], ...(gold ? [['result.gold', `+${gold}`]] : [])];
   const totals = (o, extra = []) => [['result.score', o.score.toLocaleString()], ['result.wins', o.wins], ['result.time', fmt(o.time)], ...extra];
 

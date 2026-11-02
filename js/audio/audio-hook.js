@@ -72,6 +72,7 @@ export function installAudio({ menu, scene, meta = null, stages = null, roster =
   const start = scene.startMatch.bind(scene), end = scene.endMatch.bind(scene);
   scene.startMatch = (...args) => {
     start(...args); // si el combate no arranca, la excepción sale tal cual (main.js ya la muestra) y no tocamos el audio
+    if (args[3]?.preview) return; // vista previa de la tienda: sigue la música del menú
     try {
       clearTimeout(mt); audio.music(stageElement() ?? elementOf(menu.idx), 'battle'); audio.sfx('round_start');
       moves.reset(); prev = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(track);

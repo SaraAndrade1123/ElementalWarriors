@@ -1,0 +1,129 @@
+/* ════════════ Cinemáticas v1.3: intro mejorada, final de combate, historia y vista previa de armas ════════════ */
+
+/* ── piezas comunes (franjas de cine, subtítulos, destello de corte) ── */
+#outro,#scine{position:fixed;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+#scine{z-index:9;pointer-events:auto;cursor:pointer}
+:is(#outro,#scine) .cbar{position:absolute;left:0;right:0;height:12vh;background:#05060c;box-shadow:0 0 0 1px rgba(201,164,76,.25);transition:transform .45s cubic-bezier(.2,.9,.2,1);z-index:2}
+:is(#outro,#scine) .cbar.top{top:0;animation:cbarT .5s cubic-bezier(.2,.9,.2,1) both}
+:is(#outro,#scine) .cbar.bot{bottom:0;animation:cbarB .5s cubic-bezier(.2,.9,.2,1) both}
+:is(#outro,#scine) .cbar.top::after,:is(#outro,#scine) .cbar.bot::before{content:"";position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gilt),transparent)}
+:is(#outro,#scine) .cbar.top::after{bottom:0}:is(#outro,#scine) .cbar.bot::before{top:0}
+:is(#outro,#scine).out .cbar.top{transform:translateY(-100%)}:is(#outro,#scine).out .cbar.bot{transform:translateY(100%)}
+:is(#outro,#scine).out>:not(.cbar){opacity:0;transition:opacity .3s}
+:is(#outro,#scine) .csub{position:absolute;left:6vw;right:6vw;bottom:calc(12vh + 2.2vh);display:grid;justify-items:start;gap:8px;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;z-index:3}
+:is(#outro,#scine) .csub.on{opacity:1;transform:none}:is(#outro,#scine) .csub.r{justify-items:end;text-align:right}
+:is(#outro,#scine) .cwho{display:flex;align-items:baseline;gap:12px;padding:6px 22px 6px 16px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 75%,#000),color-mix(in srgb,var(--c) 25%,#05060c));clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+:is(#outro,#scine) .csub.r .cwho{clip-path:polygon(14px 0,100% 0,100% 100%,0 100%);padding:6px 16px 6px 22px;flex-direction:row-reverse;background:linear-gradient(270deg,color-mix(in srgb,var(--c) 75%,#000),color-mix(in srgb,var(--c) 25%,#05060c))}
+:is(#outro,#scine) .cwho b{font:800 clamp(1.1rem,2.3vw,1.6rem)/1 var(--f-display);letter-spacing:.05em;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+:is(#outro,#scine) .cwho i{font:600 .85rem var(--f-body);letter-spacing:.12em;color:rgba(255,255,255,.8);font-style:normal}
+:is(#outro,#scine) .csub p{margin:0;max-width:min(860px,88vw);padding:12px 20px;font:600 clamp(1.05rem,2.2vw,1.45rem)/1.4 var(--f-body);color:#fff;background:rgba(5,6,12,.74);border-left:3px solid var(--c);text-shadow:0 2px 4px #000}
+:is(#outro,#scine) .csub.r p{border-left:0;border-right:3px solid var(--c)}
+:is(#outro,#scine) .csub p:not(.done)::after{content:"▌";color:var(--c);margin-left:2px;animation:blink .6s steps(2) infinite}
+:is(#cine,#outro,#scine) .oflash{position:absolute;inset:0;background:#fff;opacity:0;z-index:4;pointer-events:none}
+:is(#cine,#outro,#scine).cut .oflash{animation:cutFlash .32s ease-out}
+@keyframes cutFlash{0%{opacity:.85}100%{opacity:0}}
+:is(#outro,#scine) .cskip{position:absolute;right:2vw;bottom:3.5vh;font:600 .8rem var(--f-body);letter-spacing:.14em;color:rgba(241,220,154,.75);text-transform:uppercase;z-index:3}
+
+/* ── INTRO: paneles diagonales con el color de cada guerrero, líneas de velocidad y choque final ── */
+#cine .cslash{position:absolute;top:-10%;bottom:-10%;width:62%;opacity:0;mix-blend-mode:screen;pointer-events:none}
+#cine .cslash.a{left:-12%;background:linear-gradient(100deg,transparent 8%,color-mix(in srgb,var(--ca) 55%,transparent) 30%,color-mix(in srgb,var(--ca) 12%,transparent) 75%,transparent);transform:skewX(-14deg)}
+#cine .cslash.b{right:-12%;background:linear-gradient(-100deg,transparent 8%,color-mix(in srgb,var(--cb) 55%,transparent) 30%,color-mix(in srgb,var(--cb) 12%,transparent) 75%,transparent);transform:skewX(-14deg)}
+#cine[data-shot="title"] .cslash.a{animation:slashA .7s cubic-bezier(.1,1,.3,1) both}
+#cine[data-shot="title"] .cslash.b{animation:slashB .7s .08s cubic-bezier(.1,1,.3,1) both}
+@keyframes slashA{from{opacity:0;transform:skewX(-14deg) translateX(-60%)}to{opacity:1;transform:skewX(-14deg)}}
+@keyframes slashB{from{opacity:0;transform:skewX(-14deg) translateX(60%)}to{opacity:1;transform:skewX(-14deg)}}
+#cine .cspeed{position:absolute;inset:0;opacity:0;pointer-events:none;background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.0) 0 2.2deg,rgba(255,255,255,.09) 2.4deg 2.9deg,rgba(255,255,255,0) 3.1deg 7deg);
+  -webkit-mask:radial-gradient(circle at 50% 50%,transparent 26%,#000 64%);mask:radial-gradient(circle at 50% 50%,transparent 26%,#000 64%)}
+#cine:is([data-shot="title"],.clash) .cspeed{opacity:1;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#cine .cclash{position:absolute;inset:0;opacity:0;pointer-events:none}
+#cine .cclash i{position:absolute;top:0;bottom:0;width:52%;opacity:.5;mix-blend-mode:screen}
+#cine .cclash i.a{left:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--ca) 60%,transparent));clip-path:polygon(0 0,100% 0,88% 100%,0 100%)}
+#cine .cclash i.b{right:0;background:linear-gradient(-90deg,transparent,color-mix(in srgb,var(--cb) 60%,transparent));clip-path:polygon(12% 0,100% 0,100% 100%,0 100%)}
+#cine .cclash span{position:absolute;left:50%;top:-5%;bottom:-5%;width:6px;background:#fff;box-shadow:0 0 18px #fff,0 0 42px var(--ca),0 0 42px var(--cb);transform:translateX(-50%) skewX(-8deg)}
+#cine.clash .cclash{opacity:1}
+#cine.clash .cclash i.a{animation:clashA .5s cubic-bezier(.1,1.2,.3,1) both}#cine.clash .cclash i.b{animation:clashB .5s cubic-bezier(.1,1.2,.3,1) both}
+#cine.clash .cclash span{animation:clashLine .9s ease-out both}
+@keyframes clashA{from{transform:translateX(-100%)}}@keyframes clashB{from{transform:translateX(100%)}}
+@keyframes clashLine{0%{opacity:0;transform:translateX(-50%) skewX(-8deg) scaleY(0)}25%{opacity:1;transform:translateX(-50%) skewX(-8deg) scaleY(1)}100%{opacity:0}}
+
+/* ── FINAL DE COMBATE ── */
+#outro .oslash{position:absolute;inset:0;opacity:0;transition:opacity .3s}
+#outro .oslash i{position:absolute;left:-20%;right:-20%;height:16vh;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--c) 70%,transparent) 30%,color-mix(in srgb,var(--c) 30%,transparent) 70%,transparent);transform:rotate(-8deg);mix-blend-mode:screen}
+#outro .oslash i:nth-child(1){top:26%;animation:oSlash .6s cubic-bezier(.1,1,.3,1) both}
+#outro .oslash i:nth-child(2){top:44%;height:4vh;opacity:.7;animation:oSlash .6s .08s cubic-bezier(.1,1,.3,1) both reverse}
+#outro .oslash i:nth-child(3){top:56%;height:1.2vh;background:#fff;opacity:.85;animation:oSlash .5s .14s cubic-bezier(.1,1,.3,1) both}
+@keyframes oSlash{from{transform:rotate(-8deg) translateX(-110%)}to{transform:rotate(-8deg)}}
+#outro[data-shot="slam"] .oslash{opacity:1}
+#outro .olines{position:absolute;inset:0;opacity:0;background:repeating-conic-gradient(from 0deg at 50% 46%,transparent 0 2deg,rgba(255,255,255,.1) 2.2deg 2.8deg,transparent 3deg 6.5deg);
+  -webkit-mask:radial-gradient(circle at 50% 46%,transparent 22%,#000 62%);mask:radial-gradient(circle at 50% 46%,transparent 22%,#000 62%);animation:spin 8s linear infinite}
+#outro:is([data-shot="slam"],[data-shot="pose"]) .olines{opacity:1;transition:opacity .2s}
+#outro .oban{position:absolute;left:0;right:0;top:30%;display:grid;justify-items:center;gap:.4vh;opacity:0;transform:skewX(-10deg)}
+#outro .oban.on{opacity:1}
+#outro .oban .oko{font:800 clamp(.9rem,1.8vw,1.3rem) var(--f-body);letter-spacing:.5em;color:#fff;padding:3px 14px 3px 20px;background:#b8121b;box-shadow:0 0 18px rgba(255,40,40,.6)}
+#outro .oban.on .oko{animation:fbIn 1.9s cubic-bezier(.15,1.5,.3,1) both}
+#outro .oban b{font:800 clamp(3rem,10vw,7.2rem)/.95 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:#fff;white-space:nowrap;
+  -webkit-text-stroke:3px #12060a;paint-order:stroke fill;text-shadow:0 0 22px var(--c),0 0 60px var(--c),0 7px 0 #12060a}
+#outro .oban.on b{animation:oName .7s .1s cubic-bezier(.1,1.4,.3,1) both}
+#outro .oban em{font:800 clamp(1.2rem,3.4vw,2.4rem)/1 var(--f-display);font-style:normal;letter-spacing:.42em;text-transform:uppercase;
+  color:transparent;background:linear-gradient(180deg,#fff7d6,#f1dc9a 45%,#a8792a);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 3px 0 #1a0d04)}
+#outro .oban.on em{animation:fadeUp .5s .45s both}
+@keyframes oName{0%{opacity:0;transform:scale(2.4);filter:blur(8px)}60%{opacity:1;transform:scale(.94);filter:none}100%{transform:scale(1)}}
+#outro .oframe{position:absolute;inset:0;display:grid;align-content:end;justify-items:start;padding:0 6vw calc(12vh + 5vh);opacity:0;transition:opacity .25s;
+  background:radial-gradient(70% 90% at 70% 50%,transparent 40%,rgba(5,6,12,.65)),linear-gradient(115deg,color-mix(in srgb,var(--c) 40%,transparent),transparent 45%)}
+#outro .oframe.on{opacity:1}
+#outro .oframe b{font:800 clamp(2.4rem,7vw,5rem)/1 var(--f-display);text-transform:uppercase;color:#fff;-webkit-text-stroke:2px #12060a;paint-order:stroke fill;text-shadow:0 0 30px var(--c),0 5px 0 #12060a}
+#outro .oframe em{font:700 clamp(1rem,2.2vw,1.5rem) var(--f-body);font-style:normal;letter-spacing:.4em;text-transform:uppercase;color:#f1dc9a}
+#outro .oframe.on b{animation:slamL .6s cubic-bezier(.1,1.3,.3,1) both}
+#outro .oframe.on em{animation:fadeUp .5s .25s both}
+#outro.lose::after{content:"";position:absolute;inset:0;background:radial-gradient(80% 80% at 50% 50%,rgba(10,10,30,.15),rgba(4,4,12,.6));pointer-events:none;z-index:1}
+body.outro #fightfx{opacity:0}
+
+/* ── HISTORIA ── */
+body.story-cine #hud,body.story-cine #touch,body.story-cine #menu,body.story-cine #hint,body.story-cine #vsprev{display:none!important}
+#scine .scard{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1.2vh;opacity:0;transition:opacity .35s;z-index:3;
+  background:radial-gradient(60% 50% at 50% 50%,rgba(5,6,12,.55),transparent 75%)}
+#scine .scard.on{opacity:1}
+#scine .scard i{font:700 clamp(.9rem,1.8vw,1.25rem) var(--f-body);font-style:normal;letter-spacing:.55em;text-transform:uppercase;color:#f1dc9a;padding:4px 18px;border-top:1px solid var(--gilt);border-bottom:1px solid var(--gilt)}
+#scine .scard b{font:800 clamp(2rem,6vw,4.6rem)/1.05 var(--f-display);letter-spacing:.04em;text-transform:uppercase;text-align:center;color:#fff;-webkit-text-stroke:2px #12060a;paint-order:stroke fill;text-shadow:0 0 26px var(--c),0 5px 0 #12060a}
+#scine .scard em{font:600 clamp(.9rem,1.7vw,1.2rem) var(--f-body);font-style:italic;color:#d9e0ee;letter-spacing:.12em}
+#scine .scard.on i{animation:fadeUp .5s both}#scine .scard.on b{animation:oName .8s .15s cubic-bezier(.1,1.3,.3,1) both}#scine .scard.on em{animation:fadeUp .6s .6s both}
+#scine .snarr{position:absolute;left:10vw;right:10vw;top:50%;transform:translateY(-50%);margin:0;text-align:center;font:italic 600 clamp(1.05rem,2.3vw,1.6rem)/1.55 var(--f-body);color:#eef2fa;
+  text-shadow:0 2px 12px #000,0 0 2px #000;opacity:0;transition:opacity .3s;z-index:3}
+#scine .snarr.on{opacity:1}
+#scine[data-shot="narr"]::before,#scine[data-shot="ending"]::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 50%,rgba(4,6,14,.35),rgba(2,3,8,.85));z-index:1}
+#scine .snarr:not(.done)::after{content:"▌";color:var(--gilt);animation:blink .6s steps(2) infinite}
+#scine .srays{position:absolute;inset:-20%;opacity:0;z-index:1;background:repeating-conic-gradient(from 0deg at 50% 60%,rgba(255,226,150,.0) 0 5deg,rgba(255,226,150,.16) 6deg 9deg,rgba(255,226,150,0) 10deg 16deg);
+  -webkit-mask:radial-gradient(circle at 50% 60%,#000 10%,transparent 60%);mask:radial-gradient(circle at 50% 60%,#000 10%,transparent 60%);animation:spin 30s linear infinite}
+#scine[data-shot="ending"] .srays{opacity:1;transition:opacity 1.2s}
+#scine[data-shot="ending"] .snarr{color:#fff6d8}
+#scine .sskip{position:absolute;top:calc(12vh + 1.4vh);right:2vw;z-index:5;padding:7px 16px;font:700 .8rem var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:#f1dc9a;
+  background:rgba(5,6,12,.7);border:1px solid var(--gilt-dim);cursor:pointer}
+#scine .sskip:hover,#scine .sskip:focus-visible{color:#fff;border-color:var(--gilt)}
+#scine .snext{position:absolute;right:3vw;bottom:calc(12vh + 1vh);z-index:5;color:var(--gilt);font-size:1rem;opacity:0;transition:opacity .2s}
+#scine.ready .snext{opacity:1;animation:bob 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateX(4px)}}
+
+/* ── VISTA PREVIA DE ARMAS ── */
+#wprev{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:4;display:grid;gap:4px;max-width:min(420px,calc(100vw - 470px));min-width:240px;
+  padding:12px 16px 14px;background:linear-gradient(180deg,rgba(18,28,62,.92),rgba(8,12,28,.94));border:1px solid var(--gilt-dim);border-left:3px solid var(--gilt);box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .35s both}
+#wprev i{font:700 .7rem var(--f-body);font-style:normal;letter-spacing:.3em;text-transform:uppercase;color:#ff6b5a;display:flex;align-items:center;gap:8px}
+#wprev i::before{content:"";width:8px;height:8px;border-radius:50%;background:#ff3b30;box-shadow:0 0 8px #ff3b30;animation:blink 1s steps(2) infinite}
+#wprev b{font:800 1.15rem var(--f-display);color:#fff3cc}
+#wprev span{font:500 .9rem/1.35 var(--f-body);color:#c3cbdb}
+#wprev button{justify-self:start;margin-top:4px}
+.item.weapon.live{box-shadow:inset 0 0 0 1px var(--gilt),0 0 18px rgba(241,220,154,.18)}
+.mini.pv{border-color:#e4c46a;color:#f1dc9a}.mini.pv::before{content:"▶ "}.mini.pv.on::before{content:"■ "}
+
+/* ── 2 jugadores: aviso de teclado ── */
+.note.kbd{display:grid;gap:2px;padding:8px 12px;border-left:3px solid #e0a040;background:rgba(224,160,64,.08)}
+.note.kbd b{color:#ffd28a}.note.ok.kbd{border-left-color:#5fd38a;background:rgba(95,211,138,.08);color:#bff0cf}
+
+@media (max-height:520px){
+  :is(#outro,#scine) .cbar{height:9vh}:is(#outro,#scine) .csub{bottom:calc(9vh + 1vh)}:is(#outro,#scine) .csub p{padding:8px 14px;font-size:.95rem}
+  #outro .oban{top:22%}#scine .sskip{top:calc(9vh + 6px)}#scine .snext{bottom:calc(9vh + 6px)}
+  #outro .oframe{padding-bottom:calc(9vh + 3vh)}
+  #wprev{max-width:min(360px,calc(100vw - 460px));min-width:200px;padding:8px 12px 10px}#wprev span{font-size:.8rem}
+}
+@media (max-width:760px),(max-aspect-ratio:1/1){#wprev{left:12px;right:12px;max-width:none;top:max(12px,env(safe-area-inset-top));bottom:auto}}
+@media (prefers-reduced-motion:reduce){#outro *,#scine *,#cine .cspeed,#cine .cslash,#cine .cclash *{animation:none!important}}

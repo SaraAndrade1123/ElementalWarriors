@@ -1,0 +1,74 @@
+{
+ "_doc": "Cinemática FINAL de cada combate (estilo Mortal Kombat / Guilty Gear). pairs['ganador>perdedor'] = líneas tras la victoria; who: 'w' (ganador) o 'l' (perdedor). mirror[id] = contra sí mismo. Si falta un par (guerreros personalizados) se usan generic[id].win (ganador) y generic[id].lose (perdedor) y, si tampoco hay, generic['*'] con {name} (quien habla) y {foe} (el otro). Cada línea tiene es y en.",
+ "version": 1,
+ "pairs": {
+  "ignis>aqua": [
+   { "who": "w", "es": "¿Ves? Hasta el océano hierve si la llama es lo bastante terca.", "en": "See? Even the ocean boils if the flame is stubborn enough." },
+   { "who": "l", "es": "Hoy hervía, Ignis. Mañana vuelve la marea.", "en": "Today it boiled, Ignis. Tomorrow the tide returns." }
+  ],
+  "ignis>terra": [
+   { "who": "w", "es": "Tu montaña aguantó mucho… pero hasta la roca se agrieta con el calor.", "en": "Your mountain held for a while… but even rock cracks in the heat." },
+   { "who": "l", "es": "Grieta no es derrumbe, muchacho. Apúntalo.", "en": "A crack isn't a collapse, boy. Write that down." }
+  ],
+  "ignis>zephyr": [
+   { "who": "w", "es": "Deja de soplar y escucha: el fuego no se apaga con chistes.", "en": "Stop blowing and listen: fire doesn't go out with jokes." },
+   { "who": "l", "es": "Vale, vale… pero admite que el último fue bueno.", "en": "Okay, okay… but admit the last one was good." }
+  ],
+  "aqua>ignis": [
+   { "who": "w", "es": "Toda esa rabia y ni una chispa llegó a tocarme. Respira, Ignis.", "en": "All that rage and not one spark touched me. Breathe, Ignis." },
+   { "who": "l", "es": "…La próxima vez evaporaré tu calma.", "en": "…Next time I'll evaporate that calm of yours." }
+  ],
+  "aqua>terra": [
+   { "who": "w", "es": "Gota a gota, hasta la piedra más dura cede. Paciencia, Terra.", "en": "Drop by drop, even the hardest stone gives way. Patience, Terra." },
+   { "who": "l", "es": "Paciencia la tengo. Lo que me sobra es orgullo herido.", "en": "Patience I have. What I've got too much of is wounded pride." }
+  ],
+  "aqua>zephyr": [
+   { "who": "w", "es": "El viento corre mucho, pero la lluvia siempre termina cayendo.", "en": "The wind runs fast, but the rain always comes down in the end." },
+   { "who": "l", "es": "¿Revancha? Prometo no reírme… mucho.", "en": "Rematch? I promise not to laugh… much." }
+  ],
+  "terra>ignis": [
+   { "who": "w", "es": "Mucho fuego, poca raíz. Planta los pies y quizá aguantes un asalto.", "en": "Lots of fire, no roots. Plant your feet and maybe you'll last a round." },
+   { "who": "l", "es": "¡Esta vez solo… me resbalé con tu suelo!", "en": "This time I just… slipped on your floor!" }
+  ],
+  "terra>aqua": [
+   { "who": "w", "es": "El agua rodea la montaña. No la mueve. Nunca lo hará.", "en": "Water flows around the mountain. It doesn't move it. It never will." },
+   { "who": "l", "es": "Los ríos cavaron cañones, Terra. Tengo tiempo.", "en": "Rivers carved canyons, Terra. I have time." }
+  ],
+  "terra>zephyr": [
+   { "who": "w", "es": "Te lo dije: lo que sube… acaba besando el suelo. Mi suelo.", "en": "Told you: what goes up… ends up kissing the ground. My ground." },
+   { "who": "l", "es": "Auch. Tu suelo es muy poco cariñoso.", "en": "Ouch. Your ground isn't very affectionate." }
+  ],
+  "zephyr>ignis": [
+   { "who": "w", "es": "¡Uf! Ni me despeiné. Bueno… no tengo pelo, pero ya me entiendes.", "en": "Phew! Didn't even mess up my hair. Well… I have none, but you get it." },
+   { "who": "l", "es": "Cuando te alcance, se te acaban las bromas.", "en": "When I catch you, you'll run out of jokes." }
+  ],
+  "zephyr>aqua": [
+   { "who": "w", "es": "Las olas necesitan viento para moverse. Hoy el viento dijo que no.", "en": "Waves need wind to move. Today the wind said no." },
+   { "who": "l", "es": "Muy ingenioso. Ahora ayúdame a levantarme.", "en": "Very clever. Now help me up." }
+  ],
+  "zephyr>terra": [
+   { "who": "w", "es": "No puedes pegarle a lo que no toca el suelo. ¡Lección del día!", "en": "You can't hit what never touches the ground. Lesson of the day!" },
+   { "who": "l", "es": "Algún día bajarás, pájaro. Y te estaré esperando.", "en": "Someday you'll come down, birdie. And I'll be waiting." }
+  ]
+ },
+ "mirror": {
+  "ignis": [
+   { "who": "w", "es": "Solo puede quedar una llama. Y arde más la que no duda.", "en": "Only one flame can remain. The one that never doubts burns brighter." }
+  ],
+  "aqua": [
+   { "who": "w", "es": "Mirarse en el agua es fácil. Vencer al reflejo, no tanto.", "en": "Looking into the water is easy. Defeating the reflection, not so much." }
+  ],
+  "terra": [
+   { "who": "w", "es": "Dos montañas no caben en el mismo valle. Ya sabes cuál se queda.", "en": "Two mountains can't share one valley. You know which one stays." }
+  ],
+  "zephyr": [
+   { "who": "w", "es": "¡Ja! Gané a la versión más guapa de mí. O sea… a mí.", "en": "Ha! I beat the most handsome version of me. So… me." }
+  ]
+ },
+ "generic": {
+  "*": {
+   "win": [{ "es": "Buen combate, {foe}. Pero el elemento de {name} manda hoy.", "en": "Good fight, {foe}. But today {name}'s element rules." }],
+   "lose": [{ "es": "Volveré más fuerte.", "en": "I'll be back stronger." }]
+  }
+ }
+}

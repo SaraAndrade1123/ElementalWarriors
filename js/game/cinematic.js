@@ -47,7 +47,8 @@ export function installCinematic({ scene, roster = [], data = null, doc = global
     const lines = pickLines(api.data, a, b, L, { a: names[0], b: names[1] });
     const shots = [{ kind: 'title', dur: 2.1 }];
     lines.forEach((l, i) => shots.push({ kind: 'line', who: l.who, text: l.text, dur: shotLen(l.text), first: !lines.slice(0, i).some(x => x.who === l.who) }));
-    shots.push({ kind: 'wide', dur: 1.1 });
+    const said = new Set(); for (const sh of shots) if (sh.kind === 'line') { sh.ots = said.has(sh.who); said.add(sh.who); } // 2.ª frase del mismo: plano por encima del hombro del rival
+    shots.push({ kind: 'clash', dur: 1.5 });
     let k = 0, st = 0; const total = shots.reduce((s, x) => s + x.dur, 0);
     m.phase = 'cine'; m.pt = 0; m.v.forEach(v => { v.cel = null; });
     // ─ capa de interfaz ─
@@ -55,7 +56,9 @@ export function installCinematic({ scene, roster = [], data = null, doc = global
     if (hasDom) {
       doc.body.classList.add('cine');
       el = doc.createElement('div'); el.id = 'cine'; el.innerHTML = `<div class="cbar top"></div><div class="cbar bot"></div>
+        <div class="cslash a"></div><div class="cslash b"></div><div class="cspeed"></div>
         <div class="ctitle"><b class="cn a"></b><span class="cvs">VS</span><b class="cn b"></b><i class="cstage"></i></div>
+        <div class="cclash"><i class="a"></i><i class="b"></i><span></span></div><div class="oflash"></div>
         <div class="csub"><div class="cwho"><b></b><i></i></div><p></p></div><span class="cskip"></span>`;
       doc.body.append(el);
       title = el.querySelector('.ctitle'); sub = el.querySelector('.csub'); who = sub.querySelector('b'); alias = sub.querySelector('i'); txt = sub.querySelector('p'); hint = el.querySelector('.cskip');
@@ -66,6 +69,7 @@ export function installCinematic({ scene, roster = [], data = null, doc = global
       const stName = scene.__stages?.currentId; title.querySelector('.cstage').textContent = stName ? t(`stage.${stName}.name`) : '';
       hint.textContent = t('cine.skip') === 'cine.skip' ? 'Pulsa cualquier tecla para saltar' : t('cine.skip');
       api.cols = [col(a), a === b ? (scene.mirrors?.get(b)?.fx?.color || col(b)) : col(b)];
+      el.style.setProperty('--ca', api.cols[0]); el.style.setProperty('--cb', api.cols[1]);
     }
     const ids = [a, b];
     const finish = () => {
@@ -84,7 +88,8 @@ export function installCinematic({ scene, roster = [], data = null, doc = global
       const out = render.call(this, rdt, cam);
       if (this.phase !== 'cine' || !cur) return out;
       if (this.paused) return out;
-      st += rdt; while (k < shots.length && st > shots[k].dur) { st -= shots[k].dur; k++; if (shots[k]?.kind === 'line' && shots[k].first) this.v[shots[k].who].cel = { name: 'intro', t: 0 }; }
+      st += rdt; let cut = false;
+      while (k < shots.length && st > shots[k].dur) { st -= shots[k].dur; k++; cut = true; if (shots[k]?.kind === 'line' && shots[k].first) this.v[shots[k].who].cel = { name: 'intro', t: 0 }; }
       if (k >= shots.length) { finish(); return out; }
       const s = shots[k], u = st / s.dur, [fa, fb] = this.f, H = i => (this.f[i].def.height || 3.3);
       _a.set(fa.x, 0, 0); _b.set(fb.x, 0, 0);
@@ -92,11 +97,17 @@ export function installCinematic({ scene, roster = [], data = null, doc = global
         const e = ease(u); _p.set(0, 7.5 - 4.2 * e, 19 - 6 * e); _l.set(0, 2.4 - .6 * e, 0);
       } else if (s.kind === 'line') { // plano 3/4 de quien habla, con un leve acercamiento
         const f = this.f[s.who], dir = f.facing, h = H(s.who), e = ease(u);
-        _p.set(f.x + dir * (2.7 - .3 * e), h * .8, 3.6 - .6 * e); _l.set(f.x + dir * .15, h * .76, 0); // más de frente: se le ve la cara
-      } else { const e = ease(u); _p.set((fa.x + fb.x) / 2, 2.6, 13 - 1.2 * e); _l.set((fa.x + fb.x) / 2, 1.8, 0); }
+        if (s.ots) { const o = this.f[1 - s.who]; _p.set(o.x + dir * .7, H(1 - s.who) * .88, 1.7 - .2 * e); _l.set(f.x, h * .74, 0); } // por encima del hombro del que escucha
+        else { _p.set(f.x + dir * (2.7 - .3 * e), h * .8, 3.6 - .6 * e); _l.set(f.x + dir * .15, h * .76, 0); } // 3/4: se le ve la cara
+      } else { // choque de miradas: cámara baja entre los dos que se abre a plano general; las auras estallan
+        const e = ease(u), mx = (fa.x + fb.x) / 2; _p.set(mx, .9 + 1.6 * e, 5 + 8 * e); _l.set(mx, 1.9 - .1 * e, 0);
+        if ((api._au = (api._au ?? 0) - rdt) <= 0 && this.vfx) { api._au = .1; for (const f of this.f) this.vfx.aura?.({ x: f.x }, f.def.id); }
+        if (cut) { this.shake = Math.max(this.shake || 0, .3); for (const [i, f] of this.f.entries()) this.vfx?.flash?.({ x: f.x, y: 1.7 }, new THREE.Color(api.cols?.[i] || '#ffffff').getHex(), 3); }
+      }
       cam.position.copy(_p); cam.lookAt(_l);
       if (el) {
-        el.dataset.shot = s.kind; title.classList.toggle('on', s.kind === 'title');
+        el.dataset.shot = s.kind; title.classList.toggle('on', s.kind === 'title'); el.classList.toggle('clash', s.kind === 'clash');
+        if (cut) { el.classList.remove('cut'); void el.offsetWidth; el.classList.add('cut'); }
         if (s.kind === 'line') {
           const i = s.who, id = ids[i], n = Math.floor(st * 46);
           sub.classList.add('on'); sub.classList.toggle('r', i === 1); sub.style.setProperty('--c', api.cols?.[i] || '#f1dc9a');

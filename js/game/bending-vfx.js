@@ -129,8 +129,8 @@ export class BendingVfx {
     this.rock = { geo: rockGeo(.55, 1, 1.3), geoS: rockGeo(.36, 0, 2.1), wall: this.#wallGeo(), mat: new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: .95, metalness: 0, emissive: 0x0c0d08 }) };
     this.iceGeo = new THREE.ConeGeometry(.09, .62, 5); this.iceGeo.rotateZ(-Math.PI / 2);
     this.spikeGeo = spikeGeo(); this.slabGeo = slabGeo(); this.stones = []; // colmillos y losas sueltas que brotan, aguantan y se hunden
-    this.crackMat = new THREE.MeshBasicMaterial({ color: 0xc8f06a, transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
-    this.crackGeo = new THREE.PlaneGeometry(1, .16); this.crackGeo.rotateX(-Math.PI / 2);
+    this.crackMat = new THREE.MeshBasicMaterial({ color: 0xe2ff7a, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+    this.crackGeo = new THREE.PlaneGeometry(1, .24); this.crackGeo.rotateX(-Math.PI / 2);
     this.iceMat = new THREE.MeshToonMaterial({ color: 0xcff6ff, gradientMap: GRAD, emissive: 0x2a6a9a, transparent: true, opacity: .92 });
   }
   #wallGeo() { // losa de roca irregular, con la base en y = 0
@@ -204,7 +204,7 @@ export class BendingVfx {
         if (!this.v.reduce) this.m.shake = Math.max(this.m.shake || 0, .08); break; }
       case 'b_heave': { // arranca el suelo: anillo de losas que se levantan a su alrededor
         this.ring(root.x, .05, 0xb9d86a, 1, 7, .5, true); this.v.dust(root.x, 1.5); this.pebbles(root.x, .2, 4);
-        for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; this.stone(root.x + Math.cos(a) * 1.1, Math.sin(a) * .7, rnd(.5, .9), { geo: this.slabGeo, w: .45, tilt: -Math.cos(a) * .5, yaw: a, life: .6, delay: i * .02 }); }
+        for (let i = 0; i < 5; i++) { const a = Math.PI * (1.05 + i / 4 * .9); this.stone(root.x + Math.cos(a) * 1.5, Math.sin(a) * .9 - .2, rnd(.5, .9), { geo: this.slabGeo, w: .45, tilt: -Math.cos(a) * .5, yaw: a, life: .6, delay: i * .02 }); }
         if (!this.v.reduce) this.m.shake = Math.max(this.m.shake || 0, .2); break; }
       case 'b_rock_punch': this.v.shapes.sprite('flash', _w.set(x + d * .2, y, .6), { color: 0xffffff, size: .8, grow: 1.6, life: .12 }); this.emitDust(x + d * .3, y - .3, 2); this.pebbles(x + d * .3, y, 1.5, d * 3); break;
       case 'b_air_push':
@@ -319,7 +319,7 @@ export class BendingVfx {
       case 'fangs': { // Fisura de Colmillos: hileras de colmillos que brotan inclinados hacia el rival
         if (p.t >= (o.next ?? 0)) {
           o.next = p.t + (this.v.reduce ? .09 : .05); const n = (o.n = (o.n ?? 0) + 1);
-          for (let j = 0; j < 2; j++) this.stone(p.x + rnd(-.12, .12), j ? rnd(.05, .35) : rnd(-.4, -.05), rnd(.75, 1.15) * (1 + Math.min(n, 12) * .025), { tilt: -d * rnd(.18, .42), life: .62 });
+          for (let j = 0; j < 2; j++) this.stone(p.x + rnd(-.12, .12), j ? rnd(.05, .35) : rnd(-.45, -.05), rnd(1.0, 1.5) * (1 + Math.min(n, 12) * .03), { w: rnd(1.1, 1.45), tilt: -d * rnd(.22, .48), life: .66 });
           if (o.lx !== undefined) this.crack(o.lx, p.x, .55); o.lx = p.x;
           this.pebbles(p.x, .2, .6, d * 1.5); if (n % 2) this.emitDust(p.x, 0, .7);
         }
