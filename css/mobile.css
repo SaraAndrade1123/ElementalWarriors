@@ -16,7 +16,8 @@
   #view .panel .back{font-size:.82rem}
   #view .tabs button{padding:5px 10px;font-size:.8rem;min-height:30px}
   #view .note,#view .lead{font-size:.8rem;margin:0}
-  #view .cta{padding:9px 24px;font-size:.95rem;position:sticky;bottom:0;z-index:2;box-shadow:0 -10px 18px rgba(4,7,16,.85)}
+  #view .cta{padding:9px 24px;font-size:.95rem;position:sticky;bottom:0;z-index:5;box-shadow:0 -10px 18px rgba(4,7,16,.85)}
+  #view .cta[aria-disabled=true]{opacity:1;filter:grayscale(.85) brightness(.55)} /* fijo abajo: opaco aunque esté desactivado */
   .toast{top:max(10px,env(safe-area-inset-top));bottom:auto;transform:translate(-50%,-12px);font-size:.85rem;padding:8px 16px;max-width:min(70vw,520px)}
   .toast.on{transform:translate(-50%,0)}
 
