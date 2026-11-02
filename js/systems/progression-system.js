@@ -27,7 +27,10 @@ export class Progression {
     if (!raw || typeof raw.matchId !== 'string' || !raw.matchId || raw.matchId.length > 64 || !MODES.includes(raw.mode) ||
         !OUTCOMES.includes(raw.outcome) || !/^[\w-]{1,40}$/.test(raw.characterId ?? '')) return { ok: false, error: 'invalid' };
     if (raw.mode === 'training') return { ok: true, ignored: true, gold: 0, unlocked: [] }; // el entrenamiento no cuenta
-    const r = { ...raw, roundsWon: clamp(raw.roundsWon, 9) }, gold = this.rewardFor(r);
+    const r = { ...raw, roundsWon: clamp(raw.roundsWon, 9) }, base = this.rewardFor(r), extra = clamp(raw.bonusGold, 500);
+    // 2 jugadores en el mismo equipo: lo que gana el J2 (base + bonificaciones) va a la misma cuenta
+    const p2 = raw.p2 && OUTCOMES.includes(raw.p2.outcome) ? this.rewardFor({ ...r, outcome: raw.p2.outcome, roundsWon: clamp(raw.p2.roundsWon, 9) }) + clamp(raw.p2.bonusGold, 500) : 0;
+    const gold = base + extra + p2;
     let unlocked = [];
     const res = this.save.commit(d => {
       if (d.rewards.includes(r.matchId)) return { ok: false, error: 'duplicate' }; // un evento de fin = una sola recompensa
@@ -43,7 +46,7 @@ export class Progression {
     });
     if (!res.ok) return res;
     if (unlocked.length) this.onUnlock?.(unlocked);
-    return { ok: true, gold, unlocked: unlocked.map(a => a.id), bonus: unlocked.reduce((n, a) => n + a.reward, 0) };
+    return { ok: true, gold, base, extra, p2, unlocked: unlocked.map(a => a.id), bonus: unlocked.reduce((n, a) => n + a.reward, 0) };
   }
   recordEvent(name) { // eventos sueltos (p. ej. 'arcade_clear' cuando exista F7)
     const key = { arcade_clear: 'arcadeClears', story_clear: 'storyClears' }[name]; if (!key) return { ok: false, error: 'invalid' };

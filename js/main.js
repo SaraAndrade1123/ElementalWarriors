@@ -23,6 +23,9 @@ import { installFightFx } from './game/fight-fx.js';
 import { installVersusPreview } from './ui/versus-preview.js';
 import { startTitle } from './ui/title.js';
 import { createStoryCine } from './game/story-cine.js';
+import { installFightReport } from './game/fight-report.js';
+import { renderResult } from './ui/result-screen.js';
+import { installPanelDock } from './ui/panel-dock.js';
 import { installOutro } from './game/cinematic-end.js';
 import { createWeaponPreview } from './ui/weapon-preview.js';
 
@@ -43,7 +46,7 @@ const optional = p => json(p).catch(e => { console.warn('[datos] opcional no dis
 async function boot() {
   const settings = new Settings(); let lang = settings.get().lang, menu = null;
   const L = MSG[lang];
-  if (location.protocol === 'file:') return fail(L.file);
+  if (location.protocol === 'file:' && !globalThis.__EW_STANDALONE) return fail(L.file); // la versión de un solo archivo (index.html) funciona sin servidor
   try {
     await loadLocale(lang);
     const [{ roster }, { items }, shopData, achData, economy, stageData, moves, modes, mirrorData, weaponData, introData, outroData] = await Promise.all([json('data/characters.json'), json('data/menu.json'), json('data/items.json'), json('data/achievements.json'), json('data/economy.json'), json('data/stages.json'), json('data/moves.json'), json('data/modes.json'), optional('data/mirror.json'), optional('data/weapons.json'), optional('data/intros.json'), optional('data/outros.json')]);
@@ -84,6 +87,7 @@ async function boot() {
     if (weaponData) installWeaponShop(menu, { meta, roster, data: weaponData, preview: wPreview });
     installFightFx({ scene, roster }); // impactos, congelado de técnica y K.O. con más producción (docs/PRESENTACION.md)
     installCinematic({ scene, roster, data: introData }); // cinemática con diálogo antes de cada combate
+    installFightReport({ scene }); // bonificaciones y rango de cada combate (pantalla de resultados)
     installOutro({ scene, roster, data: outroData }); // cinemática de victoria al terminar cada combate (antes del panel)
     if (dev) window.ewAudio = audio; // consola: ewAudio.sfx('hit_heavy', { element: 'fire' })
     if (dev) window.ewStages = stages; // consola: ewStages.react({ power: 1 })
@@ -142,15 +146,21 @@ async function boot() {
       $('#pause-meta').textContent = [m?.mode === 'training' ? null : t('pause.round', { n: m?.round ?? 1 }), rule, st ? t(`stage.${st}.name`) : null].filter(Boolean).join('  ·  ');
     };
     // Fin de combate → Rose Gold, estadísticas y logros (una sola vez por combate: matchId único).
+    // Fin de combate → Rose Gold (base + bonificaciones del resumen), estadísticas y logros. En 2 jugadores el J2 también suma a la misma cuenta.
+    let pending = null;
     const record = (r, c) => {
       const id = globalThis.crypto?.randomUUID?.() ?? `m-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      const rec = meta.progression.recordMatch({ matchId: id, mode: c.rec ?? 'versus_ai', outcome: r.winner < 0 ? 'draw' : r.winner === 0 ? 'win' : 'loss',
-        characterId: c.a, roundsWon: r.wins[0], difficulty: c.level || 'normal', maxCombo: r.stats.combo[0], maxDamage: Math.round(r.stats.best[0]), durationSec: Math.round(r.time), transformations: 0 });
-      return rec.ok && !rec.ignored ? rec.gold + (rec.bonus || 0) : 0;
+      const rep = scene.__report?.build(r) || null, local = c.mode === 'versus', out = w => w < 0 ? 'draw' : w ? 'loss' : 'win';
+      const rec = meta.progression.recordMatch({ matchId: id, mode: c.rec ?? 'versus_ai', outcome: out(r.winner),
+        characterId: c.a, roundsWon: r.wins[0], difficulty: c.level || 'normal', maxCombo: r.stats.combo[0], maxDamage: Math.round(r.stats.best[0]), durationSec: Math.round(r.time), transformations: 0,
+        bonusGold: rep?.sides[0].gold || 0, p2: local && rep ? { outcome: r.winner < 0 ? 'draw' : r.winner === 1 ? 'win' : 'loss', roundsWon: r.wins[1], bonusGold: rep.sides[1].gold } : null });
+      const ok = rec.ok && !rec.ignored;
+      pending = rep ? { rep, cfg: c, local, gold: ok ? [rec.base + rec.extra + (rec.bonus || 0), rec.p2] : [0, 0], result: r } : null;
+      return ok ? rec.gold + (rec.bonus || 0) : 0;
     };
     const showPanel = p => {
-      $('#r-title').textContent = p.title; $('#r-sub').textContent = p.sub || '';
-      $('#r-stats').replaceChildren(...p.rows.flatMap(([k, v]) => { const d = document.createElement('dt'), e = document.createElement('dd'); d.textContent = t(k); e.textContent = v; return [d, e]; }));
+      const rep = pending; pending = null;
+      renderResult(p, rep, { t, roster, sideName, sideFx, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color });
       again = p.again?.run ?? null; nxt = p.next?.run ?? null; onMenu = p.onMenu ?? null;
       $('#r-again').hidden = !p.again; if (p.again) $('#r-again .lbl').textContent = p.again.label;
       $('#r-next').hidden = !p.next; if (p.next) $('#r-next .lbl').textContent = p.next.label;
@@ -202,7 +212,8 @@ async function boot() {
     };
     installModes(menu, { cfg: modes, roster, stages, meta, flow });
     installVersusPreview(menu, { scene, roster }); // Versus: los dos elegidos frente a frente
-    for (const href of ['css/cinema.css', 'css/mobile.css']) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.append(l); } // cinemáticas v1.3 y ajustes de celular: siempre las últimas hojas
+    installPanelDock(menu); // botón principal fijo al pie del panel (no tapa el contenido)
+    for (const href of ['css/cinema.css', 'css/result.css', 'css/mobile.css']) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.append(l); } // cinemáticas v1.3 y ajustes de celular: siempre las últimas hojas
     // Pausa: maniquí, vida infinita y reinicio de posiciones (entrenamiento) · dificultad de la CPU (combate contra la CPU)
     const optLabels = () => {
       const m = scene.match;

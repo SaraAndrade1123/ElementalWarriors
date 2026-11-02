@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { addExtras } from './stage-extras.js';
 
 // Construye un escenario 3D a partir de su configuración (data/stages.json).
 // Devuelve la MISMA interfaz que js/game/arena.js (group, sky, update, dispose) y añade react() para
@@ -154,6 +155,7 @@ export function buildStage(cfg, { half = 8.2, particles = 300 } = {}) {
     }
   };
   for (const p of cfg.props) P[p]?.();
+  addExtras(cfg, { g, add, flame, anim, R, glow, accent }); // fondos ricos por escenario (js/stages/stage-extras.js)
 
   // --- Partículas ambientales (la cantidad respeta la calidad gráfica) ---
   const N = Math.max(0, Math.min(cfg.fx.count, particles)), pos = new Float32Array(N * 3), seed = new Float32Array(N);

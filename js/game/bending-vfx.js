@@ -109,6 +109,42 @@ function rockColors(g, strata = 0) {
 }
 const GRAD = (() => { const t = new THREE.DataTexture(new Uint8Array([70, 150, 230]), 3, 1, THREE.RedFormat); t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true; return t; })();
 
+// Lengua de fuego (textura de lágrima: núcleo blanco → amarillo → naranja → rojo transparente) y humo.
+let FLAME_TEX = null, SMOKE_TEX = null;
+function flameTex() {
+  if (FLAME_TEX || typeof document === 'undefined') return FLAME_TEX;
+  const c = document.createElement('canvas'); c.width = 64; c.height = 128; const x = c.getContext('2d'); if (!x?.createRadialGradient) return null;
+  x.beginPath(); x.moveTo(32, 4); x.bezierCurveTo(48, 40, 62, 70, 58, 96); x.bezierCurveTo(54, 120, 10, 120, 6, 96); x.bezierCurveTo(2, 70, 16, 40, 32, 4); x.closePath();
+  const g = x.createRadialGradient(32, 92, 2, 32, 80, 64); g.addColorStop(0, 'rgba(255,255,240,1)'); g.addColorStop(.25, 'rgba(255,236,150,.95)'); g.addColorStop(.55, 'rgba(255,150,40,.75)'); g.addColorStop(.85, 'rgba(220,50,10,.35)'); g.addColorStop(1, 'rgba(160,20,0,0)');
+  x.fillStyle = g; x.fill(); FLAME_TEX = new THREE.CanvasTexture(c); return FLAME_TEX;
+}
+function smokeTex() {
+  if (SMOKE_TEX || typeof document === 'undefined') return SMOKE_TEX;
+  const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); if (!x?.createRadialGradient) return null;
+  const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(70,60,60,.55)'); g.addColorStop(.6, 'rgba(50,40,40,.25)'); g.addColorStop(1, 'rgba(40,30,30,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64); SMOKE_TEX = new THREE.CanvasTexture(c); return SMOKE_TEX;
+}
+class FlameFx {
+  constructor(scene) { this.scene = scene; this.items = []; this.ok = !!flameTex(); }
+  spawn(o, smoke = false) {
+    if (!this.ok || this.items.length > 220) return;
+    const m = new THREE.SpriteMaterial({ map: smoke ? smokeTex() : flameTex(), color: 0xffffff, transparent: true, depthWrite: false, fog: false, blending: smoke ? THREE.NormalBlending : THREE.AdditiveBlending, rotation: o.rot ?? 0 });
+    const sp = new THREE.Sprite(m); sp.position.set(o.x, o.y, o.z ?? .5); sp.renderOrder = smoke ? 8 : 11; this.scene.add(sp);
+    this.items.push({ sp, t: 0, life: o.life ?? .4, vx: o.vx ?? 0, vy: o.vy ?? 1.5, s0: o.s0 ?? .35, s1: o.s1 ?? .1, smoke, a: o.a ?? .6, spin: o.spin ?? 0 });
+  }
+  update(dt) {
+    for (let i = this.items.length - 1; i >= 0; i--) {
+      const q = this.items[i]; q.t += dt; const k = q.t / q.life;
+      if (k >= 1) { q.sp.removeFromParent(); q.sp.material.dispose(); this.items.splice(i, 1); continue; }
+      q.sp.position.x += q.vx * dt; q.sp.position.y += q.vy * dt; q.vx *= 1 - dt * 2; q.sp.material.rotation += q.spin * dt;
+      const s = q.s0 + (q.s1 - q.s0) * k; q.sp.scale.set(s * (q.smoke ? 1 : .62), s * (q.smoke ? 1 : 1.25), 1);
+      if (q.smoke) q.sp.material.opacity = Math.sin(Math.PI * k) * .7;
+      else { const c = q.sp.material.color; c.setRGB(1, .78 - k * .5, .38 - k * .32); q.sp.material.opacity = q.a * (k < .12 ? k / .12 : 1) * (1 - k * k); } // naranja que se apaga a rojo (sin quemarse a blanco)
+    }
+  }
+  dispose() { for (const q of this.items) { q.sp.removeFromParent(); q.sp.material.dispose(); } this.items = []; }
+}
+
 export const BEND_KINDS = ['fireball', 'comet', 'geyser', 'ice', 'boulder', 'wall', 'gust', 'tornado', 'airball', 'rockshot', 'fangs', 'slabwave'];
 // colmillo de piedra (base en y = 0, punta afilada e irregular) y losa tectónica (bloque partido con estratos)
 function spikeGeo() {
@@ -128,7 +164,7 @@ export class BendingVfx {
     this.v = vfx; this.scene = scene; this.m = match; this.t = 0; this.proj = new Map(); this.live = new Map(); this.dying = [];
     this.rock = { geo: rockGeo(.55, 1, 1.3), geoS: rockGeo(.36, 0, 2.1), wall: this.#wallGeo(), mat: new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: .95, metalness: 0, emissive: 0x0c0d08 }) };
     this.iceGeo = new THREE.ConeGeometry(.09, .62, 5); this.iceGeo.rotateZ(-Math.PI / 2);
-    this.spikeGeo = spikeGeo(); this.slabGeo = slabGeo(); this.stones = []; // colmillos y losas sueltas que brotan, aguantan y se hunden
+    this.flames = new FlameFx(scene); this.spikeGeo = spikeGeo(); this.slabGeo = slabGeo(); this.stones = []; // colmillos y losas sueltas que brotan, aguantan y se hunden
     this.crackMat = new THREE.MeshBasicMaterial({ color: 0xe2ff7a, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
     this.crackGeo = new THREE.PlaneGeometry(1, .24); this.crackGeo.rotateX(-Math.PI / 2);
     this.iceMat = new THREE.MeshToonMaterial({ color: 0xcff6ff, gradientMap: GRAD, emissive: 0x2a6a9a, transparent: true, opacity: .92 });
@@ -139,6 +175,9 @@ export class BendingVfx {
     return rockColors(g.index ? g.toNonIndexed() : g, 6.5);
   }
   emitFire(x, y, k = 1, dir = 0, z = .45) {
+    // lenguas de fuego (sprites con forma de llama) + algo de humo arriba
+    for (let i = 0; i < this.v.n(1.2 * k); i++) this.flames.spawn({ a: .5, x: x + rnd(-.1, .1), y: y + rnd(-.1, .05), z: z + .05, vx: -dir * rnd(.8, 2.4) + rnd(-.4, .4), vy: rnd(1.4, 3), life: rnd(.22, .4), s0: rnd(.45, .7) * Math.min(1.4, k), s1: .08, rot: rnd(-.35, .35) + (dir ? -dir * .5 : 0), spin: rnd(-1, 1) });
+    if (Math.random() < .12 * k) this.flames.spawn({ x: x + rnd(-.1, .1), y: y + .35, z: z - .05, vx: -dir * .8, vy: rnd(.8, 1.5), life: rnd(.6, .9), s0: .4, s1: 1.1 }, true);
     const c = C.fire; for (let i = 0; i < this.v.n(3 * k); i++)
       this.v.parts.emit({ x: x + rnd(-.08, .08), y: y + rnd(-.08, .08), z: z + rnd(-.05, .05), vx: -dir * rnd(1, 3) + rnd(-.6, .6), vy: rnd(.8, 2.6), vz: rnd(-.3, .3), g: -2.5, drag: 2.5, life: rnd(.22, .42), s0: rnd(.22, .36) * k, s1: .02, c0: i % 3 ? c[1] : c[0], c1: c[2] });
   }
@@ -293,6 +332,9 @@ export class BendingVfx {
         const s = 1 + Math.sin(p.t * 40) * .06, ang = Math.atan2(p.def.vy || 0, p.vx); g.rotation.z = ang;
         o.shell.scale.set(1.7 * s, s, s); o.core.scale.setScalar(s * .9);
         this.emitFire(p.x - Math.cos(ang) * .3, p.y - Math.sin(ang) * .3, p.kind === 'comet' ? 1 : 1.4, d);
+        // cola de lenguas de fuego que salen despedidas hacia atrás y núcleo que late
+        for (let j = 0; j < this.v.n(p.kind === 'comet' ? 2 : 3); j++) this.flames.spawn({ x: p.x - Math.cos(ang) * .2, y: p.y - Math.sin(ang) * .2 + rnd(-.16, .16), z: .55, vx: -Math.cos(ang) * rnd(3, 5.5), vy: -Math.sin(ang) * rnd(3, 5) + rnd(-.3, .5), life: rnd(.18, .3), s0: rnd(.8, 1.1), s1: .25, a: .38, rot: ang + Math.PI / 2 + rnd(-.25, .25) });
+        this.flames.spawn({ x: p.x, y: p.y, z: .62, vx: 0, vy: .5, life: .09, s0: p.kind === 'comet' ? 1 : 1.35, s1: 1.1, a: .35, rot: ang + Math.PI / 2 });
         o.trail.push({ x: p.x, y: p.y }); if (o.trail.length > 14) o.trail.shift(); // estela de llamas (cola del cometa)
         o.tail.set(o.trail.map((q, j) => ({ x: q.x, y: q.y, w: Math.pow(j / (o.trail.length - 1 || 1), .7), a: j / (o.trail.length - 1 || 1) })));
         o.tail.mat.uniforms.uT.value = this.t;
@@ -360,8 +402,8 @@ export class BendingVfx {
         const r = p.kind === 'comet' ? .34 : .46, sm = elemMat('fire', { shell: true, scale: [4.5, 3], flow: [-6, .8] });
         o.shell = add(new THREE.Mesh(withAlpha(new THREE.SphereGeometry(r, 20, 14)), sm), sm);
         o.core = add(new THREE.Mesh(new THREE.SphereGeometry(r * .36, 14, 10), new THREE.MeshBasicMaterial({ color: 0xffe9a8, transparent: true, opacity: .75, blending: THREE.AdditiveBlending, depthWrite: false })));
-        const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.#soft(), color: 0xff5a14, transparent: true, opacity: .45, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); glow.scale.setScalar(r * 4.2); g.add(glow);
-        o.tail = new Ribbon(this.scene, elemMat('fire', { scale: [3, 1.4], flow: [-5, 0] }), { width: r * 1.05, n: 24, z: .02 }); o.trail = [];
+        const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.#soft(), color: 0xff5a14, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); glow.scale.setScalar(r * 3.6); g.add(glow);
+        o.tail = new Ribbon(this.scene, elemMat('fire', { scale: [3, 1.4], flow: [-5, 0], alpha: .7 }), { width: r * .95, n: 24, z: .02 }); o.trail = [];
         break; }
       case 'geyser': {
         const cm = elemMat('water', { shell: true, scale: [4, 2], flow: [0, -3.5] }); const cg = withAlpha(new THREE.CylinderGeometry(.42, .62, 3.8, 20, 8, true)); cg.translate(0, 1.9, 0);
@@ -402,6 +444,8 @@ export class BendingVfx {
       case 'fireball': case 'comet':
         this.v.shapes.sprite('flash', _w.set(x, low, .6), { color: 0xffd080, size: 1.4, grow: 1.8, life: .2 }); this.ring(x, low, 0xff8a2a, .6, 4, .3);
         this.v.burst(_w.set(x, low, .5), E3('fire'), { n: 26, speed: 5, up: 2, g: -3, life: .45, size: .38, size1: .03, drag: 3 });
+        for (let j = 0; j < this.v.n(14); j++) { const a = rnd(0, 6.28), v = rnd(2.5, 6); this.flames.spawn({ x, y: low, z: .6, vx: Math.cos(a) * v, vy: Math.sin(a) * v + 1.5, life: rnd(.25, .45), s0: rnd(.7, 1.1), s1: .15, rot: a - Math.PI / 2 }); }
+        for (let j = 0; j < 4; j++) this.flames.spawn({ x: x + rnd(-.3, .3), y: low + .4, z: .4, vx: rnd(-.6, .6), vy: rnd(.8, 1.6), life: rnd(.8, 1.2), s0: .5, s1: 1.6 }, true);
         if (p.landed) { this.ring(x, .05, 0xff7a2a, .5, 5, .4, true); this.v.burst(_w.set(x, .1, .3), E3('fire'), { n: 14, speed: 3, up: 3, g: -2, life: .6, size: .3, spread: .25 }); }
         break;
       case 'ice': this.v.burst(_w.set(x, low, .5), E3('ice'), { n: 22, speed: 5, up: 2, g: 14, life: .45, size: .14, size1: .05, floor: true }); this.v.shapes.sprite('flash', _w.set(x, low, .6), { color: 0xe8fbff, size: .9, grow: 1.6, life: .14 }); break;
@@ -425,7 +469,7 @@ export class BendingVfx {
   hasProjectile(p) { return this.proj.has(p); }
 
   update(dt) {
-    this.t += dt; this.sustained(dt); this.#stones(dt);
+    this.t += dt; this.sustained(dt); this.#stones(dt); this.flames.update(dt);
     for (let i = this.dying.length - 1; i >= 0; i--) {
       const z = this.dying[i]; z.t += dt; const k = z.t / z.life;
       if (z.rb) { z.rb.mesh.material.uniforms.uA.value = Math.max(0, 1 - k); z.rb.mat.uniforms.uT.value = this.t; }
@@ -438,7 +482,7 @@ export class BendingVfx {
   dispose() {
     for (const p of [...this.proj.keys()]) { const o = this.proj.get(p); this.#disposeGroup(o.g, o.mats); o.tail?.dispose(); } this.proj.clear();
     for (const st of this.live.values()) for (const k of Object.keys(st)) { const o = st[k]; if (o?.rb) o.rb.dispose(); if (o?.mesh) o.mesh.removeFromParent(); }
-    for (const o of this.stones) o.m.removeFromParent(); this.stones = []; this.spikeGeo.dispose(); this.slabGeo.dispose(); this.crackGeo.dispose(); this.crackMat.dispose();
+    this.flames.dispose(); for (const o of this.stones) o.m.removeFromParent(); this.stones = []; this.spikeGeo.dispose(); this.slabGeo.dispose(); this.crackGeo.dispose(); this.crackMat.dispose();
     this.live.clear(); for (const z of this.dying) { if (z.crack) { z.crack.removeFromParent(); z.crack.material.dispose(); } if (z.rb) z.rb.dispose(); if (z.mesh) z.mesh.removeFromParent(); if (z.g) this.#disposeGroup(z.g, z.mats); } this.dying = [];
     this.rock.geo.dispose(); this.rock.geoS.dispose(); this.rock.wall.dispose(); this.rock.mat.dispose(); this.iceGeo.dispose(); this.iceMat.dispose(); this._soft?.dispose();
   }

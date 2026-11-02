@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elemental Warriors</title>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/theme.css">
+<script type="importmap">{"imports":{"three":"./js/vendor/three/build/three.module.js","three/addons/":"./js/vendor/three/examples/jsm/"}}</script>
+</head>
+<body data-reduce="0">
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<section id="loader" class="loader">
+  <div class="tbg" aria-hidden="true"><i class="neb fire"></i><i class="neb water"></i><i class="neb earth"></i><i class="neb wind"></i></div>
+  <canvas id="tfx" aria-hidden="true"></canvas>
+  <svg class="crest" viewBox="-200 -200 400 400" aria-hidden="true">
+    <defs>
+      <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#c9a44c"/><stop offset="1" stop-color="#6b4f1a"/></linearGradient>
+      <radialGradient id="cf" r=".6"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#e2451b"/></radialGradient>
+      <radialGradient id="cw" r=".6"><stop offset="0" stop-color="#d8f6ff"/><stop offset="1" stop-color="#2f8cff"/></radialGradient>
+      <radialGradient id="ce" r=".6"><stop offset="0" stop-color="#f1e7b0"/><stop offset="1" stop-color="#8a7a3c"/></radialGradient>
+      <radialGradient id="ca" r=".6"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9cc8ff"/></radialGradient>
+    </defs>
+    <g class="ring" fill="none" stroke="url(#cg)">
+      <circle r="186" stroke-width="2"/><circle r="176" stroke-width="1" opacity=".6"/><circle r="128" stroke-width="1.5"/>
+      <circle r="168" stroke-width="10" stroke-dasharray="1 9.4" opacity=".55"/>
+      <path d="M0-186 L10-168 L0-150 L-10-168Z M186 0 L168 10 L150 0 L168-10Z M0 186 L10 168 L0 150 L-10 168Z M-186 0 L-168 10 L-150 0 L-168-10Z" fill="url(#cg)" stroke="none"/>
+    </g>
+    <g class="star" fill="none" stroke="url(#cg)" stroke-width="1.2" opacity=".7"><path d="M0-128 L90 90 L-128 0 L128 0 L-90 90Z"/><path d="M0 128 L90-90 L-128 0 M128 0 L-90-90 L0 128" opacity=".5"/></g>
+    <g class="medal">
+      <g transform="translate(0,-150)"><circle r="24" fill="#0c1428" stroke="url(#cg)" stroke-width="2"/><path d="M0-15 C8-6 11 0 9 6 C7 12 2 15 0 15 C-6 15-10 10-9 4 C-8-2-3-4 0-15Z M0 1 C3 4 4 7 3 10 C1 12-2 11-2 8 C-2 5 0 4 0 1Z" fill="url(#cf)"/></g>
+      <g transform="translate(150,0)"><circle r="24" fill="#0c1428" stroke="url(#cg)" stroke-width="2"/><path d="M0-15 C6-6 11 1 11 6 C11 12 6 16 0 16 C-6 16-11 12-11 6 C-11 1-6-6 0-15Z" fill="url(#cw)"/></g>
+      <g transform="translate(0,150)"><circle r="24" fill="#0c1428" stroke="url(#cg)" stroke-width="2"/><path d="M-15 12 L-5-6 L0 2 L6-12 L15 12Z" fill="url(#ce)"/></g>
+      <g transform="translate(-150,0)"><circle r="24" fill="#0c1428" stroke="url(#cg)" stroke-width="2"/><path d="M-12 2 C-12-8 0-12 6-6 C10-2 6 4 1 2 C-2 1-1-3 2-3 M-13 9 C-4 9 6 11 13 4 M-9 14 C-2 14 4 15 9 12" fill="none" stroke="url(#ca)" stroke-width="2.6" stroke-linecap="round"/></g>
+    </g>
+  </svg>
+  <h1 class="logo"><span>Elemental</span><span>Warriors</span></h1>
+  <p class="sub" data-i18n="ui.subtitle">Batalla por los Reinos</p>
+  <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="bar"></i></div>
+  <p id="status" class="status" role="status">Cargando / Loading…</p>
+  <button id="start" class="cta" data-i18n="ui.start" hidden>Comenzar</button>
+  <p class="tfoot" aria-hidden="true"><span data-i18n="cr.project">Elemental Warriors · proyecto formativo ADSO</span></p>
+</section>
+
+<main id="menu" hidden>
+  <div class="left">
+    <div class="brand"><b>Elemental</b><b>Warriors</b></div>
+    <div id="view" class="view"></div>
+    <p class="ver" data-i18n="ui.version">v1.4.0</p>
+  </div>
+  <aside class="plaque">
+    <button id="prev" class="arrow" data-i18n-aria="ui.prev" aria-label="Guerrero anterior">‹</button>
+    <div class="info">
+      <p id="pl-el" class="el"></p>
+      <h2 id="pl-name"></h2>
+      <p id="pl-alias" class="alias"></p>
+      <div id="pl-dots" class="dots"></div>
+    </div>
+    <button id="next" class="arrow" data-i18n-aria="ui.next" aria-label="Guerrero siguiente">›</button>
+  </aside>
+  <p class="hint" data-i18n="ui.hint"></p>
+</main>
+<div id="hud" hidden>
+  <div class="hp p1"><b id="hud-n1"></b><span class="hpbar"><u id="tr1"></u><i id="hp1"></i></span><span class="gdbar"><i id="gd1"></i></span><span class="pips" id="pips1"></span></div>
+  <div class="mid"><button id="exit" class="ghost" data-i18n="hud.pause">Pausa</button><b id="timer">60</b></div>
+  <div class="hp p2"><b id="hud-n2"></b><span class="hpbar"><u id="tr2"></u><i id="hp2"></i></span><span class="gdbar"><i id="gd2"></i></span><span class="pips" id="pips2"></span></div>
+  <p id="announce" class="announce"></p>
+  <p id="combo" class="combo" hidden></p>
+  <div id="notes" class="notes" aria-live="polite"></div>
+  <div class="res p1" id="res1"><span class="rbar"><i></i><s style="left:25%"></s><s style="left:50%"></s><s style="left:75%"></s></span><b class="rlbl"></b></div>
+  <div class="res p2" id="res2"><span class="rbar"><i></i><s style="left:25%"></s><s style="left:50%"></s><s style="left:75%"></s></span><b class="rlbl"></b></div>
+  <p id="hint" class="dummy"></p>
+  <pre id="dbg" class="dbg" hidden aria-hidden="true"></pre>
+</div>
+<div id="touch" hidden></div>
+<div id="pause" hidden role="dialog" aria-modal="true" aria-labelledby="pause-t">
+  <div class="pz">
+    <header class="panel pz-head">
+      <h2 id="pause-t" data-i18n="pause.title">Pausa</h2>
+      <div id="pause-vs" class="duel"></div>
+      <p id="pause-meta" class="pz-meta"></p>
+    </header>
+    <section class="panel pz-menu" aria-labelledby="pause-t">
+      <ul class="nav" role="list">
+        <li><button class="nav-item" id="p-resume"><span class="lbl" data-i18n="pause.resume">Continuar</span></button></li>
+        <li><button class="nav-item" id="p-restart"><span class="lbl" data-i18n="pause.restart">Reiniciar combate</span></button></li>
+        <li class="train-only" hidden><button class="nav-item" id="p-dummy"><span class="lbl"></span></button></li>
+        <li class="train-only" hidden><button class="nav-item" id="p-inf"><span class="lbl"></span></button></li>
+        <li class="train-only" hidden><button class="nav-item" id="p-reset"><span class="lbl" data-i18n="pause.reset">Reiniciar posiciones</span></button></li>
+        <li class="cpu-only" hidden><button class="nav-item" id="p-opt"><span class="lbl"></span></button></li>
+        <li><button class="nav-item" id="p-quality"><span class="lbl"></span></button></li>
+        <li><button class="nav-item" id="p-menu"><span class="lbl" data-i18n="pause.menu">Volver al menú</span></button></li>
+      </ul>
+    </section>
+    <section class="panel guide">
+      <h2 data-i18n="guide.title">Guía de controles</h2>
+      <div id="guide-solo">
+      <div class="gr"><span data-i18n="guide.move">Mover</span><span><kbd class="kc">A</kbd><kbd class="kc">D</kbd><i>/</i><kbd class="kc">←</kbd><kbd class="kc">→</kbd></span></div>
+      <div class="gr"><span data-i18n="guide.jump">Saltar</span><span><kbd class="kc">W</kbd><kbd class="kc">↑</kbd><kbd class="kc wide">Espacio</kbd></span></div>
+      <div class="gr"><span data-i18n="guide.crouch">Agacharse</span><span><kbd class="kc">S</kbd><kbd class="kc">↓</kbd></span></div>
+      <div class="gr"><span data-i18n="guide.dash">Correr / retroceso</span><span><kbd class="kc">→</kbd><kbd class="kc">→</kbd><i>/</i><kbd class="kc">←</kbd><kbd class="kc">←</kbd></span></div>
+      <div class="gr"><span data-i18n="guide.attacks">Ligero · Medio · Pesado</span><span><kbd class="kc">J</kbd><kbd class="kc">K</kbd><kbd class="kc">L</kbd><i data-i18n="guide.attackstip"></i></span></div>
+      <div class="gr"><span data-i18n="guide.special">Técnica especial</span><span><kbd class="kc">U</kbd><i data-i18n="guide.specialtip"></i></span></div>
+      <div class="gr"><span data-i18n="guide.res">Resonancia</span><span><kbd class="kc">I</kbd><i data-i18n="guide.restip"></i></span></div>
+      <div class="gr"><span data-i18n="guide.weapon">Arma</span><span><kbd class="kc">O</kbd><i data-i18n="guide.weapontip"></i></span></div>
+      <div class="gr"><span data-i18n="guide.gb">Rompeguardia</span><span><kbd class="kc">K</kbd>+<kbd class="kc">L</kbd><i data-i18n="guide.gbtip"></i></span></div>
+      <div class="gr"><span data-i18n="guide.throw">Lanzamiento</span><span><kbd class="kc">J</kbd>+<kbd class="kc">K</kbd><i data-i18n="guide.throwtip"></i></span></div>
+      <div class="gr"><span data-i18n="guide.guard">Guardia</span><span><kbd class="kc">←</kbd><i>/</i><kbd class="kc wide">Shift</kbd><i data-i18n="guide.guardtip"></i></span></div>
+      </div>
+      <div id="guide-vs" hidden>
+        <div class="gr vs"><span data-i18n="guide.vs.p1">Jugador 1</span><span><kbd class="kc">A</kbd><kbd class="kc">D</kbd><kbd class="kc">W</kbd><kbd class="kc">S</kbd><i>·</i><kbd class="kc">F</kbd><kbd class="kc">G</kbd><kbd class="kc">H</kbd><i>·</i><kbd class="kc">R</kbd><kbd class="kc">T</kbd><kbd class="kc">E</kbd><i data-i18n="guide.vs.keys"></i></span></div>
+        <div class="gr vs"><span data-i18n="guide.vs.p2">Jugador 2</span><span><kbd class="kc">←</kbd><kbd class="kc">→</kbd><kbd class="kc">↑</kbd><kbd class="kc">↓</kbd><i>·</i><kbd class="kc">1</kbd><kbd class="kc">2</kbd><kbd class="kc">3</kbd><i>·</i><kbd class="kc">4</kbd><kbd class="kc">5</kbd><i>/</i><kbd class="kc">,</kbd><kbd class="kc">.</kbd><kbd class="kc">-</kbd><i>·</i><kbd class="kc">L</kbd><kbd class="kc">Ñ</kbd><i>·</i><kbd class="kc">6</kbd><i>/</i><kbd class="kc">K</kbd></span></div>
+        <p class="note" data-i18n="versus.ghost"></p>
+      </div>
+      <div class="gr"><span data-i18n="guide.debug">Depuración</span><span><kbd class="kc">F1</kbd><i data-i18n="guide.debugtip"></i></span></div>
+      <div class="gr"><span data-i18n="guide.pause">Pausa</span><span><kbd class="kc wide">Esc</kbd><kbd class="kc">P</kbd></span></div>
+      <div class="gr"><span data-i18n="guide.touch">Táctil</span><span><kbd class="kc t">◀</kbd><kbd class="kc t">▶</kbd><kbd class="kc t">▲</kbd><kbd class="kc t">▼</kbd><kbd class="kc t">L</kbd><kbd class="kc t">M</kbd><kbd class="kc t">H</kbd><kbd class="kc t">✦</kbd><kbd class="kc t">◈</kbd><kbd class="kc t">🛡</kbd></span></div>
+      <p class="note" data-i18n="guide.soon"></p>
+    </section>
+  </div>
+</div>
+<div id="result" hidden role="dialog" aria-modal="true" aria-labelledby="r-title">
+  <section class="panel rp">
+    <header class="rp-head"><h2 id="r-title"></h2><p id="r-sub" class="lead"></p><div id="r-chips" class="rp-chips"></div></header>
+    <div id="r-cards" class="rp-cards"></div>
+    <dl id="r-stats"></dl>
+    <ul class="nav rp-nav" role="list">
+      <li><button class="nav-item" id="r-next" hidden><span class="lbl" data-i18n="result.next">Continuar</span></button></li>
+      <li><button class="nav-item" id="r-again"><span class="lbl" data-i18n="result.again">Revancha</span></button></li>
+      <li><button class="nav-item" id="r-menu"><span class="lbl" data-i18n="result.menu">Volver al menú</span></button></li>
+    </ul>
+  </section>
+</div>
+<div id="story" hidden role="dialog" aria-modal="true" aria-labelledby="story-t">
+  <section class="panel">
+    <h2 id="story-t" data-i18n="menu.story">Historia</h2>
+    <div id="story-lines"></div>
+    <ul class="nav" role="list"><li><button class="nav-item" id="story-next"><span class="lbl" data-i18n="story.next">Continuar</span></button></li></ul>
+  </section>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
