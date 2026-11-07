@@ -1,8 +1,9 @@
-# Elemental Warriors (v1.5.0 · transformación, desafíos, música y mundos)
+# Elemental Warriors (v1.6.0 · dificultad, derrotas y celular fácil)
 
 ## Cómo abrirlo
-- **Jugar**: abre `index.html` con doble clic (o desde el celular). Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet.
-- **Desarrollar**: `npm start` y abre http://localhost:5173/index-dev.html (usa los módulos de `js/`). Tras cambiar código, datos o estilos, `npm run build` vuelve a generar `index.html` (y `dist/elemental-warriors-online.html`, la versión que se publica en línea).
+- **Jugar (PC o celular)**: abre `index.html`. Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet. En el celular lo más fácil es el enlace en línea (se abre en Chrome y listo); también puedes pasar `index.html` al teléfono y abrirlo con Chrome. Pon el móvil en horizontal y pulsa **Pantalla completa**.
+- Si alguna vez se queda cargando, a los 30 s aparece el motivo con dos botones: **Reintentar** y **Modo ligero** (baja la calidad gráfica).
+- **Desarrollar**: `npm start` y abre http://localhost:5173/tools/dev/index.html (usa los módulos de `js/`; es solo para programar). Tras cambiar código, datos o estilos, `npm run build` vuelve a generar `index.html` (y `dist/elemental-warriors-online.html`, la versión que se publica en línea).
 
 Comprobar datos: `npm run check`.
 Si un guerrero mira hacia atrás, cambia su `yaw` en `data/characters.json` (por ejemplo, suma 3.14).
@@ -103,3 +104,11 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Escenarios**: cordilleras con luz, sombra y nieve; clima propio (lluvia y niebla en el bosque, brasas y meteoros en las cenizas, tormenta con relámpagos en las mareas, tormenta de arena en el bastión, nieve y tornado en el viento, aurora en el equilibrio); cascada con río en el bosque; símbolos de cada elemento (pebeteros de llama eterna, tromba de agua, monolito con rocas en órbita, orbes de los cuatro elementos).
 - **Historia**: el prólogo recorre los mundos de los elementos y sus desastres; el héroe se presenta en su mundo; cada capítulo empieza con la llegada narrada al mundo del rival, que se ve con su clima y efectos.
 - **Vista previa de la daga**: el maniquí ataca justo cuando la daga está en guardia, así se ve el bloqueo y el contraataque.
+
+## v1.6.0 — Dificultad, derrotas y celular fácil
+- **Un solo `index.html`** para jugar; la página de desarrollo se movió a `tools/dev/index.html`. Logo propio en la pestaña (rombo con los cuatro elementos).
+- **Carga en el celular**: vigilante de arranque que muestra en qué paso se detuvo, botones Reintentar / Modo ligero, comprobación de WebGL; botón **Pantalla completa** (gira a horizontal) y aviso para girar el teléfono.
+- **Dificultad Fácil · Medio · Difícil · Extremo** en Combate de prueba (y en Versus, Arcade e Historia). La CPU también usa la **transformación**.
+- **Puños**: el pulgar se cierra por delante de los dedos como un puño real (Ignis y Terra).
+- **Derrotas**: cada guerrero cae al suelo con su propia pose (Ignis rodilla arriba y mano en el pecho, Aqua acurrucada, Terra en estrella, Zephyr con los brazos sobre la cabeza) y, en la escena final, el perdedor se incorpora, mira al ganador y hace su gesto propio (Ignis golpea el suelo, Aqua se lleva la mano al pecho, Terra se cruza de brazos, Zephyr se rasca la nuca).
+- **Interfaz**: botones de la historia en una línea («Continuar · capítulo 2» y «Empezar desde el principio» debajo), versus de 2 jugadores con los guerreros encuadrados en el espacio libre, panel del celular que no tapa a los personajes, selector de canción con flechas, sin efecto «hover» pegado en pantallas táctiles, sin «Neutro» junto a Terra, estandartes de Cenizas con emblema.

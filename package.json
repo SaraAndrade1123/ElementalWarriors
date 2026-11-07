@@ -1,13 +1,13 @@
 {
  "name": "elemental-warriors",
- "version": "1.5.0",
+ "version": "1.6.0",
  "private": true,
  "type": "module",
  "description": "Elemental Warriors - juego de lucha anime 2.5D (Three.js)",
  "scripts": {
   "start": "npx --yes serve . -l 5173",
   "check": "node tools/check.mjs",
-  "test": "node tools/test-fighter.mjs && node tools/test-anim.mjs && node tools/test-match.mjs && node tools/test-f3.mjs && node tools/test-f4.mjs && node tools/test-modes.mjs && node tools/test-flow.mjs && node tools/test-progression.mjs && node tools/test-stages.mjs && node tools/test-audio.mjs && node tools/test-elements.mjs && node tools/test-bending.mjs && node tools/test-integracion.mjs && node tools/test-mirror.mjs && node tools/test-weapons.mjs && node tools/test-presentacion.mjs && node tools/test-v13.mjs && node tools/test-v14.mjs && node tools/test-v15.mjs",
+  "test": "node tools/test-fighter.mjs && node tools/test-anim.mjs && node tools/test-match.mjs && node tools/test-f3.mjs && node tools/test-f4.mjs && node tools/test-modes.mjs && node tools/test-flow.mjs && node tools/test-progression.mjs && node tools/test-stages.mjs && node tools/test-audio.mjs && node tools/test-elements.mjs && node tools/test-bending.mjs && node tools/test-integracion.mjs && node tools/test-mirror.mjs && node tools/test-weapons.mjs && node tools/test-presentacion.mjs && node tools/test-v13.mjs && node tools/test-v14.mjs && node tools/test-v15.mjs && node tools/test-v16.mjs",
   "build": "node tools/build-standalone.mjs",
   "dev": "npx --yes serve . -l 5173"
  },

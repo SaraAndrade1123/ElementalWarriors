@@ -197,11 +197,25 @@ export function addExtras(cfg, K) {
       anim.push((tm, dt) => { t.offset.x += dt * .05; });
     },
     banners() {
+      // tela pintada: degradado oscuro→color del escenario, ribete dorado, emblema de llama y cola en dos puntas
+      const ac = new THREE.Color(accent), deep = ac.clone().multiplyScalar(.28), mid = ac.clone().multiplyScalar(.62);
+      const bt = tex(128, 352, (x, W, H) => {
+        const cut = H - 42; x.beginPath(); x.moveTo(0, 0); x.lineTo(W, 0); x.lineTo(W, H); x.lineTo(W / 2, cut); x.lineTo(0, H); x.closePath();
+        const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, hex(deep)); g.addColorStop(.55, hex(mid)); g.addColorStop(1, hex(deep));
+        x.fillStyle = g; x.fill(); x.save(); x.clip();
+        x.strokeStyle = 'rgba(255,214,120,.9)'; x.lineWidth = 6; x.strokeRect(9, -4, W - 18, H + 8);
+        x.fillStyle = 'rgba(0,0,0,.25)'; for (let i = 0; i < 8; i++) x.fillRect(16 + i * 13, 0, 2, H);
+        x.restore();
+        const cx = W / 2, cy = 120; x.fillStyle = 'rgba(20,6,8,.85)'; x.beginPath(); x.arc(cx, cy, 34, 0, 7); x.fill();
+        x.strokeStyle = 'rgba(255,214,120,.95)'; x.lineWidth = 3; x.stroke();
+        x.fillStyle = 'rgba(255,190,90,.95)'; x.beginPath(); x.moveTo(cx, cy - 24); x.quadraticCurveTo(cx + 20, cy, cx + 8, cy + 20); x.quadraticCurveTo(cx, cy + 10, cx - 8, cy + 20); x.quadraticCurveTo(cx - 20, cy, cx, cy - 24); x.fill();
+        x.fillStyle = 'rgba(255,214,120,.9)'; x.fillRect(14, 210, W - 28, 3); x.fillRect(14, 218, W - 28, 1.5);
+      });
       for (const x of [-9, -4.5, 4.5, 9]) {
         add(new THREE.Mesh(new THREE.CylinderGeometry(.07, .09, 7, 6), poleMat), x, 3.5, -5.5);
-        const f = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 3, 2, 10), new THREE.MeshBasicMaterial({ color: accent, side: THREE.DoubleSide })), pos = f.geometry.attributes.position, b = pos.array.slice();
+        add(new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, 1.4, 6).rotateZ(Math.PI / 2), poleMat), x + .6, 6.62, -5.5);
+        const f = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 3, 2, 10), new THREE.MeshBasicMaterial({ map: bt, transparent: true, alphaTest: .4, side: THREE.DoubleSide })), pos = f.geometry.attributes.position, b = pos.array.slice();
         add(f, x + .6, 5.1, -5.5); anim.push(t => { for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(t * 2.4 + b[i * 3 + 1] * 1.5 + x) * .18 * ((1.5 - b[i * 3 + 1]) / 3)); pos.needsUpdate = true; });
-        const em = new THREE.Mesh(new THREE.CircleGeometry(.28, 16), new THREE.MeshBasicMaterial({ color: 0x1a0608 })); add(em, x + .6, 5.6, -5.48);
       }
     },
     moon() { flame(-14, 17, -38, 16, cfg.rim); const m = new THREE.Mesh(new THREE.CircleGeometry(3.4, 40), new THREE.MeshBasicMaterial({ color: 0xeaf6ff, fog: false })); add(m, -14, 17, -38.5); },

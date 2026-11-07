@@ -233,3 +233,12 @@ La F7 recibida partía de la F3 (sin F4 ni las animaciones de v0.6.0). Se hizo u
 - [x] Historia con planos de mundo (recorrido del prólogo, llegadas narradas).
 - [x] Daga en la vista previa: maniquí guiado para mostrar el contraataque.
 - [x] `npm test` = 19 suites OK (nueva `tools/test-v15.mjs`).
+
+## v1.6.0
+- [x] Un solo index.html (desarrollo en tools/dev/index.html) y favicon temático.
+- [x] Vigilante de carga (__EW_BOOT, Reintentar, Modo ligero, WebGL) y pantalla completa en táctil.
+- [x] Pulgar del puño cerrado por delante de los dedos.
+- [x] Dificultad Fácil/Medio/Difícil/Extremo en Combate de prueba; la CPU se transforma.
+- [x] Poses K.O. distintas por guerrero y gesto de derrota mirando al ganador.
+- [x] Botones de historia, versus 2J, panel móvil, selector de canción con flechas, hover táctil, sin «Neutro».
+- [x] `npm test` = 20 suites (tools/test-v16.mjs).

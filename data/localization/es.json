@@ -13,7 +13,7 @@
  "menu.credits": "Créditos",
  "ui.start": "Comenzar",
  "ui.back": "Volver",
- "ui.version": "v1.5.0 · transformación, desafíos, música y mundos",
+ "ui.version": "v1.6.0 · dificultad, derrotas y celular fácil",
  "ui.hint": "← → cambian de guerrero · ↑ ↓ navegan · Enter elige · Esc vuelve",
  "ui.loading": "Cargando guerreros… {done}/{total}",
  "ui.ready": "Todo listo",

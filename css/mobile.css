@@ -53,7 +53,7 @@
 }
 
 /* ── Celular: botón de pantalla completa y aviso de girar el teléfono durante el combate ── */
-.loader .fullscr{margin-top:10px;padding:8px 22px;font-size:.9rem}
+.loader .fullscr{position:fixed;top:max(10px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));margin:0;padding:7px 16px;font-size:.82rem;z-index:5}
 .rotate-hint{display:none;position:fixed;inset:0;z-index:30;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;background:rgba(5,7,16,.94);color:#f1dc9a;font:700 1.1rem var(--f-display)}
 .rotate-hint b{font-size:3rem;animation:spin 2.4s linear infinite}
 @media (orientation:portrait) and (max-width:700px) and (pointer:coarse){body:has(#hud:not([hidden])) .rotate-hint{display:grid}}
@@ -67,7 +67,9 @@
 }
 
 /* botones del pie de los paneles: una sola línea, el secundario discreto debajo */
-#view .pdock .cta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08em;font-size:clamp(.92rem,2.4vh,1.08rem);padding:11px 18px}
-#view .pdock .row.story-acts{display:grid;gap:6px}
+#view .pdock .cta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08em;font-size:clamp(.92rem,2.4vh,1.08rem);padding:11px 42px}
+#view .pdock .row.story-acts,#view.docked>.panel>.pdock .row.story-acts{display:grid;grid-template-columns:1fr;gap:4px}
+#view .pdock .row.story-acts>*{width:100%}#view .pdock .row.story-acts>.ghost.restart{width:auto}
 #view .pdock .ghost.restart{justify-self:center;padding:5px 14px;font:600 .82rem var(--f-body);letter-spacing:.06em;color:#c9b88a;background:none;border:0;border-bottom:1px solid rgba(201,164,76,.4);clip-path:none}
 #view .pdock .ghost.restart:hover,#view .pdock .ghost.restart:focus-visible{color:#fff3cc;border-bottom-color:#f1dc9a}
+#view .pdock .row.story-acts>.cta{font-size:clamp(.86rem,2.2vh,1rem);letter-spacing:.05em;padding:11px 36px}
