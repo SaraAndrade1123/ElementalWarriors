@@ -47,6 +47,17 @@ export function makeClip(name, dur, keys, meta = {}) {
     (track[IDX[c]] ||= []).push({ t: k.t, v: k[c], e: k.e || 'io' });
   }
   for (const c in track) track[c].sort((a, b) => a.t - b.t);
+  // Sin «rebotes» de un fotograma: si un canal llega rápido a un extremo (in2/in3/lin) y sale rápido en sentido contrario
+  // (out2/out3/lin/back), el brazo daba media vuelta a toda velocidad. Ahora la salida arranca desde quieto (io): el golpe
+  // sigue llegando seco, pero se ve el instante del impacto antes de recoger.
+  const FAST_IN = { in2: 1, in3: 1, lin: 1 }, FAST_OUT = { out2: 1, out3: 1, lin: 1, back: 1 };
+  for (const c in track) {
+    const ks = track[c];
+    for (let i = 1; i < ks.length - 1; i++) {
+      const a = ks[i - 1].v, b = ks[i].v, n = ks[i + 1].v;
+      if ((b - a) * (n - b) < 0 && FAST_IN[ks[i].e] && FAST_OUT[ks[i + 1].e]) ks[i + 1] = { ...ks[i + 1], e: 'io' };
+    }
+  }
   return { name, dur, track, chs: Object.keys(track).map(Number), lastT: Math.max(0, ...keys.map(k => k.t)), ...meta };
 }
 export function evalClip(clip, t, base, out) {
@@ -55,7 +66,7 @@ export function evalClip(clip, t, base, out) {
     const ks = clip.track[c]; let t0 = 0, v0 = base[c];
     for (let i = 0; i <= ks.length; i++) {
       const k = i < ks.length ? ks[i] : { t: clip.dur, v: base[c], e: 'io' };
-      if (t <= k.t) { out[c] = v0 + (k.v - v0) * EASE[k.e]((t - t0) / Math.max(1e-6, k.t - t0)); break; }
+      if (t <= k.t) { out[c] = k.t - t0 < 1e-6 ? k.v : v0 + (k.v - v0) * EASE[k.e]((t - t0) / (k.t - t0)); break; } // clave en t = 0: vale desde el primer instante
       t0 = k.t; v0 = k.v;
     }
   }

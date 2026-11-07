@@ -206,7 +206,7 @@ export class SceneManager {
         const og = (m.userData.orig ??= m.map), cache = (m.userData.cache ??= {});
         const isHead = /head|face|eye/i.test(m.name || ''), use = pal && (!isHead || pal.slots);
         if (use && !cache[pal.id]) {
-          const cv = recolorImage(og.image, pal, id, isHead ? ['eyes', 'arrow'] : null);
+          const cv = recolorImage(og.image, pal, id, isHead ? ['eyes', 'arrow', 'band', 'bandGold', 'pom'] : null);
           if (cv) { const tx = new THREE.CanvasTexture(cv); Object.assign(tx, { flipY: og.flipY, colorSpace: og.colorSpace, wrapS: og.wrapS, wrapT: og.wrapT, anisotropy: og.anisotropy }); cache[pal.id] = tx; }
         }
         m.map = (use && cache[pal.id]) || og; m.needsUpdate = true;
@@ -258,7 +258,10 @@ export class SceneManager {
     let anim = null;
     if (c.src) { try { anim = new Animator(root, holder, d.id, { facing: -1 }); anim.setReduce(this.reduce); } catch (e) { console.error(`[espejo] ${d.id}: sin esqueleto animado`, e); } }
     applyChroma(holder, spec); // después de crear las armas: también se tiñen
-    const m = { def: d, holder, anim, t0: 0, intro: null, fx: spec.fx, mirror: spec };
+    // (v1.7) el espejo lleva además su propio efecto de material y su estilo de técnicas (data/mirror.json → chroma, vfx)
+    const pal = spec.chroma ? { id: 'mirror_' + d.id, fx: spec.fx, chroma: spec.chroma, vfx: spec.vfx } : null;
+    if (pal) try { applyChromaFx(holder, pal); } catch (e) { console.warn('[espejo] chroma', e); }
+    const m = { def: d, holder, anim, t0: 0, intro: null, fx: spec.fx, mirror: spec, pal };
     this.mirrors.set(id, m); return m;
   }
 

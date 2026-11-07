@@ -27,6 +27,12 @@
     "rim": "#7fe9ff",
     "outline": "#0b2b66",
     "aura": "embers"
+   },
+   "vfx": {
+    "style": "embers",
+    "a": "#e8fdff",
+    "c": "#6fe6ff",
+    "b": "#1e3cff"
    }
   },
   {
@@ -56,7 +62,13 @@
     "rim": "#ffd35a",
     "outline": "#5a2a00",
     "aura": "sparkles",
-    "amount": 0.8
+    "amount": 0.9
+   },
+   "vfx": {
+    "style": "stars",
+    "a": "#fffbe0",
+    "c": "#ffd35a",
+    "b": "#ff8a00"
    }
   },
   {
@@ -85,7 +97,13 @@
     "glow2": "#ff7bd5",
     "rim": "#c77bff",
     "outline": "#2a0a4a",
-    "aura": "sparkles"
+    "aura": "motes"
+   },
+   "vfx": {
+    "style": "helix",
+    "a": "#ffe6ff",
+    "c": "#d47bff",
+    "b": "#6a1ab8"
    }
   },
   {
@@ -110,12 +128,18 @@
     "#e8505f"
    ],
    "chroma": {
-    "kind": "ember",
-    "glow": "#ff5a5a",
-    "glow2": "#8a0814",
-    "rim": "#ff4d4d",
+    "kind": "ink",
+    "glow": "#ff3b4e",
+    "glow2": "#7a0a18",
+    "rim": "#ff5a6a",
     "outline": "#3a0610",
-    "aura": "embers"
+    "aura": "ink"
+   },
+   "vfx": {
+    "style": "ink",
+    "a": "#ffd0d4",
+    "c": "#ff3b4e",
+    "b": "#6a0612"
    }
   },
   {
@@ -140,12 +164,18 @@
     "#00e5ff"
    ],
    "chroma": {
-    "kind": "neon",
-    "glow": "#19f0ff",
-    "glow2": "#0a6cff",
-    "rim": "#19e6ff",
+    "kind": "caustic",
+    "glow": "#3ff0ff",
+    "glow2": "#1a7cff",
+    "rim": "#5ff3ff",
     "outline": "#001a3a",
     "aura": "bubbles"
+   },
+   "vfx": {
+    "style": "bubbles",
+    "a": "#e0ffff",
+    "c": "#3ff0ff",
+    "b": "#0a3aa0"
    }
   },
   {
@@ -171,12 +201,17 @@
    ],
    "chroma": {
     "kind": "crystal",
-    "glow": "#9dffd0",
-    "glow2": "#12c77d",
-    "rim": "#5dffb0",
+    "glow": "#9dffd6",
+    "glow2": "#20d08a",
+    "rim": "#7dffc2",
     "outline": "#043d2a",
-    "aura": "sparkles",
-    "amount": 0.8
+    "aura": "sparkles"
+   },
+   "vfx": {
+    "style": "shards",
+    "a": "#eafff4",
+    "c": "#5affb4",
+    "b": "#0a7a4a"
    }
   },
   {
@@ -190,7 +225,10 @@
     "dark": "#1a0806",
     "cream": "#ff9a1f",
     "creamShade": "#b8520c",
-    "eyes": "#ffdd55"
+    "eyes": "#ffdd55",
+    "band": "#2a0a04",
+    "bandGold": "#ffb020",
+    "pom": "#ff6a1a"
    },
    "fx": {
     "color": "#ff7a1a",
@@ -203,11 +241,17 @@
    ],
    "chroma": {
     "kind": "lava",
-    "glow": "#ffb02e",
-    "glow2": "#ff3b00",
-    "rim": "#ff7a1a",
-    "outline": "#2a0800",
+    "glow": "#ffb347",
+    "glow2": "#ff3b1a",
+    "rim": "#ff6a2a",
+    "outline": "#2a0804",
     "aura": "embers"
+   },
+   "vfx": {
+    "style": "embers",
+    "a": "#fff0b0",
+    "c": "#ff7a2a",
+    "b": "#a01a04"
    }
   },
   {
@@ -221,7 +265,10 @@
     "dark": "#050b2a",
     "cream": "#aee4ff",
     "creamShade": "#5c9fd6",
-    "eyes": "#e8fbff"
+    "eyes": "#e8fbff",
+    "band": "#0a1f6b",
+    "bandGold": "#aee4ff",
+    "pom": "#e8fbff"
    },
    "fx": {
     "color": "#7fc8ff",
@@ -234,12 +281,17 @@
    ],
    "chroma": {
     "kind": "crystal",
-    "glow": "#c8ecff",
-    "glow2": "#2f7dff",
-    "rim": "#7fc8ff",
-    "outline": "#0a1f6b",
-    "aura": "sparkles",
-    "amount": 0.8
+    "glow": "#bfe8ff",
+    "glow2": "#3d7dff",
+    "rim": "#9fd8ff",
+    "outline": "#061a4a",
+    "aura": "sparkles"
+   },
+   "vfx": {
+    "style": "shards",
+    "a": "#f0faff",
+    "c": "#7fc8ff",
+    "b": "#1a3dc0"
    }
   },
   {
@@ -253,7 +305,10 @@
     "dark": "#07030f",
     "cream": "#9b6bff",
     "creamShade": "#5a3aa8",
-    "eyes": "#c9a8ff"
+    "eyes": "#c9a8ff",
+    "band": "#130a26",
+    "bandGold": "#c9a8ff",
+    "pom": "#9b6bff"
    },
    "fx": {
     "color": "#b48cff",
@@ -267,10 +322,16 @@
    "chroma": {
     "kind": "galaxy",
     "glow": "#c9a8ff",
-    "glow2": "#7a3df0",
-    "rim": "#9b6bff",
-    "outline": "#130a26",
+    "glow2": "#7a3dff",
+    "rim": "#a07bff",
+    "outline": "#0a0418",
     "aura": "motes"
+   },
+   "vfx": {
+    "style": "stars",
+    "a": "#f0e6ff",
+    "c": "#a07bff",
+    "b": "#3a1a8a"
    }
   },
   {
@@ -300,11 +361,17 @@
    ],
    "chroma": {
     "kind": "pulse",
-    "glow": "#a6f0ff",
-    "glow2": "#5ad1ff",
-    "rim": "#e6faff",
-    "outline": "#1c3f8f",
+    "glow": "#bfe6ff",
+    "glow2": "#ffffff",
+    "rim": "#8fd0ff",
+    "outline": "#0b2b66",
     "aura": "motes"
+   },
+   "vfx": {
+    "style": "runes",
+    "a": "#ffffff",
+    "c": "#9fd8ff",
+    "b": "#2a6ad8"
    }
   },
   {
@@ -331,12 +398,17 @@
    ],
    "chroma": {
     "kind": "storm",
-    "glow": "#d9c7ff",
+    "glow": "#e8ddff",
     "glow2": "#ffe86b",
-    "rim": "#a98bff",
-    "outline": "#261052",
-    "aura": "bolts",
-    "amount": 0.8
+    "rim": "#b49cff",
+    "outline": "#1a0a4a",
+    "aura": "bolts"
+   },
+   "vfx": {
+    "style": "bolt",
+    "a": "#fffbe0",
+    "c": "#c8b4ff",
+    "b": "#5b2bd6"
    }
   },
   {
@@ -362,12 +434,19 @@
     "#fff1c4"
    ],
    "chroma": {
-    "kind": "gold",
-    "glow": "#fff6cc",
-    "glow2": "#ffc233",
-    "rim": "#ffe9a0",
-    "outline": "#5a3d00",
-    "aura": "sparkles"
+    "kind": "prism",
+    "glow": "#fff1c4",
+    "glow2": "#ffcf5a",
+    "rim": "#ffe08a",
+    "outline": "#5a3a00",
+    "aura": "sparkles",
+    "amount": 0.9
+   },
+   "vfx": {
+    "style": "stars",
+    "a": "#ffffff",
+    "c": "#ffe08a",
+    "b": "#c08a1a"
    }
   },
   {
@@ -375,72 +454,304 @@
    "type": "palette",
    "char": "ignis",
    "price": 150,
-   "hue": 38,
-   "sat": 1.15,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "coat": "#2a1a06",
+    "cloth": "#b8760f",
+    "trim": "#fff0b0",
+    "eyes": "#ffd35a"
+   },
+   "fx": {
+    "color": "#ffc23a",
+    "light": "#ff9a00"
+   },
+   "swatch": [
+    "#2a1a06",
+    "#b8760f",
+    "#fff0b0"
+   ],
+   "chroma": {
+    "kind": "scales",
+    "glow": "#ffd25a",
+    "glow2": "#ff7a00",
+    "rim": "#ffcc4a",
+    "outline": "#3a2200",
+    "aura": "sparkles"
+   },
+   "vfx": {
+    "style": "shards",
+    "a": "#fff6c8",
+    "c": "#ffc23a",
+    "b": "#c25a00"
+   }
   },
   {
    "id": "pal_ignis_violet",
    "type": "palette",
    "char": "ignis",
    "price": 250,
-   "hue": -75,
-   "sat": 1,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "coat": "#07040e",
+    "cloth": "#3a0b5c",
+    "trim": "#c35cff",
+    "eyes": "#e08cff"
+   },
+   "fx": {
+    "color": "#b45cff",
+    "light": "#6a1ab8"
+   },
+   "swatch": [
+    "#07040e",
+    "#3a0b5c",
+    "#c35cff"
+   ],
+   "chroma": {
+    "kind": "void",
+    "glow": "#c35cff",
+    "glow2": "#ff4fd8",
+    "rim": "#b45cff",
+    "outline": "#1a0630",
+    "aura": "smoke"
+   },
+   "vfx": {
+    "style": "smoke",
+    "a": "#f0d8ff",
+    "c": "#b45cff",
+    "b": "#3a0b6b"
+   }
   },
   {
    "id": "pal_aqua_jade",
    "type": "palette",
    "char": "aqua",
    "price": 150,
-   "hue": -65,
-   "sat": 1,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "main": "#2a9d8a",
+    "shade": "#0e4a44",
+    "light": "#9ff5e0",
+    "white": "#f0fffb",
+    "eyes": "#7dffe0"
+   },
+   "fx": {
+    "color": "#5fffd8",
+    "light": "#1aa890"
+   },
+   "swatch": [
+    "#0e4a44",
+    "#2a9d8a",
+    "#9ff5e0"
+   ],
+   "chroma": {
+    "kind": "scales",
+    "glow": "#7dffe0",
+    "glow2": "#1ad6b0",
+    "rim": "#8affea",
+    "outline": "#06302c",
+    "aura": "bubbles"
+   },
+   "vfx": {
+    "style": "helix",
+    "a": "#e8fffa",
+    "c": "#5fffd8",
+    "b": "#0a7a6a"
+   }
   },
   {
    "id": "pal_aqua_dusk",
    "type": "palette",
    "char": "aqua",
    "price": 250,
-   "hue": 70,
-   "sat": 1.1,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "main": "#b8487a",
+    "shade": "#45183a",
+    "light": "#ffb0a0",
+    "white": "#ffe8d8",
+    "eyes": "#ffcf7a"
+   },
+   "fx": {
+    "color": "#ff8ab0",
+    "light": "#c04a8a"
+   },
+   "swatch": [
+    "#45183a",
+    "#b8487a",
+    "#ffb0a0"
+   ],
+   "chroma": {
+    "kind": "aurora",
+    "glow": "#ff7aa8",
+    "glow2": "#ffb347",
+    "rim": "#ff9ac0",
+    "outline": "#2a0a24",
+    "aura": "motes"
+   },
+   "vfx": {
+    "style": "stars",
+    "a": "#fff0e0",
+    "c": "#ff8ab0",
+    "b": "#8a2a6a"
+   }
   },
   {
    "id": "pal_terra_amber",
    "type": "palette",
    "char": "terra",
    "price": 150,
-   "hue": -35,
-   "sat": 1.1,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "main": "#b8741a",
+    "shade": "#6b3e0a",
+    "dark": "#2a1804",
+    "cream": "#ffe0a0",
+    "creamShade": "#c49a5a",
+    "eyes": "#ffd070",
+    "band": "#6b3e0a",
+    "bandGold": "#ffe28a",
+    "pom": "#ffcf6a"
+   },
+   "fx": {
+    "color": "#ffc25a",
+    "light": "#c4801a"
+   },
+   "swatch": [
+    "#6b3e0a",
+    "#b8741a",
+    "#ffe0a0"
+   ],
+   "chroma": {
+    "kind": "sand",
+    "glow": "#ffd88a",
+    "glow2": "#fff2c8",
+    "rim": "#ffc25a",
+    "outline": "#3a2204",
+    "aura": "sand"
+   },
+   "vfx": {
+    "style": "sand",
+    "a": "#fff6d8",
+    "c": "#ffc25a",
+    "b": "#8a5a1a"
+   }
   },
   {
    "id": "pal_terra_frost",
    "type": "palette",
    "char": "terra",
    "price": 250,
-   "hue": 95,
-   "sat": 1,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "main": "#7cc6f2",
+    "shade": "#3a78ad",
+    "dark": "#10243d",
+    "cream": "#f2fbff",
+    "creamShade": "#a9cde6",
+    "eyes": "#e8fbff",
+    "band": "#3a78ad",
+    "bandGold": "#ffffff",
+    "pom": "#d8f4ff"
+   },
+   "fx": {
+    "color": "#bfeaff",
+    "light": "#5aa8e0"
+   },
+   "swatch": [
+    "#3a78ad",
+    "#7cc6f2",
+    "#f2fbff"
+   ],
+   "chroma": {
+    "kind": "frost",
+    "glow": "#d8f4ff",
+    "glow2": "#7fd0ff",
+    "rim": "#cdeeff",
+    "outline": "#0a2a4a",
+    "aura": "snow"
+   },
+   "vfx": {
+    "style": "snow",
+    "a": "#ffffff",
+    "c": "#bfeaff",
+    "b": "#3a7ac0"
+   }
   },
   {
    "id": "pal_zephyr_aurora",
    "type": "palette",
    "char": "zephyr",
    "price": 150,
-   "hue": 160,
-   "sat": 1.4,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "main": "#c8fff0",
+    "red": "#2fc8a0",
+    "brown": "#1a5a6b",
+    "trim": "#8affd8",
+    "arrow": "#b48cff",
+    "eyes": "#ffffff"
+   },
+   "fx": {
+    "color": "#8affd8",
+    "light": "#2fc8a0"
+   },
+   "swatch": [
+    "#1a5a6b",
+    "#2fc8a0",
+    "#c8fff0"
+   ],
+   "chroma": {
+    "kind": "aurora",
+    "glow": "#8affd8",
+    "glow2": "#b48cff",
+    "rim": "#9affe0",
+    "outline": "#0a2a2a",
+    "aura": "motes"
+   },
+   "vfx": {
+    "style": "helix",
+    "a": "#f0fff8",
+    "c": "#8affd8",
+    "b": "#3a8a9a"
+   }
   },
   {
    "id": "pal_zephyr_ember",
    "type": "palette",
    "char": "zephyr",
    "price": 250,
-   "hue": -35,
-   "sat": 1.2,
-   "hidden": true
+   "hidden": true,
+   "slots": {
+    "main": "#ffd9b0",
+    "red": "#e8401a",
+    "brown": "#5a1004",
+    "trim": "#ffae3a",
+    "arrow": "#ffdd55",
+    "eyes": "#ffcc33"
+   },
+   "fx": {
+    "color": "#ff8a3a",
+    "light": "#e8401a"
+   },
+   "swatch": [
+    "#5a1004",
+    "#e8401a",
+    "#ffd9b0"
+   ],
+   "chroma": {
+    "kind": "ember",
+    "glow": "#ffb347",
+    "glow2": "#ff3b1a",
+    "rim": "#ff8a3a",
+    "outline": "#3a0804",
+    "aura": "embers"
+   },
+   "vfx": {
+    "style": "smoke",
+    "a": "#fff0c8",
+    "c": "#ff8a3a",
+    "b": "#a01a04"
+   }
   },
   {
    "id": "wp_cuchillos",

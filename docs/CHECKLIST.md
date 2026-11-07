@@ -242,3 +242,11 @@ La F7 recibida partía de la F3 (sin F4 ni las animaciones de v0.6.0). Se hizo u
 - [x] Poses K.O. distintas por guerrero y gesto de derrota mirando al ganador.
 - [x] Botones de historia, versus 2J, panel móvil, selector de canción con flechas, hover táctil, sin «Neutro».
 - [x] `npm test` = 20 suites (tools/test-v16.mjs).
+
+## v1.7.0
+- [x] Inercialización en el director de animación; clave en t = 0 sin salto; reacciones y guardia sin escalones; extremos sin rebote (`tools/anim-audit.mjs`).
+- [x] Derrota en el suelo con gesto distinto por guerrero mirando al ganador.
+- [x] Chromas: uniformes por material (cada uno su efecto), 19 efectos, sin teñir pelo/piel, corona de Terra, paletas antiguas por zonas.
+- [x] Técnicas con los colores y la firma del chroma; espejos con material y técnicas propias.
+- [x] Logo nuevo.
+- [x] `npm test` = 21 suites (tools/test-v17.mjs).

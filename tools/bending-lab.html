@@ -35,6 +35,7 @@ import * as THREE from 'three';
 import { SceneManager } from '../js/game/scene-manager.js';
 import { installElements } from '../js/elements/element-hook.js';
 import { installBending } from '../js/elements/bending-hook.js';
+import { installChromaVfx } from '../js/game/chroma-vfx.js';
 
 const $ = s => document.querySelector(s), err = $('#err');
 const fail = e => { err.textContent += String(e && e.stack || e) + '\n'; console.error(e); };
@@ -60,7 +61,7 @@ const lab = window.lab = { ready: false, speed: 1, cam: 'game', draw: true, time
     const sm = lab.sm = new SceneManager($('#c'), { quality: 'medium', reduceMotion: false, lang: 'es' });
     await sm.loadCharacters(roster);
     const bdata = await (await fetch('../data/bending.json')).json(), edata = await (await fetch('../data/elements.json')).json();
-    installElements({ scene: sm, roster, data: edata, url: null }); installBending({ scene: sm, roster, data: bdata, url: null });
+    installElements({ scene: sm, roster, data: edata, url: null }); installBending({ scene: sm, roster, data: bdata, url: null }); installChromaVfx({ scene: sm });
     sm.renderer.setAnimationLoop(null);
     const input = lab.input = new LabInput();
     for (const id of ['p1', 'p2']) $('#' + id).innerHTML = roster.map(r => `<option value="${r.id}">${r.name}</option>`).join('');

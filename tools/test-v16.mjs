@@ -32,7 +32,7 @@ ok(ATTACKS.includes('lose'), 'existe la animación de derrota');
 const atk = rd('js/game/animation/attacks.js');
 ok((atk.match(/\blose\s*:/g) || []).length >= 4, 'cada guerrero tiene un gesto de derrota distinto');
 const cine = rd('js/game/cinematic-end.js');
-ok(/clips\?\.lose \? 'lose'/.test(cine) && /ko\s*=\s*false/.test(cine), 'en la escena final el perdedor se incorpora, mira al ganador y hace su gesto');
+ok(/lose\?\.ground \? \{ name: 'lose'/.test(cine) && /L\.ko = true/.test(cine), 'en la escena final el perdedor sigue en el suelo, mira al ganador y hace su gesto');
 
 // 4 · interfaz
 { const eh = rd('js/elements/element-hook.js'), body = eh.slice(eh.indexOf('function decorateHeader'), eh.indexOf('function refreshMenu')); ok(body.length > 0 && !/elem\.rel|neutral/.test(body), 'Terra ya no muestra «Neutro» en el menú'); }
@@ -40,6 +40,6 @@ ok(/song-pick/.test(rd('js/audio/audio-hook.js')) && /song-pick/.test(rd('css/au
 ok(/story-acts/.test(rd('js/ui/modes-ui.js')) && /story-acts/.test(rd('css/mobile.css')), 'historia: «Continuar» y «Empezar desde el principio» ordenados');
 ok(/hover:\s*none/.test(rd('css/mobile.css')), 'sin hover pegado en pantallas táctiles');
 ok(/pairScale/.test(rd('js/game/scene-manager.js')), 'versus 2J: los guerreros se encuadran en el espacio libre');
-ok(js('package.json').version === '1.6.0' && /v1\.6\.0/.test(es['ui.version']), 'versión 1.6.0');
+ok(/^1\.[6-9]\./.test(js('package.json').version), 'versión 1.6 o posterior');
 
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.6: todo correcto'); process.exit(bad ? 1 : 0);

@@ -28,7 +28,11 @@ export const PALETTE_MODELS = {
       dark: ['#30301f'],
       cream: ['#dcd2ab', '#ddd3ac'],
       creamShade: ['#a19a7c', '#756b5b'],
-      eyes: ['#acbcac', '#d4dcdc', '#94aca4', '#acb4ac', '#b4bcac']
+      eyes: ['#acbcac', '#d4dcdc', '#94aca4', '#acb4ac', '#b4bcac'],
+      // (v1.7) la «corona» del pelo (textura de la cabeza): banda verde, franja dorada y pompones
+      band: ['#486d3c', '#476c3a', '#385331', '#33502d'],
+      bandGold: ['#b7ae60', '#b9a95f', '#bcaf5e', '#bbaa66'],
+      pom: ['#e9e3ca', '#e8e8d1', '#eae4cb', '#e9e5cb']
     },
     keep: ['#dec4ac', '#d8c3ad', '#a79181', '#a89584', '#e6e2cf', '#2a292a', '#141415', '#2c2b2c', '#282828', '#232222', '#1c1c1c', '#462222', '#000000']
   },

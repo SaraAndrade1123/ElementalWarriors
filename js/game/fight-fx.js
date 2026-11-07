@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { themed, signature } from './chroma-vfx.js';
 import { t } from '../systems/localization.js';
 import { AnimeFx } from './render/anime-fx.js';
 
@@ -91,11 +92,14 @@ export function installFightFx({ scene, roster = [], doc = globalThis.document, 
       // aura del chroma premium equipado: partículas de su color alrededor del cuerpo
       if (this.vfx?.parts && !this.sm?.reduce) this.v.forEach((v, i) => {
         const ch = v.c.pal?.chroma; if (!ch?.aura) return; const f = this.f[i];
-        S.au = S.au || [0, 0]; S.au[i] -= rdt; if (S.au[i] > 0) return; S.au[i] = ch.aura === 'bolts' ? .09 : .045;
+        S.au = S.au || [0, 0]; S.au[i] -= rdt; if (S.au[i] > 0) return; S.au[i] = ch.aura === 'bolts' ? .09 : ch.aura === 'smoke' ? .08 : .045;
         const h = (f.def.height || 3.3), c0 = new THREE.Color(ch.glow), c1 = new THREE.Color(ch.glow2), r = Math.random;
         const o = { embers: { vy: 1.6 + r() * 1.2, g: -1, s0: .14, s1: 0, life: .7 }, sparkles: { vy: .3, g: 0, s0: .1, s1: 0, life: .45 }, bubbles: { vy: 1 + r(), g: -.5, s0: .12, s1: .16, life: .8 },
-          motes: { vy: .5, g: 0, s0: .11, s1: .02, life: 1 }, bolts: { vy: 0, g: 0, s0: .22, s1: 0, life: .12 } }[ch.aura] || { vy: .8, g: 0, s0: .1, s1: 0, life: .6 };
+          motes: { vy: .5, g: 0, s0: .11, s1: .02, life: 1 }, bolts: { vy: 0, g: 0, s0: .22, s1: 0, life: .12 },
+          smoke: { vy: .7, g: 0, s0: .3, s1: .7, life: 1.1, a0: .3 }, ink: { vy: -.2, g: 3, s0: .14, s1: .04, life: .8 }, petals: { vy: .2, g: .6, s0: .14, s1: .08, life: 1.4, vx: (r() - .5) * 1.2 },
+          snow: { vy: -.3, g: .5, s0: .08, s1: .03, life: 1.3 }, sand: { vy: .1, g: .4, s0: .05, s1: .02, life: .9, vx: (r() - .5) * 2.5 } }[ch.aura] || { vy: .8, g: 0, s0: .1, s1: 0, life: .6 };
         this.vfx.parts.emit({ x: f.x + (r() - .5) * .9, y: f.y + r() * h * .9, z: (r() - .5) * .6, vx: (r() - .5) * .4, vz: 0, drag: 1, c0, c1, ...o });
+        if (ch.aura === 'bolts' && r() < .3) { const th = f.vtheme; if (th) themed(f, () => signature(this.vfx, { x: f.x + (r() - .5) * .6, y: f.y + r() * h * .8, z: .2 }, 1, 'aura')); }
       });
       S.hp?.forEach((el, i) => el?.classList.toggle('low', this.f[i].hp / this.f[i].maxHp < .3 && !this.f[i].ko));
       // al acabar la ronda el ganador se aparta del caído (que nadie celebre encima del rival)

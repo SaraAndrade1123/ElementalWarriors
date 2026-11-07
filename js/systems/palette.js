@@ -5,6 +5,7 @@ import { PALETTE_MODELS } from './palette-models.js';
 
 const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 const lum = (r, g, b) => (.299 * r + .587 * g + .114 * b) / 255;
+const HEAD_ONLY = ['band', 'bandGold', 'pom']; // ranuras que solo existen en la textura de la cabeza (corona de Terra)
 const NEAR = 40, FAR = 80; // distancia (RGB) hasta la que un pixel se considera de esa ranura, y a partir de la cual no se toca
 
 export function hueShift(px, hue, sat = 1) { // px: Uint8ClampedArray RGBA, se modifica en sitio
@@ -27,6 +28,7 @@ export function hueShift(px, hue, sat = 1) { // px: Uint8ClampedArray RGBA, se m
 export function applyPalette(px, model, slots, opts = {}) {
   const refs = [];
   for (const [name, list] of Object.entries(model.slots)) {
+    if (opts.only ? !opts.only.includes(name) : HEAD_ONLY.includes(name)) continue; // solo compiten las ranuras pedidas (y los colores fijos)
     const t = slots[name] ? hex(slots[name]) : null, mainL = Math.max(.04, lum(...hex(list[0])));
     for (const s of list) refs.push({ c: hex(s), t: t && (!opts.only || opts.only.includes(name)) ? t : null, mainL, flat: !!opts.flat?.includes(name) });
   }

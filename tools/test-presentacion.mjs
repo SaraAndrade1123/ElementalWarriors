@@ -67,7 +67,7 @@ const input = { read: () => ({}), clear() {} };
   const g = new THREE.Group(), mat = new THREE.MeshToonMaterial(); mat.userData.charMat = true; g.add(new THREE.Mesh(new THREE.BoxGeometry(), mat));
   const on = applyChromaFx(g, pals[0]), sh = { uniforms: {}, vertexShader: '#include <project_vertex>', fragmentShader: '#include <emissivemap_fragment>' }; mat.onBeforeCompile(sh);
   const off = applyChromaFx(g, null);
-  ok(on && /ewChroma|ewAdd/.test(sh.fragmentShader) && sh.uniforms.ewKind && !off && !mat.userData.ewChroma, 'el efecto se inyecta en el material del guerrero y se quita al desequipar'); }
+  ok(on && /ewChroma|ewAdd/.test(sh.fragmentShader) && sh.uniforms.ecKind && !off && !mat.userData.ewChroma, 'el efecto se inyecta en el material del guerrero y se quita al desequipar'); }
 
 // 6 · créditos
 ok(readFileSync('js/ui/menu-manager.js', 'utf8').includes("'Claude'") && readFileSync('js/ui/menu-manager.js', 'utf8').includes('Sara Andrade Rodriguez'), 'los créditos incluyen a Sara Andrade Rodriguez y a Claude');

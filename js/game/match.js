@@ -3,6 +3,7 @@ import { Fighter, separate, resolveBoth, resolveThrows, stepProjectiles, makePro
 import { makeBrain } from './ai.js';
 import { glow } from './arena.js';
 import { Vfx, elemOf } from './vfx.js';
+import { themed, signature, TH } from './chroma-vfx.js';
 import { DebugOverlay, infoLines } from './debug.js';
 import { t } from '../systems/localization.js';
 
@@ -158,7 +159,7 @@ export class Match {
           if (e.type === 'hit') this.onHit(e, e.a === a ? 0 : 1);
           else if (e.type === 'clash') { this.vfx?.flash(e.pos, 0xffffff, 2); this.fx('block', e.p.owner, { x: e.pos.x }); }
         }
-        for (const p of this.proj) if (p.dead) this.vfx?.projectileEnd(p, 'end');
+        for (const p of this.proj) if (p.dead) themed(p.owner, () => this.vfx?.projectileEnd(p, 'end'));
         this.proj = this.proj.filter(p => !p.dead);
       }
     }
@@ -220,13 +221,16 @@ export class Match {
       if (v.cel) { v.cel.t += vdt; const c = anim?.dir.clips[v.cel.name]; if (c && !c.hold && v.cel.t > c.dur * (anim.S.atkSpeed || 1)) v.cel = null; }
       anim?.update(vdt, f, { yaw: v.c.holder.rotation.y, action: v.cel, preview: v.preview });
       // estelas y efectos que pide la animación
-      if (anim && this.vfx && vdt > 0) {
+      if (anim && this.vfx && vdt > 0) themed(f, () => { // con los colores y la firma de su chroma (si lleva)
         const d = anim.dir; this.vfx.trail(i, anim.anchors(), d.trails, elemOf(f.def.id));
         if (d.cues.length) { const A = anim.anchors(); for (const c of d.cues) { const an = A[c.at] || A.wF; an.tip.getWorldPosition(_p); this.vfx.cue(c, f.def.id, _p, f.facing, { x: ix(f, i) }); } }
         v.auraT -= vdt; if ((f.meter >= RULES.meterMax || (f.act && f.act.name === 'ex')) && v.auraT <= 0) { v.auraT = .06; this.vfx.aura({ x: ix(f, i) }, f.def.id); }
-      }
+      });
     });
-    for (const p of this.proj) this.vfx?.projectile(p);
+    for (const p of this.proj) themed(p.owner, () => { // el proyectil lleva el color y la estela-firma del chroma de quien lo lanza
+      this.vfx?.projectile(p);
+      if (TH.cur?.style && this.vfx && vdt > 0 && Math.random() < .6) signature(this.vfx, { x: p.x - (p.dir || 0) * .3, y: p.y, z: .45 }, 2, 'trail', p.dir || 0);
+    });
     this.vfx?.update(vdt > 0 ? vdt : rdt * .15);
     for (let i = this.sparks.length - 1; i >= 0; i--) {
       const s = this.sparks[i], u = s.userData; u.life -= rdt;

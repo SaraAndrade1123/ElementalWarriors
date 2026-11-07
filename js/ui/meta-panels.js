@@ -60,7 +60,7 @@ export function installMetaPanels(menu, { meta, scene, roster, dev = false }) {
     return h('li', { class: 'item' },
       swatch(d, it), h('div', { class: 'meta' }, h('b', {}, name), owned ? null : h('span', { class: 'price' }, h('span', { class: 'gem', 'aria-hidden': 'true' }), t('shop.price', { n: it.price })),
         it.chroma ? h('span', { class: 'cfx', style: `--g:${it.chroma.glow};--g2:${it.chroma.glow2}` }, h('i', {}, t('chroma.badge')), t('chroma.k.' + it.chroma.kind)) : null,
-        it.chroma ? h('span', { class: 'cfx2' }, t('chroma.a.' + it.chroma.aura) + ' · ' + t('chroma.outline')) : null),
+        it.chroma ? h('span', { class: 'cfx2' }, [it.vfx?.style ? t('chroma.s.' + it.vfx.style) : null, t('chroma.a.' + it.chroma.aura), t('chroma.outline')].filter(Boolean).join(' · ')) : null),
       h('div', { class: 'acts' }, ...acts),
       confirming === it.id ? h('p', { class: 'confirm' }, t('shop.confirmq', { name, n: it.price }),
         act(it, 'yes', t('shop.confirm'), () => doBuy(it), 'mini buy'), act(it, 'no', t('shop.cancel'), () => { confirming = null; rerender(); })) : null);

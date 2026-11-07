@@ -27,6 +27,7 @@ import { createStoryCine } from './game/story-cine.js';
 import { installFightReport } from './game/fight-report.js';
 import { renderResult } from './ui/result-screen.js';
 import { installPanelDock } from './ui/panel-dock.js';
+import { installChromaVfx } from './game/chroma-vfx.js';
 import { patchFighter as patchTransform, patchCpu as patchTransformCpu, installTransform } from './game/transform.js';
 import { Fighter, RULES } from './game/fighter.js';
 import { installOutro } from './game/cinematic-end.js';
@@ -93,6 +94,7 @@ async function boot() {
     installFightFx({ scene, roster }); // impactos, congelado de técnica y K.O. con más producción (docs/PRESENTACION.md)
     installCinematic({ scene, roster, data: introData }); // cinemática con diálogo antes de cada combate
     patchTransform(Fighter, RULES); patchTransformCpu(CpuBrain); installTransform({ scene, t, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color }); // transformación definitiva (F5)
+    installChromaVfx({ scene }); // (v1.7) las técnicas toman el color y la firma del chroma equipado / del espejo
     installFightReport({ scene }); // bonificaciones y rango de cada combate (pantalla de resultados)
     installOutro({ scene, roster, data: outroData }); // cinemática de victoria al terminar cada combate (antes del panel)
     if (dev) window.ewAudio = audio; // consola: ewAudio.sfx('hit_heavy', { element: 'fire' })

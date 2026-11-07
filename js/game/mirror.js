@@ -18,7 +18,7 @@ vec3 ewChroma(vec3 lin){
 }`;
 export function chromaMaterial(src, spec) {
   const m = src.clone(); if (src.userData?.orig) m.map = src.userData.orig; // nunca la textura de una paleta de la tienda
-  m.userData = { ...src.userData, chroma: spec.id, cache: {} }; delete m.userData.orig;
+  m.userData = { ...src.userData, chroma: spec.id, cache: {} }; for (const k of ['orig', 'ewChroma', 'ewBase', 'ewInk', 'ewU']) delete m.userData[k]; // sin restos del chroma del original
   const U = {
     ewHue: { value: ((spec.hue % 360) + 360) % 360 / 360 }, ewSat: { value: spec.sat }, ewVal: { value: spec.val }, ewSkin: { value: spec.keepSkin ? 1 : 0 },
     ewTint: { value: new THREE.Color(spec.tint) }, ewTintK: { value: spec.tintAmount }, ewRim: { value: new THREE.Color(spec.rim) }, ewRimK: { value: spec.rimStrength }, ewRimP: { value: spec.rimPower },

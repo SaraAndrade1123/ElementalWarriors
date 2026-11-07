@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { warpTime } from './animation/attacks.js';
+import { registerTables, themed, TH } from './chroma-vfx.js';
 
 // Efectos del CONTROL ELEMENTAL (sólo presentación: nunca tocan la simulación). Se monta encima del Vfx del combate
 // (reutiliza sus partículas, formas y destellos) y añade:
@@ -15,6 +16,7 @@ const C = {
   earth: [new THREE.Color(0xc8b48a), new THREE.Color(0x8a7c62), new THREE.Color(0x4a4236)],
   rune: new THREE.Color(0x9cff5a),
 };
+registerTables({ bend: C }); // los chromas los cambian mientras se dibuja lo de su luchador (chroma-vfx.js)
 const E3 = k => ({ a: C[k][0], b: C[k][2], c: C[k][1] });
 const rnd = (a, b) => a + Math.random() * (b - a);
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _u = new THREE.Vector3();
@@ -55,7 +57,7 @@ const MODE = { fire: 0, water: 1, ice: 1, air: 2 };
 function elemMat(kind, { shell = false, scale = [3, 1.5], flow = [-2.5, 0], alpha = 1 } = {}) {
   const c = C[kind];
   return new THREE.ShaderMaterial({
-    uniforms: { uT: { value: 0 }, uA: { value: alpha }, uMode: { value: MODE[kind] }, uShell: { value: shell ? 1 : 0 }, c1: { value: c[0] }, c2: { value: c[1] }, c3: { value: c[2] },
+    uniforms: { uT: { value: 0 }, uA: { value: alpha }, uMode: { value: MODE[kind] }, uShell: { value: shell ? 1 : 0 }, c1: { value: c[0].clone() }, c2: { value: c[1].clone() }, c3: { value: c[2].clone() },
       uScale: { value: new THREE.Vector2(...scale) }, uFlow: { value: new THREE.Vector2(...flow) }, uSeed: { value: Math.random() * 50 } },
     vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, side: THREE.DoubleSide,
     blending: kind === 'fire' || kind === 'air' ? THREE.AdditiveBlending : THREE.NormalBlending, fog: false,
@@ -130,7 +132,8 @@ class FlameFx {
     if (!this.ok || this.items.length > 220) return;
     const m = new THREE.SpriteMaterial({ map: smoke ? smokeTex() : flameTex(), color: 0xffffff, transparent: true, depthWrite: false, fog: false, blending: smoke ? THREE.NormalBlending : THREE.AdditiveBlending, rotation: o.rot ?? 0 });
     const sp = new THREE.Sprite(m); sp.position.set(o.x, o.y, o.z ?? .5); sp.renderOrder = smoke ? 8 : 11; this.scene.add(sp);
-    this.items.push({ sp, t: 0, life: o.life ?? .4, vx: o.vx ?? 0, vy: o.vy ?? 1.5, s0: o.s0 ?? .35, s1: o.s1 ?? .1, smoke, a: o.a ?? .6, spin: o.spin ?? 0 });
+    this.items.push({ sp, t: 0, life: o.life ?? .4, vx: o.vx ?? 0, vy: o.vy ?? 1.5, s0: o.s0 ?? .35, s1: o.s1 ?? .1, smoke, a: o.a ?? .6, spin: o.spin ?? 0, tint: TH.cur ? [TH.cur.a.clone(), TH.cur.c.clone(), TH.cur.b.clone()] : null });
+    if (smoke && TH.cur) m.color.copy(TH.cur.c).lerp(new THREE.Color(1, 1, 1), .5);
   }
   update(dt) {
     for (let i = this.items.length - 1; i >= 0; i--) {
@@ -139,6 +142,7 @@ class FlameFx {
       q.sp.position.x += q.vx * dt; q.sp.position.y += q.vy * dt; q.vx *= 1 - dt * 2; q.sp.material.rotation += q.spin * dt;
       const s = q.s0 + (q.s1 - q.s0) * k; q.sp.scale.set(s * (q.smoke ? 1 : .62), s * (q.smoke ? 1 : 1.25), 1);
       if (q.smoke) q.sp.material.opacity = Math.sin(Math.PI * k) * .7;
+      else if (q.tint) { const c = q.sp.material.color; if (k < .5) c.copy(q.tint[0]).lerp(q.tint[1], k * 2); else c.copy(q.tint[1]).lerp(q.tint[2], (k - .5) * 2); q.sp.material.opacity = q.a * (k < .12 ? k / .12 : 1) * (1 - k * k); }
       else { const c = q.sp.material.color; c.setRGB(1, .78 - k * .5, .38 - k * .32); q.sp.material.opacity = q.a * (k < .12 ? k / .12 : 1) * (1 - k * k); } // naranja que se apaga a rojo (sin quemarse a blanco)
     }
   }
@@ -162,13 +166,20 @@ function slabGeo() {
 export class BendingVfx {
   constructor(vfx, scene, match) {
     this.v = vfx; this.scene = scene; this.m = match; this.t = 0; this.proj = new Map(); this.live = new Map(); this.dying = [];
-    this.rock = { geo: rockGeo(.55, 1, 1.3), geoS: rockGeo(.36, 0, 2.1), wall: this.#wallGeo(), mat: new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: .95, metalness: 0, emissive: 0x0c0d08 }) };
+    const rock0 = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: .95, metalness: 0, emissive: 0x0c0d08 });
+    this.rock = { geo: rockGeo(.55, 1, 1.3), geoS: rockGeo(.36, 0, 2.1), wall: this.#wallGeo(), mat0: rock0 };
+    this.themedMats = new Map(); const tm = (key, base, paint) => { const th = TH.cur; if (!th) return base; const k = th.id + key; let m = this.themedMats.get(k); if (!m) { m = base.clone(); paint(m, th); this.themedMats.set(k, m); } return m; };
+    this.tm = tm;
+    // con chroma, la roca, el hielo y las grietas toman sus colores (un material por chroma, compartido)
+    Object.defineProperty(this.rock, 'mat', { get: () => tm('rock', rock0, (m, th) => { m.color.copy(th.c).lerp(new THREE.Color(1, 1, 1), .45); m.emissive.copy(th.b).multiplyScalar(.3); }) });
     this.iceGeo = new THREE.ConeGeometry(.09, .62, 5); this.iceGeo.rotateZ(-Math.PI / 2);
     this.flames = new FlameFx(scene); this.spikeGeo = spikeGeo(); this.slabGeo = slabGeo(); this.stones = []; // colmillos y losas sueltas que brotan, aguantan y se hunden
-    this.crackMat = new THREE.MeshBasicMaterial({ color: 0xe2ff7a, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+    this.crackMat0 = new THREE.MeshBasicMaterial({ color: 0xe2ff7a, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
     this.crackGeo = new THREE.PlaneGeometry(1, .24); this.crackGeo.rotateX(-Math.PI / 2);
-    this.iceMat = new THREE.MeshToonMaterial({ color: 0xcff6ff, gradientMap: GRAD, emissive: 0x2a6a9a, transparent: true, opacity: .92 });
+    this.iceMat0 = new THREE.MeshToonMaterial({ color: 0xcff6ff, gradientMap: GRAD, emissive: 0x2a6a9a, transparent: true, opacity: .92 });
   }
+  get crackMat() { return this.tm('crack', this.crackMat0, (m, th) => m.color.copy(th.a)); }
+  get iceMat() { return this.tm('ice', this.iceMat0, (m, th) => { m.color.copy(th.a); m.emissive.copy(th.b).multiplyScalar(.6); }); }
   #wallGeo() { // losa de roca irregular, con la base en y = 0
     const g = new THREE.BoxGeometry(.85, 2.9, 1.3, 3, 8, 3), p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { _v.fromBufferAttribute(p, i); const j = Math.sin(_v.y * 4.1 + _v.z * 3) * .07 + Math.cos(_v.x * 9 + _v.y * 2.3) * .05; p.setXYZ(i, _v.x * (1 + j), _v.y + 1.45 + (_v.y > 1.3 ? Math.sin(_v.z * 6 + _v.x * 8) * .18 : 0), _v.z * (1 + j)); }
@@ -267,10 +278,10 @@ export class BendingVfx {
           if (ct < s.t0 || ct > s.t1 + (s.kind === 'water_whip' ? 0 : 0)) continue;
           on.add(s.kind); const k = (ct - s.t0) / Math.max(1e-3, s.t1 - s.t0), an = A[s.at];
           const P = an ? an.tip.getWorldPosition(_v) : _v.set(rx, 1.5, 0);
-          this.#sfx(s.kind, st, { f, P, k, ct, dt, rx, A, clip, a });
+          themed(f, () => this.#sfx(s.kind, st, { f, P, k, ct, dt, rx, A, clip, a }));
         }
       }
-      for (const kind of Object.keys(st)) if (!on.has(kind) && st[kind]) this.#end(kind, st, f);
+      for (const kind of Object.keys(st)) if (!on.has(kind) && st[kind]) themed(f, () => this.#end(kind, st, f));
     });
   }
   #sfx(kind, st, { f, P, k, dt, rx }) {
@@ -463,7 +474,7 @@ export class BendingVfx {
     }
   }
   #disposeGroup(g, mats = []) {
-    g.removeFromParent(); const shared = new Set([this.rock.geo, this.rock.geoS, this.rock.wall, this.rock.mat, this.iceGeo, this.iceMat, this.slabGeo, this.spikeGeo]);
+    g.removeFromParent(); const shared = new Set([this.rock.geo, this.rock.geoS, this.rock.wall, this.rock.mat0, this.iceGeo, this.iceMat0, this.slabGeo, this.spikeGeo, ...this.themedMats.values()]);
     g.traverse(o => { if (o.isMesh || o.isSprite) { if (!shared.has(o.geometry)) o.geometry?.dispose?.(); if (!shared.has(o.material)) o.material.dispose(); } });
   }
   hasProjectile(p) { return this.proj.has(p); }
@@ -482,8 +493,8 @@ export class BendingVfx {
   dispose() {
     for (const p of [...this.proj.keys()]) { const o = this.proj.get(p); this.#disposeGroup(o.g, o.mats); o.tail?.dispose(); } this.proj.clear();
     for (const st of this.live.values()) for (const k of Object.keys(st)) { const o = st[k]; if (o?.rb) o.rb.dispose(); if (o?.mesh) o.mesh.removeFromParent(); }
-    this.flames.dispose(); for (const o of this.stones) o.m.removeFromParent(); this.stones = []; this.spikeGeo.dispose(); this.slabGeo.dispose(); this.crackGeo.dispose(); this.crackMat.dispose();
+    this.flames.dispose(); for (const o of this.stones) o.m.removeFromParent(); this.stones = []; this.spikeGeo.dispose(); this.slabGeo.dispose(); this.crackGeo.dispose(); this.crackMat0.dispose();
     this.live.clear(); for (const z of this.dying) { if (z.crack) { z.crack.removeFromParent(); z.crack.material.dispose(); } if (z.rb) z.rb.dispose(); if (z.mesh) z.mesh.removeFromParent(); if (z.g) this.#disposeGroup(z.g, z.mats); } this.dying = [];
-    this.rock.geo.dispose(); this.rock.geoS.dispose(); this.rock.wall.dispose(); this.rock.mat.dispose(); this.iceGeo.dispose(); this.iceMat.dispose(); this._soft?.dispose();
+    this.rock.geo.dispose(); this.rock.geoS.dispose(); this.rock.wall.dispose(); this.rock.mat0.dispose(); this.iceGeo.dispose(); this.iceMat0.dispose(); for (const m of this.themedMats.values()) m.dispose(); this.themedMats.clear(); this._soft?.dispose();
   }
 }

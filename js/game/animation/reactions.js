@@ -2,13 +2,15 @@
 import { IDX, smooth } from './pose.js';
 const mixv = (a, b, w) => a + (b - a) * w;
 // envolvente de una reacción: ataque rápido, meseta y relajación (p = progreso 0..1 del aturdimiento)
-export const env = p => p <= 0 ? 0 : p < .12 ? smooth(p / .12) : p < .45 ? 1 : p < 1 ? 1 - smooth((p - .45) / .55) : 0;
+export const env = (p, a = .12) => p <= 0 ? 0 : p < a ? smooth(p / a) : p < .45 ? 1 : p < 1 ? 1 - smooth((p - .45) / .55) : 0;
+// envolvente para las manos y los brazos: suben algo más despacio que el tronco (si no, saltan de un fotograma a otro)
+const envH = p => env(p, .26);
 
 const to = (o, w) => (k, v) => { const i = IDX[k]; o[i] += (v - o[i]) * w; };   // hacia un valor absoluto
 const by = (o, w) => (k, v) => { o[IDX[k]] += v * w; };                         // sumando un desplazamiento
 
 export function guardOverlay(o, w, crouched, S) {
-  const g = S.shield, T = to(o, w), A = by(o, w), lo = crouched ? -.14 : 0;
+  const g = S.shield, T = to(o, w), A = by(o, w), lo = -.14 * (+crouched || 0); // crouched: 0..1 (suave), no un sí/no
   T('hnFx', g.F.x); T('hnFy', g.F.y + lo); T('hnFz', g.F.z); T('hnBx', g.B.x); T('hnBy', g.B.y + lo); T('hnBz', g.B.z);
   T('hnFflare', g.flareF); T('hnBflare', g.flareB); T('hnFfist', g.fist); T('hnBfist', g.fist); T('hnFroll', g.rollF); T('hnBroll', g.rollB);
   T('hnFpitch', g.pitchF); T('hnBpitch', g.pitchB);
@@ -17,7 +19,7 @@ export function guardOverlay(o, w, crouched, S) {
 
 // p = progreso del aturdimiento, k = fuerza, air = en el aire, kind = 'hit' | 'crush', side = alterna izquierda/derecha
 export function hitOverlay(o, p, k, air, S, side = 1, kind = 'hit') {
-  const e = env(p) * (S.react ?? 1), w = Math.min(1, env(p) * .95), T = to(o, w), A = by(o, e * k);
+  const e = env(p) * (S.react ?? 1), w = Math.min(1, envH(p) * .95), T = to(o, w), A = by(o, e * k);
   if (kind === 'crush') { // guardia rota: tambaleo largo con los brazos abiertos
     const wob = Math.sin(p * 18) * .12 * env(p);
     A('spPitch', -.25); A('hdPitch', -.3); A('comZ', -.12); A('comY', -.14); A('spRoll', wob); A('hdRoll', -wob * 1.4); A('pelRoll', wob * .4);
@@ -33,7 +35,7 @@ export function hitOverlay(o, p, k, air, S, side = 1, kind = 'hit') {
 }
 
 export function blockOverlay(o, p, k, t) {
-  const e = env(p), A = by(o, e * k), tr = Math.sin(t * 55) * .025 * e;
+  const e = env(p, .3), A = by(o, e * k), tr = Math.sin(t * 31) * .018 * e; // el temblor del bloqueo, más grave: antes vibraba a 55 Hz
   A('comZ', -.12); A('spPitch', -.08); A('hdPitch', .06); A('comY', -.04); A('ftBz', -.06);
   o[IDX.hnFz] += tr; o[IDX.hnBz] -= tr; o[IDX.hnFy] += tr * .6;
 }

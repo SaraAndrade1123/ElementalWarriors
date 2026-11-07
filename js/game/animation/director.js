@@ -8,20 +8,32 @@ import { buildAttacks, warpTime } from './attacks.js';
 
 const arr = () => new Float32Array(N);
 const rate = (dt, k) => 1 - Math.exp(-dt * k);
+// Seguidor críticamente amortiguado (segundo orden): arranca y frena con suavidad, sin el escalón del primer fotograma
+// que deja una aproximación exponencial. o[k] = valor, o[k + 'v'] = su velocidad. w ≈ rapidez (1/s).
+const follow = (o, k, target, w, dt) => {
+  const v = o[k + 'v'] || 0, x = o[k] - target, e = Math.exp(-w * dt), j = (v + w * x) * dt;
+  o[k] = target + (x + j) * e; o[k + 'v'] = (v - w * j) * e;
+  return o[k];
+};
 const GETUP = .35, DOWN = .5;
+// Canales que son ángulos que pueden dar vueltas completas: al fundir se toma el camino corto.
+const WRAP = new Set(['comPitch', 'comYaw', 'comRoll', 'wpSpin'].map(k => IDX[k]));
+const wrapPi = a => a - Math.round(a / (2 * Math.PI)) * 2 * Math.PI;
+// Duración de la inercialización según el estado al que se entra (s).
+const XF = { ko: .16, down: .12, getup: .12, thrown: .1, hit: .1, blk: .09, clip: .1, fromClip: .14, other: .16 };
 const EXAG = ['comZ', 'comY', 'spYaw', 'spPitch', 'pelYaw', 'hdPitch', 'shFfwd', 'shBfwd', 'ftFz', 'ftBz'].map(k => IDX[k]); // nunca comPitch: las volteretas (2π) se deformarían
 
 export class Director {
   constructor(S, { legLen = 1.6, rest = { x: .42, y: -.86, z: .19 } } = {}) {
     this.S = S; this.legLen = legLen; this.rest = rest; this.clips = buildAttacks(S); this.neutral = neutral(rest); this.reduce = false; this.exag = 1;
-    this.b = { idle: arr(), walk: arr(), run: arr(), ground: arr(), sq: arr(), air: arr(), base: arr(), tmp: arr(), out: arr(), last: arr(), from: arr() };
+    this.b = { idle: arr(), walk: arr(), run: arr(), ground: arr(), sq: arr(), air: arr(), base: arr(), tmp: arr(), out: arr(), last: arr(), prev: arr(), from: arr() };
     this.trails = []; this.cues = [];
     this.reset();
   }
   reset() {
-    Object.assign(this, { t: 0, u: 0, ru: 0, ww: 0, rw: 0, airW: 0, gw: 0, lieW: 0, landT: 9, landK: 0, takeT: 9, wasAir: false, lastVy: 0, flipT: 9, jumpN: 0,
+    Object.assign(this, { t: 0, u: 0, ru: 0, ww: 0, rw: 0, airW: 0, gw: 0, wwv: 0, rwv: 0, airWv: 0, gwv: 0, lieW: 0, landT: 9, landK: 0, takeT: 9, wasAir: false, lastVy: 0, flipT: 9, jumpN: 0,
       hitN: 0, bkN: 0, hitT: 9, bkT: 9, koT: 0, downT: 0, key: 'free', xf: null, lastCT: -1, lastClip: null, side: 1 });
-    this.b.last.set(this.neutral); this.trails = []; this.cues = [];
+    this.b.last.set(this.neutral); this.b.prev.set(this.neutral); this.inert = null; this.trails = []; this.cues = [];
   }
 
   // f: Fighter (o estado sintético del menú). extra.action: gesto sin golpe {name, t} (presentación, victoria…);
@@ -40,8 +52,8 @@ export class Director {
     // 1 · locomoción
     const free = !act && !ko && stun <= 0 && !down && !getup && !f.bdash;
     const moving = Math.abs(vRel) > .1 && !f.air && free, running = moving && !!f.run;
-    this.ww += ((moving && !running ? 1 : 0) - this.ww) * rate(dt, 14);
-    this.rw += ((running ? 1 : 0) - this.rw) * rate(dt, 12);
+    follow(this, 'ww', moving && !running ? 1 : 0, 16, dt);
+    follow(this, 'rw', running ? 1 : 0, 14, dt);
     if (moving && !running) this.u += vRel * dt / (4 * S.walk.stepZ * this.legLen * (S.walk.stride || 1));
     if (running) this.ru += Math.abs(vRel) * dt / (1.2 * S.run.stride * this.legLen);
     if (this.wasAir && !f.air) { this.landT = 0; this.landK = clamp01(Math.abs(this.lastVy) / (f.jumpV || 14)); this.cues.push({ kind: 'land', k: this.landK }); }
@@ -49,7 +61,7 @@ export class Director {
     if (f.took === 'jump2') this.flipT = 0;
     if (f.airRec && !this.wasRec) this.recT = 0; this.wasRec = !!f.airRec; this.recT = (this.recT ?? 9) + dt;
     this.wasAir = !!f.air; this.lastVy = f.vy || 0; this.landT += dt; this.takeT += dt; this.flipT += dt;
-    this.airW += ((f.air && !f.launched && !ko ? 1 : 0) - this.airW) * rate(dt, 22);
+    follow(this, 'airW', f.air && !f.launched && !ko ? 1 : 0, 26, dt); this.airW = clamp01(this.airW);
 
     idlePose(b.idle, this.t, S, this.reduce);
     walkPose(b.walk, this.u, vRel >= 0 ? 1 : -1, b.idle, S, this.rest);
@@ -68,8 +80,8 @@ export class Director {
     if (sq > 0) { squatPose(b.sq, b.idle, sq, sq * .5, S, sq * .1); lerpInto(b.tmp, b.base, b.sq, .85 * (1 - this.airW)); b.base.set(b.tmp); }
 
     // 2 · defensa y reacciones (sobre la base)
-    this.gw += (((f.guarding && !ko && !hit && !act && !thrown) ? 1 : 0) - this.gw) * rate(dt, 20);
-    if (this.gw > .01) guardOverlay(b.base, this.gw, !!f.crouching, S);
+    follow(this, 'gw', (f.guarding && !ko && !hit && !act && !thrown) ? 1 : 0, 24, dt); this.gw = clamp01(this.gw);
+    if (this.gw > .01) guardOverlay(b.base, this.gw, f.crouch ?? (f.crouching ? 1 : 0), S);
     if (hit && !ko && !f.launched) hitOverlay(b.base, this.hitT / (f.stunMax || .3), clamp01((f.hitKb || 5) / 8) * .6 + .4, !!f.air, S, this.side, st);
     if (blk) blockOverlay(b.base, this.bkT / (f.stunMax || .2), clamp01((f.hitKb || 3) / 4) * .6 + .4, this.t);
     if (thrown) thrownOverlay(b.base, this.t);
@@ -85,7 +97,9 @@ export class Director {
 
     // 3 · golpe / gesto: el clip se re-temporiza sobre la ventana real del golpe
     let clip = null, ct = 0;
-    if (act && !ko && !lying) {
+    // los clips «de suelo» (derrota) se reproducen sobre la pose tumbada: el guerrero no se levanta
+    const ground = act && this.clips[act.name]?.ground && (ko || down);
+    if (act && ((!ko && !lying) || ground)) {
       clip = this.clips[act.name];
       if (clip) {
         ct = extra.preview ? act.t : act.def ? warpTime(clip, act) : act.t / (S.atkSpeed || 1);
@@ -101,22 +115,55 @@ export class Director {
     }
     if (!clip) { b.out.set(b.base); this.lastClip = null; }
 
-    // 4 · transición: si cambia el «estado» (nuevo golpe, impacto, KO…) se funde desde la última pose
-    const key = ko ? 'ko' : down ? 'down' : getup ? 'getup' : thrown ? 'thrown' : hit ? 'hit' + this.hitN : blk ? 'blk' + this.bkN : clip ? act : f.air ? 'air' : 'free';
+    // 4 · transición por INERCIALIZACIÓN: al cambiar de estado (nuevo golpe, impacto, K.O.…) la animación nueva empieza
+    // ya, y la diferencia con la pose anterior se disuelve con una curva quíntica que respeta la velocidad que traía el
+    // cuerpo (sin congelar la pose de partida ni saltos de un fotograma). Antes era un fundido de 35 ms: se notaba el tirón.
+    const key = ground && clip ? act : ko ? 'ko' : down ? 'down' : getup ? 'getup' : thrown ? 'thrown' : hit ? 'hit' + this.hitN : blk ? 'blk' + this.bkN : clip ? act : f.air ? 'air' : 'free';
     if (key !== this.key) {
       const was = this.key, loco = k => k === 'free' || k === 'air';
-      if (!(loco(key) && loco(was)) && !extra.preview) {
-        const d = key === 'ko' ? .06 : typeof key === 'string' && /^(hit|blk)/.test(key) ? .03 : typeof key === 'object' ? .035 : key === 'getup' || key === 'down' ? .06 : typeof was === 'object' ? .1 : .12;
-        b.from.set(b.last); this.xf = { t: 0, d };
+      if (!(loco(key) && loco(was)) && !extra.preview && dt > 0) {
+        const d = typeof key === 'object' ? XF.clip : /^hit/.test(key) ? XF.hit : /^blk/.test(key) ? XF.blk : XF[key] ?? (typeof was === 'object' ? XF.fromClip : XF.other);
+        this.startInert(b.out, d, dt);
       }
       this.key = key;
     }
-    if (this.xf) {
-      this.xf.t += dt; const w = smooth(this.xf.t / this.xf.d);
-      lerpInto(b.tmp, b.from, b.out, w); b.out.set(b.tmp); if (w >= 1) this.xf = null;
-    }
-    b.last.set(b.out);
+    if (this.inert) this.applyInert(b.out, dt);
+    b.prev.set(b.last); b.last.set(b.out);
     const o = b.last.slice(), L = this.legLen; o[IDX.comX] *= L; o[IDX.comY] *= L; o[IDX.comZ] *= L; // de «largos de pierna» a unidades del modelo
     return o;
+  }
+  // Inercialización (Bollo, GDC 2016): por canal, x0 = pose anterior − pose nueva y v0 = su velocidad; x(t) quíntica
+  // que llega a 0 en T con velocidad y aceleración 0. Si ya hay una en curso, se suma (se parte de la pose que se veía).
+  startInert(target, T, dt) {
+    const { last, prev } = this.b, n = target.length;
+    const X = new Float64Array(n), V = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      let x = last[i] - target[i], v = (last[i] - prev[i]) / dt;
+      if (WRAP.has(i)) { x = wrapPi(x); v = wrapPi(last[i] - prev[i]) / dt; }
+      X[i] = x; V[i] = v;
+    }
+    const P = new Float64Array(n * 6); // por canal: A B C a0/2 v0 x0 y su T propio
+    const Tc = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      let x0 = X[i], v0 = V[i]; const sg = x0 < 0 ? -1 : 1; x0 *= sg; v0 *= sg;
+      if (x0 < 1e-5) { Tc[i] = 0; continue; }
+      if (v0 > 0) v0 = 0; // si ya se alejaba del destino, no lo empuja más allá
+      let t = T; if (v0 < 0) t = Math.min(t, -5 * x0 / v0);
+      if (t < 3 * dt) { t = Math.min(T, 3 * dt); v0 = Math.max(v0, -x0 / t); } // nunca una mezcla de menos de 3 fotogramas
+      v0 = Math.max(v0, -4 * x0 / t); // tope a la velocidad heredada (sin latigazos)
+      const a0 = Math.max(0, (-8 * v0 * t - 20 * x0) / (t * t)), t2 = t * t, t3 = t2 * t, t4 = t3 * t, t5 = t4 * t;
+      const o = i * 6;
+      P[o] = sg * -(a0 * t2 + 6 * v0 * t + 12 * x0) / (2 * t5); P[o + 1] = sg * (3 * a0 * t2 + 16 * v0 * t + 30 * x0) / (2 * t4);
+      P[o + 2] = sg * -(3 * a0 * t2 + 12 * v0 * t + 20 * x0) / (2 * t3); P[o + 3] = sg * a0 / 2; P[o + 4] = sg * v0; P[o + 5] = sg * x0; Tc[i] = t;
+    }
+    this.inert = { t: 0, P, Tc, T };
+  }
+  applyInert(out, dt) {
+    const I = this.inert; I.t += dt; const { P, Tc } = I; let live = false;
+    for (let i = 0; i < out.length; i++) {
+      const T = Tc[i]; if (!(T > 0)) continue; const t = Math.min(I.t, T); if (I.t < T) live = true;
+      const o = i * 6; out[i] += ((((P[o] * t + P[o + 1]) * t + P[o + 2]) * t + P[o + 3]) * t + P[o + 4]) * t + P[o + 5];
+    }
+    if (!live) this.inert = null;
   }
 }

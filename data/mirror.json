@@ -1,11 +1,129 @@
 {
- "_doc": "Chroma ESPEJO: el aspecto del segundo guerrero cuando los dos luchadores son el mismo. No es una paleta de la tienda: se aplica en el sombreador sobre CUALQUIER modelo (no depende de su textura), así sirve igual para diseños personalizados futuros. hue = giro de matiz en grados, sat/val = multiplicadores de saturación y brillo, keepSkin = conserva los tonos de piel, tint/tintAmount = tiñe metales y blancos, rim/rimStrength/rimPower = contorno luminoso que identifica al espejo, fx = color de aura y partículas del menú/HUD. Un guerrero sin entrada usa «default» (y su fx se calcula girando el suyo). Nombre visible: clave de texto mirror.<id>.name (o mirror.generic).",
+ "_doc": "Chroma ESPEJO: el aspecto del segundo guerrero cuando los dos luchadores son el mismo. No es una paleta de la tienda: se aplica en el sombreador sobre CUALQUIER modelo (no depende de su textura), así sirve igual para diseños personalizados futuros. hue = giro de matiz en grados, sat/val = multiplicadores de saturación y brillo, keepSkin = conserva los tonos de piel, tint/tintAmount = tiñe metales y blancos, rim/rimStrength/rimPower = contorno luminoso que identifica al espejo, fx = color de aura y partículas del menú/HUD. Un guerrero sin entrada usa «default» (y su fx se calcula girando el suyo). Nombre visible: clave de texto mirror.<id>.name (o mirror.generic). (v1.7) chroma = efecto de material como los de la tienda (kind de js/game/chroma-fx.js); vfx = colores y estilo de las técnicas del espejo (js/game/chroma-vfx.js).",
  "version": 1,
- "default": { "hue": 165, "sat": 1.1, "val": 0.9, "keepSkin": true, "tint": "#ffffff", "tintAmount": 0.18, "rim": "#e8f4ff", "rimStrength": 0.65, "rimPower": 2.4 },
+ "default": {
+  "hue": 165,
+  "sat": 1.1,
+  "val": 0.9,
+  "keepSkin": true,
+  "tint": "#ffffff",
+  "tintAmount": 0.18,
+  "rim": "#e8f4ff",
+  "rimStrength": 0.65,
+  "rimPower": 2.4
+ },
  "chars": {
-  "ignis":  { "hue": 150, "sat": 1.15, "val": 0.92, "tint": "#7dffb0", "tintAmount": 0.22, "rim": "#5dffa8", "rimStrength": 0.8, "fx": { "color": "#3dff9a", "light": "#1fd47a" } },
-  "aqua":   { "hue": 175, "sat": 1.1, "val": 0.95, "tint": "#ffc46b", "tintAmount": 0.22, "rim": "#ffb347", "rimStrength": 0.8, "fx": { "color": "#ffb347", "light": "#ff8c1a" } },
-  "terra":  { "hue": -140, "sat": 1.15, "val": 0.92, "tint": "#ff9fd0", "tintAmount": 0.25, "rim": "#ff6fb5", "rimStrength": 0.8, "fx": { "color": "#ff6fb5", "light": "#e0408f" } },
-  "zephyr": { "hue": -45, "sat": 1.35, "val": 0.86, "tint": "#ff8090", "tintAmount": 0.3, "rim": "#ff5a6e", "rimStrength": 0.85, "fx": { "color": "#ff5a6e", "light": "#d92a45" } }
+  "ignis": {
+   "hue": 150,
+   "sat": 1.15,
+   "val": 0.92,
+   "tint": "#7dffb0",
+   "tintAmount": 0.22,
+   "rim": "#5dffa8",
+   "rimStrength": 0.8,
+   "fx": {
+    "color": "#3dff9a",
+    "light": "#1fd47a"
+   },
+   "chroma": {
+    "kind": "circuit",
+    "glow": "#5dffa8",
+    "glow2": "#d8ffe8",
+    "rim": "#5dffa8",
+    "outline": "#06301a",
+    "aura": "motes",
+    "amount": 0.85
+   },
+   "vfx": {
+    "style": "runes",
+    "a": "#e8fff0",
+    "c": "#3dff9a",
+    "b": "#0a7a3a"
+   }
+  },
+  "aqua": {
+   "hue": 175,
+   "sat": 1.1,
+   "val": 0.95,
+   "tint": "#ffc46b",
+   "tintAmount": 0.22,
+   "rim": "#ffb347",
+   "rimStrength": 0.8,
+   "fx": {
+    "color": "#ffb347",
+    "light": "#ff8c1a"
+   },
+   "chroma": {
+    "kind": "holo",
+    "glow": "#ffb347",
+    "glow2": "#ffe0a0",
+    "rim": "#ffb347",
+    "outline": "#3a1a00",
+    "aura": "sparkles",
+    "amount": 0.85
+   },
+   "vfx": {
+    "style": "helix",
+    "a": "#fff4e0",
+    "c": "#ffb347",
+    "b": "#a8540a"
+   }
+  },
+  "terra": {
+   "hue": -140,
+   "sat": 1.15,
+   "val": 0.92,
+   "tint": "#ff9fd0",
+   "tintAmount": 0.25,
+   "rim": "#ff6fb5",
+   "rimStrength": 0.8,
+   "fx": {
+    "color": "#ff6fb5",
+    "light": "#e0408f"
+   },
+   "chroma": {
+    "kind": "sakura",
+    "glow": "#ff9fd0",
+    "glow2": "#ffd6ea",
+    "rim": "#ff6fb5",
+    "outline": "#4a0a2a",
+    "aura": "petals",
+    "amount": 0.85
+   },
+   "vfx": {
+    "style": "petals",
+    "a": "#ffe6f2",
+    "c": "#ff7ab8",
+    "b": "#a0205a"
+   }
+  },
+  "zephyr": {
+   "hue": -45,
+   "sat": 1.35,
+   "val": 0.86,
+   "tint": "#ff8090",
+   "tintAmount": 0.3,
+   "rim": "#ff5a6e",
+   "rimStrength": 0.85,
+   "fx": {
+    "color": "#ff5a6e",
+    "light": "#d92a45"
+   },
+   "chroma": {
+    "kind": "neon",
+    "glow": "#ff5a6e",
+    "glow2": "#ffb0ba",
+    "rim": "#ff5a6e",
+    "outline": "#3a0610",
+    "aura": "bolts",
+    "amount": 0.85
+   },
+   "vfx": {
+    "style": "ink",
+    "a": "#ffe0e4",
+    "c": "#ff5a6e",
+    "b": "#7a0a1a"
+   }
+  }
  }
 }

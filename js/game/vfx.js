@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { registerTables, TH } from './chroma-vfx.js';
 
 // Efectos de combate (sólo presentación; nunca tocan la simulación):
 //   · Trails: estelas de arma/puño/pie durante la ventana que marca cada clip.
@@ -13,6 +14,7 @@ const ELEM = {
   zephyr: { a: new THREE.Color(0xffffff), b: new THREE.Color(0x9cc8ff), c: new THREE.Color(0xd6ecff) },
 };
 export const elemOf = id => ELEM[id] || ELEM.zephyr;
+registerTables({ elem: ELEM }); // los chromas cambian estos colores mientras se dibuja lo de su luchador (chroma-vfx.js)
 
 const canvasTex = (s, draw) => { const c = document.createElement('canvas'); c.width = c.height = s; draw(c.getContext('2d'), s); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
 const TEX = {};
@@ -102,7 +104,12 @@ class Shapes {
   constructor(scene) {
     this.scene = scene; this.items = [];
     this.rockGeo = new THREE.ConeGeometry(.28, 1, 5); this.rockGeo.translate(0, .5, 0);
-    this.rockMat = new THREE.MeshToonMaterial({ color: 0x9a8e74, emissive: 0x1c2410 });
+    this.rockMat0 = new THREE.MeshToonMaterial({ color: 0x9a8e74, emissive: 0x1c2410 }); this.rockMats = new Map();
+  }
+  get rockMat() { // con chroma: la roca toma su color (y brilla un poco en su tono)
+    const th = TH.cur; if (!th) return this.rockMat0; let m = this.rockMats.get(th.id);
+    if (!m) { m = this.rockMat0.clone(); m.color.copy(th.c).lerp(new THREE.Color(0x9a8e74), .45); m.emissive.copy(th.b).multiplyScalar(.35); this.rockMats.set(th.id, m); }
+    return m;
   }
   sprite(map, pos, { color, size = 1, grow = 2, life = .3, rot = 0, spin = 0, opacity = 1, flat = false, stretch = 1 }) {
     let m;
@@ -125,7 +132,7 @@ class Shapes {
       it.m.material.opacity = it.opacity * (1 - k * k); if (it.spin && it.m.material.rotation !== undefined) it.m.material.rotation += it.spin * dt;
     }
   }
-  dispose() { for (const it of this.items) { it.m.removeFromParent(); if (!it.rock) it.m.material.dispose(); } this.items = []; this.rockGeo.dispose(); this.rockMat.dispose(); }
+  dispose() { for (const it of this.items) { it.m.removeFromParent(); if (!it.rock) it.m.material.dispose(); } this.items = []; this.rockGeo.dispose(); this.rockMat0.dispose(); for (const m of this.rockMats.values()) m.dispose(); this.rockMats.clear(); }
 }
 
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _b = new THREE.Vector3(), _t = new THREE.Vector3();
