@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { t, getLang } from '../systems/localization.js';
 import { mirrorName } from '../systems/mirror-spec.js';
+import { typed } from '../systems/a11y.js';
 
 // CINEMÁTICA PREVIA AL COMBATE (estilo Mortal Kombat / Guilty Gear): franjas de cine, cartel «A VS B»,
 // planos de cámara sobre quien habla con subtítulos que se escriben solos, gesto de presentación de cada
@@ -109,7 +110,7 @@ export function installCinematic({ scene, roster = [], data = null, doc = global
         el.dataset.shot = s.kind; title.classList.toggle('on', s.kind === 'title'); el.classList.toggle('clash', s.kind === 'clash');
         if (cut) { el.classList.remove('cut'); void el.offsetWidth; el.classList.add('cut'); }
         if (s.kind === 'line') {
-          const i = s.who, id = ids[i], n = Math.floor(st * 46);
+          const i = s.who, id = ids[i], n = typed(st);
           sub.classList.add('on'); sub.classList.toggle('r', i === 1); sub.style.setProperty('--c', api.cols?.[i] || '#f1dc9a');
           if (who.textContent !== names[i]) { who.textContent = names[i]; alias.textContent = t(`char.${id}.alias`) === `char.${id}.alias` ? '' : t(`char.${id}.alias`); }
           txt.textContent = s.text.slice(0, n); txt.classList.toggle('done', n >= s.text.length);

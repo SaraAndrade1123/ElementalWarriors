@@ -36,9 +36,9 @@ export class WeaponVfx {
     if (!v) {
       const col = this.colorOf(p.owner.def.id), g = new THREE.Group(); g.renderOrder = 9;
       let m;
-      if (p.kind === 'w_knife') m = makeWeaponModel('dagger', col);
-      else if (p.kind === 'w_bola') m = makeWeaponModel('bola', col);
-      else if (p.kind === 'w_boomerang') m = makeWeaponModel('boomerang', col);
+      if (p.kind === 'w_knife') m = makeWeaponModel('dagger', col, { aura: true });
+      else if (p.kind === 'w_bola') m = makeWeaponModel('bola', col, { aura: true });
+      else if (p.kind === 'w_boomerang') m = makeWeaponModel('boomerang', col, { aura: true });
       else { // flecha
         const a = new THREE.Group(), shaft = new THREE.Mesh(new THREE.CylinderGeometry(.016, .016, .95, 6), new THREE.MeshToonMaterial({ color: 0x8a6a42 })); shaft.position.y = .1; a.add(shaft);
         const head = new THREE.Mesh(new THREE.ConeGeometry(.05, .16, 6), new THREE.MeshBasicMaterial({ color: col, toneMapped: false })); head.position.y = .64; a.add(head);
@@ -62,6 +62,23 @@ export class WeaponVfx {
     const v = this.proj.get(p); if (!v) return; this.proj.delete(p);
     v.g.removeFromParent(); v.g.traverse(o => { if (o.isMesh || o.isSprite) { if (o.isMesh) o.geometry?.dispose?.(); o.material.dispose(); } });
     if (how) this.V.burst(new THREE.Vector3(p.x, p.y, .3), { a: new THREE.Color(0xffffff), b: v.col }, { n: p.caught ? 8 : 14, speed: 3, g: 6, life: .35, size: .16, size1: .04, cA: new THREE.Color(0xffffff), cB: v.col });
+  }
+  // (v1.8) impacto propio de cada tipo de arma: filo → tajo en cruz · contundente → onda de choque · punta → estocada
+  impact(pos, kind, who, dir = 1, power = 1) {
+    const V = this.V, col = new THREE.Color(this.colorOf(who)), P = new THREE.Vector3(pos.x, pos.y, .65), W = new THREE.Color(0xffffff);
+    const blunt = kind === 'mace' || kind === 'bola', pierce = kind === 'bow' || kind === 'knives';
+    if (blunt) {
+      V.shapes?.sprite('ring', P, { color: col.getHex(), size: .6, grow: 5 + power * 2, life: .32, opacity: .95 });
+      V.shapes?.sprite('ring', new THREE.Vector3(pos.x, .06, .3), { color: col.getHex(), size: .8, grow: 6, life: .45, flat: true });
+      V.burst(P, { a: W, b: col }, { n: 18, speed: 6, up: 3, g: 14, life: .5, size: .2, size1: .06, cA: W, cB: col });
+    } else if (pierce) {
+      for (let i = 0; i < 10; i++) V.parts?.emit({ x: P.x - dir * .2, y: P.y + rnd(-.06, .06), z: P.z, vx: dir * rnd(9, 15), vy: rnd(-.6, .6), vz: 0, drag: 6, life: rnd(.14, .24), s0: .16, s1: 0, c0: W, c1: col });
+      V.shapes?.sprite('ring', P, { color: col.getHex(), size: .35, grow: 3, life: .2, stretch: 1.8 });
+    } else {
+      for (const r of [.75, -.75]) V.shapes?.sprite('crescent', P.clone(), { color: r > 0 ? W.getHex() : col.getHex(), size: 1.3 + power * .4, grow: 1.5, life: .24, rot: r + (dir < 0 ? Math.PI : 0) });
+      V.burst(P, { a: W, b: col }, { n: 12, speed: 6, dir: new THREE.Vector3(dir * 3, .6, 0), life: .3, size: .16, size1: 0, drag: 4, cA: W, cB: col });
+    }
+    V.shapes?.sprite('flash', P, { color: 0xffffff, size: .7 + power * .5, grow: 1.6, life: .12 });
   }
   update() {}
   dispose() { for (const p of [...this.proj.keys()]) this.projectileEnd(p); }

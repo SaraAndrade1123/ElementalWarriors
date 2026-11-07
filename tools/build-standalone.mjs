@@ -24,7 +24,7 @@ for (const f of walk('data').filter(f => f.endsWith('.json'))) assets[f.replaceA
 for (const f of walk('assets/characters').filter(f => /\.(glb|gltf|png|jpg)$/i.test(f))) assets[f.replaceAll('\\', '/')] = { t: 'b64', m: extname(f) === '.glb' ? 'model/gltf-binary' : 'application/octet-stream', v: rd(f).toString('base64') };
 
 // 3 · estilos: todas las hojas en el orden en que el juego las carga (tipografías incrustadas)
-const SHEETS = ['css/fonts.css', 'css/main.css', 'css/theme.css', 'css/modes.css', 'css/meta.css', 'css/stages.css', 'css/elements.css', 'css/audio.css', 'css/cinema.css', 'css/result.css', 'css/mobile.css'];
+const SHEETS = ['css/fonts.css', 'css/main.css', 'css/theme.css', 'css/modes.css', 'css/meta.css', 'css/stages.css', 'css/elements.css', 'css/audio.css', 'css/cinema.css', 'css/result.css', 'css/settings.css', 'css/mobile.css'];
 const css = SHEETS.map(f => {
   let s = rd(f).toString();
   s = s.replace(/url\((\.\.\/assets\/fonts\/[^)]+\.woff2)\)/g, (_, u) => `url(data:font/woff2;base64,${rd(join('css', u)).toString('base64')})`);

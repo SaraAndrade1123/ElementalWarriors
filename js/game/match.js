@@ -6,6 +6,7 @@ import { Vfx, elemOf } from './vfx.js';
 import { themed, signature, TH } from './chroma-vfx.js';
 import { DebugOverlay, infoLines } from './debug.js';
 import { t } from '../systems/localization.js';
+import { A11Y } from '../systems/a11y.js';
 
 const IDLE = NONE;
 const PI = Math.PI;
@@ -208,7 +209,7 @@ export class Match {
   render(rdt, cam) {
     const [a, b] = this.f, alpha = clamp(this.acc / STEP, 0, 1);
     const ix = (f, i) => this.prev[i].x + (f.x - this.prev[i].x) * alpha, iy = (f, i) => this.prev[i].y + (f.y - this.prev[i].y) * alpha;
-    const vdt = this.stop > 0 ? 0 : rdt * (this.phase === 'ko' || this.koT > 0 && this.koT < 1.2 ? .35 : 1); // tiempo de animación: el hit-stop congela la pose y el KO va en cámara lenta
+    const vdt = this.stop > 0 ? 0 : rdt * (!this.noSlow && (this.phase === 'ko' || this.koT > 0 && this.koT < 1.2) ? .35 : 1); // (la escena final la desactiva: noSlow) // tiempo de animación: el hit-stop congela la pose y el KO va en cámara lenta
 
     this.v.forEach((v, i) => {
       const f = this.f[i], k = 1 - Math.exp(-rdt * 16), anim = v.c.anim;
@@ -245,9 +246,9 @@ export class Match {
     const ax = ix(a, 0), bx = ix(b, 1), gap = Math.abs(ax - bx), kc = 1 - Math.exp(-rdt * 6);
     const need = clamp((gap + 5.5) / (2 * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * cam.aspect), 11.5, 26);
     this.zoom = Math.max(0, this.zoom - rdt * 1.6);
-    this.cx += (clamp((ax + bx) / 2, -6, 6) - this.cx) * kc; this.cd += (need * (1 - this.zoom * .18) - this.cd) * kc;
+    this.cx += (clamp((ax + bx) / 2, -6, 6) - this.cx) * kc; this.cd += (need * (1 - this.zoom * .18 * A11Y.camK) - this.cd) * kc;
     this.cy += (Math.max(iy(a, 0), iy(b, 1)) * .55 - this.cy) * kc;
-    let sx = 0, sy = 0; if (this.shake > .002 && !this.sm.reduce) { sx = (Math.random() - .5) * this.shake; sy = (Math.random() - .5) * this.shake; } this.shake *= Math.exp(-rdt * 9);
+    let sx = 0, sy = 0; if (this.shake > .002 && !this.sm.reduce) { sx = (Math.random() - .5) * this.shake * A11Y.camK; sy = (Math.random() - .5) * this.shake * A11Y.camK; } // (F9) efectos de cámara / cámara tranquila this.shake *= Math.exp(-rdt * 9);
     cam.position.set(this.cx + sx, 2.9 + this.cy + sy, this.cd); cam.lookAt(this.cx, 1.9 + this.cy, 0);
   }
 

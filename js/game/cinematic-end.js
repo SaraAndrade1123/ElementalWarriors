@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { t, getLang } from '../systems/localization.js';
 import { mirrorName } from '../systems/mirror-spec.js';
+import { typed } from '../systems/a11y.js';
 
 // CINEMÁTICA FINAL (estilo Mortal Kombat / Guilty Gear): al decidirse el combate, antes del panel de resultados.
 //  1 · «Golpe de victoria»: grúa que gira alrededor del ganador mientras repite su gesto, destello de su elemento,
@@ -88,6 +89,7 @@ export function installOutro({ scene, roster = [], data = null, doc = globalThis
       if (!cur || this.paused) return out;
       st += rdt; let cut = false;
       while (k < shots.length && st > shots[k].dur) { st -= shots[k].dur; k++; cut = true;
+        if (k > 0) this.noSlow = true; // tras el primer plano, la animación ya va a velocidad normal
         if (shots[k]?.lose) { // el vencido SIGUE EN EL SUELO: se apoya, mira al ganador y responde con su gesto (propio de cada uno)
           const L = this.f[l], Wf = this.f[w], v = this.v[l]; L.ko = true; L.down = 0; L.getup = 0; L.air = false; L.launched = false; L.y = 0; L.vx = L.vy = L.kv = 0; L.act = null; L.stun = 0;
           if (!cur.faced) { L.facing = Math.sign(Wf.x - L.x) || L.facing; cur.faced = true; }
@@ -102,7 +104,7 @@ export function installOutro({ scene, roster = [], data = null, doc = globalThis
       } else if (s.kind === 'line') {
         const f = this.f[s.who], fd = f.facing || 1, h = H(s.who), e = ease(u);
         if (!s.lose) { _p.set(f.x + fd * (3.1 - .4 * e), h * .3, 5.6 - .7 * e); _l.set(f.x + fd * .1, h * .64, 0); } // contrapicado heroico
-        else { const Wf = this.f[w], d = Math.sign(Wf.x - f.x) || 1; _p.set(f.x + d * (1.5 - .2 * e), h * .5, 3.5 - .35 * e); _l.set(f.x - d * .4, h * .2, 0); } // a ras de suelo, desde el lado del ganador: el vencido le mira desde el suelo
+        else { const Wf = this.f[w], d = Math.sign(Wf.x - f.x) || 1; _p.set(f.x + d * (2.3 - .25 * e), h * .46, 4.7 - .4 * e); _l.set(f.x - d * .1, h * .3, 0); } // a ras de suelo, desde el lado del ganador: el vencido le mira desde el suelo
       } else { const e = ease(u); _p.set(F.x + dir * (2.6 - .3 * e), H(w) * .58, 5.4 - .8 * e); _l.set(F.x - dir * .55, H(w) * .6, 0); } // retrato (el nombre queda a un lado)
       cam.position.copy(_p); cam.lookAt(_l);
       if (el) {
@@ -111,7 +113,7 @@ export function installOutro({ scene, roster = [], data = null, doc = globalThis
         ban.classList.toggle('on', s.kind === 'slam');
         el.querySelector('.oframe').classList.toggle('on', s.kind === 'pose');
         if (s.kind === 'line') {
-          const n = Math.floor(st * 46), i = s.who;
+          const n = typed(st), i = s.who;
           sub.classList.add('on'); sub.classList.toggle('r', i === 1); sub.style.setProperty('--c', cols[i]);
           if (whoEl.textContent !== names[i]) whoEl.textContent = names[i];
           txt.textContent = s.text.slice(0, n); txt.classList.toggle('done', n >= s.text.length);

@@ -140,20 +140,24 @@ export function backdashPose(out, p, idle) {
 
 // Tumbado boca arriba (derribo / K.O.). k: 0 = de pie … 1 = tumbado; air: 1 mientras va despedido.
 // Cómo queda cada guerrero en el suelo tras el K.O. (se aplica solo una vez caído, no en el aire): cada uno distinto.
+// En el suelo los pies NO siguen al cuerpo (ftFree 0): se apoyan en el mundo —planta en el suelo con la rodilla arriba, o
+// talón en el suelo con la punta hacia arriba y abierta—. Sus posiciones son respecto a donde estarían de pie (x afuera,
+// z hacia delante, en largos de pierna). Cada guerrero queda tumbado a su manera.
 const KO = {
-  ignis: { ftFy: .5, ftFz: .28, ftFpitch: .1, ftFx: .14, ftBx: .2, hnFx: -.15, hnFy: .05, hnFz: .32, hnFfist: .9, hnBx: .78, hnBy: .45, hnBz: -.2, hdYaw: .6, hdRoll: .1 },  // una rodilla arriba, mano al pecho
-  aqua: { ftFx: .02, ftBx: .1, ftFy: .3, ftBy: .22, ftFz: .2, ftBz: .12, ftFpitch: .5, ftBpitch: .5, hnFx: .2, hnFy: .62, hnFz: .05, hnFfist: .15, hnBx: -.05, hnBy: -.1, hnBz: .28, hnBfist: .1, hdYaw: .75, hdRoll: .35, spRoll: .12 }, // recogida, brazo bajo la cabeza
-  terra: { ftFx: .45, ftBx: .5, ftFy: .05, ftBy: .05, ftFz: .02, ftBz: -.08, hnFx: .95, hnFy: .1, hnFz: -.05, hnBx: .95, hnBy: .15, hnBz: -.05, hnFfist: .2, hnBfist: .2, hdYaw: -.2 }, // abierta en estrella, agotada
-  zephyr: { ftFy: .38, ftFz: .2, ftFx: -.05, ftBy: .1, ftBx: .12, hnFx: .35, hnFy: .85, hnFz: -.05, hnBx: .4, hnBy: .8, hnBz: -.1, hnFfist: .4, hnBfist: .4, hdYaw: .3, hdRoll: -.15 }, // brazos sobre la cabeza
+  ignis: { ftFx: .16, ftFz: .1, ftFpitch: 0, ftFyaw: .1, ftBx: .28, ftBz: .55, ftBpitch: 1.05, ftByaw: .5, hnFx: -.15, hnFy: .05, hnFz: .32, hnFfist: .9, hnBx: .78, hnBy: .45, hnBz: -.2, hdYaw: .6, hdRoll: .1 },  // una rodilla arriba, mano al pecho
+  aqua: { ftFx: .1, ftFz: .12, ftFpitch: 0, ftFyaw: -.15, ftBx: .02, ftBz: .5, ftBpitch: .9, ftByaw: .25, hnFx: .2, hnFy: .62, hnFz: .05, hnFfist: .15, hnBx: -.05, hnBy: -.1, hnBz: .28, hnBfist: .1, hdYaw: .75, hdRoll: .35, spRoll: .12 }, // una rodilla arriba y la otra pierna cruzada, brazo bajo la cabeza
+  terra: { ftFx: .48, ftFz: .5, ftFpitch: 1.0, ftFyaw: .65, ftBx: .52, ftBz: .46, ftBpitch: 1.0, ftByaw: .65, hnFx: .95, hnFy: .1, hnFz: -.05, hnBx: .95, hnBy: .15, hnBz: -.05, hnFfist: .2, hnBfist: .2, hdYaw: -.2 }, // abierta en estrella, agotada
+  zephyr: { ftFx: .42, ftFz: .22, ftFpitch: .35, ftFyaw: 1.0, ftBx: .2, ftBz: .58, ftBpitch: 1.05, ftByaw: .4, hnFx: .35, hnFy: .85, hnFz: -.05, hnBx: .4, hnBy: .8, hnBz: -.1, hnFfist: .4, hnBfist: .4, hdYaw: .3, hdRoll: -.15 }, // brazos sobre la cabeza, una pierna abierta
 };
 export function lyingPose(out, base, k, air, t, id) {
   if (k <= .001) return out;
   const s = (n, v) => { const i = IDX[n]; out[i] = out[i] + (v - out[i]) * k; }, fl = Math.sin(t * 9) * .1 * air;
-  s('comPitch', mixv(-1.5, -.9, air)); s('comY', mixv(-.83, -.25, air)); s('comZ', mixv(-.45, -.1, air)); s('comYaw', 0); s('comRoll', 0); s('ftFree', 1);
+  s('comPitch', mixv(-1.5, -.9, air)); s('comY', mixv(-.83, -.25, air)); s('comZ', mixv(-.45, -.1, air)); s('comYaw', 0); s('comRoll', 0); s('ftFree', air);
   s('pelYaw', 0); s('pelRoll', 0); s('pelPitch', mixv(.1, -.2, air)); s('spPitch', mixv(.05, -.35, air)); s('spYaw', 0); s('spRoll', 0);
   s('hdPitch', mixv(-.2, -.45, air)); s('hdYaw', mixv(.4, 0, air)); s('hdRoll', 0);
-  s('ftFx', mixv(.2, .06, air)); s('ftBx', mixv(.26, .1, air)); s('ftFy', mixv(.32, .45, air)); s('ftBy', mixv(.05, .25, air)); s('ftFz', mixv(.05, .2 + fl, air)); s('ftBz', mixv(-.05, -.1, air));
-  s('ftFpitch', mixv(.3, -.4, air)); s('ftBpitch', mixv(.5, -.5, air));
+  // pies: en el aire siguen al cuerpo (marco del cuerpo); en el suelo se apoyan (marco del mundo, ver KO)
+  s('ftFx', mixv(.16, .06, air)); s('ftBx', mixv(.28, .1, air)); s('ftFy', mixv(0, .45, air)); s('ftBy', mixv(0, .25, air)); s('ftFz', mixv(.1, .2 + fl, air)); s('ftBz', mixv(.55, -.1, air));
+  s('ftFpitch', mixv(0, -.4, air)); s('ftBpitch', mixv(1.05, -.5, air)); s('ftFyaw', mixv(.1, 0, air)); s('ftByaw', mixv(.5, 0, air));
   s('hnFx', mixv(.75, .7, air)); s('hnFy', mixv(.2, .35 + fl, air)); s('hnFz', mixv(-.15, -.2, air)); s('hnBx', mixv(.82, .8, air)); s('hnBy', mixv(.35, .25 - fl, air)); s('hnBz', mixv(-.1, -.3, air));
   s('hnFflare', .7); s('hnBflare', .7); s('hnFfist', mixv(.3, .2, air)); s('hnBfist', 0); s('hnFpitch', 0); s('hnBpitch', 0); s('hnFroll', 0); s('hnBroll', 0);
   s('shFup', mixv(.3, .4, air)); s('shBup', mixv(.3, .4, air)); s('shFfwd', 0); s('shBfwd', 0);

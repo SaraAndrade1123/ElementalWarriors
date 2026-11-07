@@ -14,7 +14,7 @@ const { loadLocale } = await import('../js/systems/localization.js');
 const B = await import('../js/game/bending.js');
 const { buildBending, BENDING_CLIPS } = await import('../js/game/animation/bending-clips.js');
 const { styleFor } = await import('../js/game/animation/styles.js');
-const { evalClip, N } = await import('../js/game/animation/pose.js');
+const { evalClip, N, CH } = await import('../js/game/animation/pose.js');
 const { warpTime } = await import('../js/game/animation/attacks.js');
 const { installElements } = await import('../js/elements/element-hook.js');
 const { installBending } = await import('../js/elements/bending-hook.js');
@@ -117,14 +117,14 @@ for (const [id, k, kind, setup] of [['ignis', 'eb', 'fireball', { x: 1 }], ['zep
   const kinds = Object.keys(used); ok(kinds.length >= 8 && IDS.every(id => kinds.some(k => k.startsWith(id))), `la IA usa el control elemental de los cuatro (${kinds.length} técnicas distintas en 80 s: ${kinds.join(', ')})`); }
 
 // ── 6 · animaciones ──
-const out = new Float32Array(N), base = new Float32Array(N);
+const out = new Float32Array(N), base = new Float32Array(N), TURNS = new Set(['comYaw', 'comPitch', 'comRoll', 'wpSpin'].map(k => CH.indexOf(k)));
 for (const id of IDS) {
   const S = styleFor(id), C = buildBending(S); ok(BENDING_CLIPS.every(k => C[k]), `${id}: existen los 3 clips (${BENDING_CLIPS.join(', ')})`);
   let finite = true, warpOk = true;
   for (const k of BENDING_CLIPS) { const c = C[k], d = data[id][k];
     for (let t = 0; t <= c.dur; t += 1 / 120) { evalClip(c, t, base, out); if (!out.every(Number.isFinite)) finite = false; }
     const at = warpTime(c, { def: d, t: d.startup + 1e-4 }); if (!(at >= c.hit[0] - 1e-3 && at <= c.hit[1] + 1e-3)) warpOk = false;
-    let jump = 0, prev = null; for (let t = 0; t <= c.dur; t += 1 / 60) { evalClip(c, t, base, out); if (prev) for (let j = 0; j < N; j++) jump = Math.max(jump, Math.abs(out[j] - prev[j]) / (j === 3 ? 8 : 1)); prev = Float32Array.from(out); }
+    let jump = 0, prev = null; for (let t = 0; t <= c.dur; t += 1 / 60) { evalClip(c, t, base, out); if (prev) for (let j = 0; j < N; j++) { let dd = out[j] - prev[j]; if (TURNS.has(j)) dd -= Math.round(dd / (2 * Math.PI)) * 2 * Math.PI; jump = Math.max(jump, Math.abs(dd) / (j === 3 ? 8 : 1)); } /* una vuelta completa (2π) es la misma pose */ prev = Float32Array.from(out); }
     if (jump > .75) { finite = false; console.error('  salto brusco', id, k, jump.toFixed(2)); } }
   ok(finite, `${id}: poses finitas y sin saltos bruscos (60 FPS)`); ok(warpOk, `${id}: el instante de liberación cae en la ventana activa real`);
 }

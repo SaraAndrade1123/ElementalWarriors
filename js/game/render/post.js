@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { A11Y } from '../../systems/a11y.js';
 
 // POSTPROCESO estilo anime de lucha (Guilty Gear / Mortal Kombat), sin dependencias externas:
 //   escena HDR → resplandor (bloom) en 2 niveles → composición con gradación de color, viñeta,
@@ -75,8 +76,9 @@ export class PostFX {
     this.U.uAspect.value = this.w / this.h;
   }
   // Efectos puntuales (se suman y decaen): impact(k) destello · invert(k) fotograma de impacto · superFreeze(sec, center)
-  impact(k = 1, color = 0xffffff) { this.fx.flash = Math.max(this.fx.flash, .22 * k); this.fx.ca = Math.max(this.fx.ca, 1.2 * k); this.U.uFlashC.value.set(color); }
-  invertFrame(k = 1) { this.fx.inv = Math.max(this.fx.inv, .9 * k); }
+  impact(k = 1, color = 0xffffff) { k *= A11Y.flashK; // (F9) reducir destellos
+    this.fx.flash = Math.max(this.fx.flash, .22 * k); this.fx.ca = Math.max(this.fx.ca, 1.2 * k); this.U.uFlashC.value.set(color); }
+  invertFrame(k = 1) { if (A11Y.reduceFlash) return; this.fx.inv = Math.max(this.fx.inv, .9 * k); } // sin fotograma invertido si se reducen destellos
   superFreeze(t = .5, center = null) { this.fx.super = 1; this.fx.lines = 1; this.superT = t; if (center) this.U.uCenter.value.copy(center); }
   update(dt) {
     const f = this.fx, k = Math.exp(-dt * 9);

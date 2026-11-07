@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { themed, signature } from './chroma-vfx.js';
 import { t } from '../systems/localization.js';
 import { AnimeFx } from './render/anime-fx.js';
+import { A11Y } from '../systems/a11y.js';
 
 // PRODUCCIÓN DEL COMBATE (estilo Guilty Gear / Mortal Kombat), solo presentación — nunca cambia la simulación:
 //   · impactos: destello, aberración cromática y «fotograma de impacto» invertido en los golpes fuertes, contraataques y K.O.
@@ -107,7 +108,7 @@ export function installFightFx({ scene, roster = [], doc = globalThis.document, 
         const w = this.f[this.winner], l = this.f[1 - this.winner], d = w.x - l.x;
         if (Math.abs(d) < 2.2 && !w.air) w.x = Math.max(-8.2, Math.min(8.2, w.x + (Math.sign(d) || 1) * Math.min(rdt, .05) * 3));
       }
-      if (S.tiltT > 0 && !this.sm?.reduce) { S.tiltT -= rdt; const k = Math.max(0, Math.min(1, S.tiltT / .3)); cam.rotateZ(S.tilt * k); }
+      if (S.tiltT > 0 && !this.sm?.reduce) { S.tiltT -= rdt; const k = Math.max(0, Math.min(1, S.tiltT / .3)); cam.rotateZ(S.tilt * k * A11Y.camK); }
       return out;
     };
   }

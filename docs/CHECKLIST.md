@@ -250,3 +250,15 @@ La F7 recibida partía de la F3 (sin F4 ni las animaciones de v0.6.0). Se hizo u
 - [x] Técnicas con los colores y la firma del chroma; espejos con material y técnicas propias.
 - [x] Logo nuevo.
 - [x] `npm test` = 21 suites (tools/test-v17.mjs).
+
+## v1.8.0 — F9 COMPLETADA
+| Funcionalidad | Archivos | Prueba | Resultado |
+|---|---|---|---|
+| Ajustes de gráficos, controles, táctil, accesibilidad, sonido e idioma | js/ui/settings-page.js, js/systems/a11y.js, js/systems/settings-manager.js, css/settings.css | test-v18 §1 + captura de las 6 pestañas + reasignación real de tecla en el navegador | OK |
+| 109 logros con hazañas registradas | data/achievements.json, js/systems/progression-system.js, js/main.js | test-v18 §2, test-progression | OK |
+| Derrota sentada distinta por guerrero | js/game/animation/attacks.js, pose.js, cinematic-end.js | test-v18 §3 + capturas de la escena final de los 4 | OK |
+| Giro de Zephyr sin vuelta extra | js/game/animation/pose.js | test-v18 §3 + secuencia de fotogramas del menú | OK |
+| Armas: aura, estelas, impactos, vista previa | weapon-art.js, weapon-vfx.js, vfx.js, weapon-preview.js | test-v18 §4 + capturas de 4 armas | OK |
+| `npm test` = 22 suites | tools/test-v18.mjs | npm test | OK |
+
+Limitaciones: no probado en dispositivos reales (solo emulación de Android y escritorio con Chromium); las voces no existen todavía (no hay control de volumen de voces).

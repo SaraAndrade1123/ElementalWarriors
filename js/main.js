@@ -9,6 +9,8 @@ import { installStageSelect } from './ui/stage-select.js';
 import { createMeta } from './systems/meta.js';
 import { installMetaPanels } from './ui/meta-panels.js';
 import { installAudio, ELEMENT_OF } from './audio/audio-hook.js';
+import { installSettingsPage } from './ui/settings-page.js';
+import { applyA11y } from './systems/a11y.js';
 import { createFlow } from './modes/flow.js';
 import { installModes } from './ui/modes-ui.js';
 import { CpuBrain, DUMMIES } from './game/ai.js';
@@ -57,7 +59,7 @@ async function boot() {
     const [{ roster }, { items }, shopData, achData, economy, stageData, moves, modes, mirrorData, weaponData, introData, outroData] = await Promise.all([json('data/characters.json'), json('data/menu.json'), json('data/items.json'), json('data/achievements.json'), json('data/economy.json'), json('data/stages.json'), json('data/moves.json'), json('data/modes.json'), optional('data/mirror.json'), optional('data/weapons.json'), optional('data/intros.json'), optional('data/outros.json')]);
     stage('gráficos 3D'); const scene = new SceneManager($('#stage'), settings.get()); scene.mirrorData = mirrorData; stage('guerreros 0/' + roster.length);
     settings.subscribe(s => {
-      scene.apply(s); document.body.dataset.reduce = s.reduceMotion ? '1' : '0';
+      scene.apply(s); document.body.dataset.reduce = s.reduceMotion ? '1' : '0'; applyA11y(s); globalThis.__ewInput?.setBindings(s.keys); // (F9)
       if (s.lang !== lang) { // cambio de idioma desde Ajustes
         lang = s.lang;
         loadLocale(lang).then(() => menu?.refresh()).catch(e => console.error('[i18n]', e));
@@ -85,15 +87,21 @@ async function boot() {
     const stages = new StageManager(stageData.stages);
     stages.problems.forEach(p => console.warn('[stages]', p));
     installStages(scene, stages); installStageSelect(menu, { stages });
+    installSettingsPage(menu, { settings }); // (F9) ajustes completos en pestañas (antes que el audio: su bloque va en «Sonido»)
     const audio = installAudio({ menu, scene, meta, stages });
     const elements = installElements({ menu, scene, roster }); // triángulo elemental (docs/ELEMENTOS.md)
     const bending = installBending({ menu, scene, roster }); // control elemental (docs/CONTROL-ELEMENTAL.md)
     installWeapons({ scene, roster, save: meta.save, data: weaponData }); // armas de la tienda y rompeguardia (docs/ARMAS.md)
-    const wPreview = createWeaponPreview({ scene, roster, moves, sfx: (n, d = {}) => audio.sfx(n, { ...d, element: ELEMENT_OF[d.who] }) });
+    const wPreview = createWeaponPreview({ scene, roster, moves, sfx: (n, d = {}) => audio.sfx(n, { ...d, element: ELEMENT_OF[d.who] }) }); globalThis.ewPreview = wPreview;
     if (weaponData) installWeaponShop(menu, { meta, roster, data: weaponData, preview: wPreview });
     installFightFx({ scene, roster }); // impactos, congelado de técnica y K.O. con más producción (docs/PRESENTACION.md)
     installCinematic({ scene, roster, data: introData }); // cinemática con diálogo antes de cada combate
     patchTransform(Fighter, RULES); patchTransformCpu(CpuBrain); installTransform({ scene, t, colorOf: id => scene.__elements?.rules?.elements?.[scene.__elements?.elementOf?.(id)]?.color }); // transformación definitiva (F5)
+    // (v1.8) la página nunca se desplaza: un gesto lateral del panel táctil o un foco fuera de la vista dejaba el menú
+    // cortado a la izquierda con el guerrero en medio («de la nada»). Se fija el desplazamiento a 0 en todo momento.
+    { const pin = el => { if (el && (el.scrollLeft || el.scrollTop)) { el.scrollLeft = 0; el.scrollTop = 0; } };
+      addEventListener('scroll', () => { if (scrollX || scrollY) scrollTo(0, 0); pin(document.documentElement); pin(document.body); }, { passive: true });
+      for (const el of [document.body, document.getElementById('menu'), document.querySelector('#menu .left')]) el?.addEventListener('scroll', () => pin(el), { passive: true }); }
     installChromaVfx({ scene }); // (v1.7) las técnicas toman el color y la firma del chroma equipado / del espejo
     installFightReport({ scene }); // bonificaciones y rango de cada combate (pantalla de resultados)
     installOutro({ scene, roster, data: outroData }); // cinemática de victoria al terminar cada combate (antes del panel)
@@ -110,6 +118,10 @@ async function boot() {
       if (paused) { label(); optLabels(); renderDuel(); $('#p-resume').focus(); } else document.activeElement?.blur();
     };
     const input = new Input($('#touch'), () => pause());
+    input.setBindings(settings.get().keys); globalThis.__ewInput = input; // (F9) teclas elegidas por el jugador
+    // (F9) pausa automática al cambiar de pestaña o de aplicación (si está activada)
+    const autoPause = () => { if (settings.get().autoPause && scene.match && !menu.enabled && !paused && scene.match.phase === 'fight') pause(true); };
+    document.addEventListener('visibilitychange', () => { if (document.hidden) autoPause(); }); addEventListener('blur', autoPause);
     const dbgEl = $('#dbg'); let dbgOn = false, lastDbg = '';
     const H = { hp: [$('#hp1'), $('#hp2')], tr: [$('#tr1'), $('#tr2')], gd: [$('#gd1'), $('#gd2')], res: [$('#res1'), $('#res2')], pips: [$('#pips1'), $('#pips2')], timer: $('#timer'), ann: $('#announce'), combo: $('#combo'), notes: $('#notes') };
     let lastAnn = '', lastPips = '', lastNotes = '', lastRes = '';
@@ -161,6 +173,8 @@ async function boot() {
       const rep = scene.__report?.build(r) || null, local = c.mode === 'versus', out = w => w < 0 ? 'draw' : w ? 'loss' : 'win';
       const rec = meta.progression.recordMatch({ matchId: id, mode: c.rec ?? 'versus_ai', outcome: out(r.winner),
         characterId: c.a, roundsWon: r.wins[0], difficulty: c.level || 'normal', maxCombo: r.stats.combo[0], maxDamage: Math.round(r.stats.best[0]), durationSec: Math.round(r.time), transformations: rep?.sides[0].stats.tf || 0,
+        feats: (() => { const S = rep?.sides[0], st = S?.stats || {}; return { rank: S?.rank, perfects: st.perfect, flawless: (st.taken || 0) === 0 && r.winner === 0, exKOs: st.exKO ? 1 : 0, counters: st.counter, throws: st.throws, parries: st.parry, dmg: Math.round(st.dmg || 0),
+          comeback: r.winner === 0 && (r.hp?.[0] ?? 1) <= .15, fast: r.winner === 0 && r.time < 30, mirror: c.a === c.b }; })(),
         bonusGold: rep?.sides[0].gold || 0, p2: local && rep ? { outcome: r.winner < 0 ? 'draw' : r.winner === 1 ? 'win' : 'loss', roundsWon: r.wins[1], bonusGold: rep.sides[1].gold } : null });
       const ok = rec.ok && !rec.ignored;
       pending = rep ? { rep, cfg: c, local, gold: ok ? [rec.base + rec.extra + (rec.bonus || 0), rec.p2] : [0, 0], result: r } : null;
@@ -231,7 +245,7 @@ async function boot() {
     installModes(menu, { cfg: modes, roster, stages, meta, flow });
     installVersusPreview(menu, { scene, roster }); // Versus: los dos elegidos frente a frente
     installPanelDock(menu); // botón principal fijo al pie del panel (no tapa el contenido)
-    for (const href of ['css/cinema.css', 'css/result.css', 'css/mobile.css']) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.append(l); } // cinemáticas v1.3 y ajustes de celular: siempre las últimas hojas
+    for (const href of ['css/cinema.css', 'css/result.css', 'css/settings.css', 'css/mobile.css']) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.append(l); } // cinemáticas v1.3 y ajustes de celular: siempre las últimas hojas
     // Pausa: maniquí, vida infinita y reinicio de posiciones (entrenamiento) · dificultad de la CPU (combate contra la CPU)
     const optLabels = () => {
       const m = scene.match;

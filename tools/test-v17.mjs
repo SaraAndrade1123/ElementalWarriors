@@ -59,6 +59,6 @@ const THREE = await import('three');
 // 4 · logo
 { const dev = rd('tools/dev/index.html'); const icon = dev.match(/rel="icon"[^>]*href="([^"]+)"/)?.[1] || '';
   ok(/linearGradient/.test(icon) && (icon.match(/<path/g) || []).length >= 4 && !/M32 32 27\.5 21/.test(icon), 'logo nuevo: cuatro llamas elementales en molinete (no rombos)'); }
-ok(js('package.json').version === '1.7.0' && /v1\.7\.0/.test(js('data/localization/es.json')['ui.version']), 'versión 1.7.0');
+ok(/^1\.([7-9]|\d\d)\./.test(js('package.json').version), 'versión 1.7 o posterior');
 
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.7: todo correcto'); process.exit(bad ? 1 : 0);

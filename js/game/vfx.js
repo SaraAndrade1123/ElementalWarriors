@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { registerTables, TH } from './chroma-vfx.js';
+import { A11Y } from '../systems/a11y.js';
 
 // Efectos de combate (sólo presentación; nunca tocan la simulación):
 //   · Trails: estelas de arma/puño/pie durante la ventana que marca cada clip.
@@ -28,9 +29,10 @@ function tex(name) {
 }
 
 // ───────── Estela: cinta entre dos anclas (base y punta) que se desvanece con la edad ─────────
-const TRAIL_N = 16;
+const TRAIL_N = 40; // (v1.8) más puntos: la estela se interpola entre fotogramas
 class Trail {
-  constructor(scene) {
+  constructor(scene, { life = .13, boost = 1 } = {}) {
+    this.life = life; this.boost = boost;
     const g = new THREE.BufferGeometry(); this.pos = new Float32Array(TRAIL_N * 2 * 3); this.al = new Float32Array(TRAIL_N * 2);
     g.setAttribute('position', new THREE.BufferAttribute(this.pos, 3)); g.setAttribute('alpha', new THREE.BufferAttribute(this.al, 1));
     const idx = []; for (let i = 0; i < TRAIL_N - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } g.setIndex(idx);
@@ -43,16 +45,26 @@ class Trail {
     this.pts = []; this.on = false; this.k = 1;
   }
   push(base, tip, live, k) {
-    if (live) this.pts.unshift({ b: base.clone(), t: tip.clone(), age: 0 }); this.k = k;
+    if (live) {
+      // (v1.8) curva entre muestras (Catmull-Rom): en golpes rápidos el barrido es una media luna, no un polígono quebrado
+      const a = this.pts[0], z = this.pts[1];
+      if (a && z && a.t.distanceTo(tip) > .12) for (const u of [.33, .67]) {
+        const cr = (p0, p1, p2, p3) => { const u2 = u * u, u3 = u2 * u; return new THREE.Vector3().addScaledVector(p0, -.5 * u3 + u2 - .5 * u).addScaledVector(p1, 1.5 * u3 - 2.5 * u2 + 1).addScaledVector(p2, -1.5 * u3 + 2 * u2 + .5 * u).addScaledVector(p3, .5 * u3 - .5 * u2); };
+        const tb = tip.clone().multiplyScalar(2).sub(a.t), bb = base.clone().multiplyScalar(2).sub(a.b);
+        this.pts.unshift({ b: cr(z.b, a.b, base, bb), t: cr(z.t, a.t, tip, tb), age: 0 });
+      }
+      this.pts.unshift({ b: base.clone(), t: tip.clone(), age: 0 });
+    }
+    this.k = k;
     if (this.pts.length > TRAIL_N) this.pts.length = TRAIL_N;
   }
   update(dt) {
-    for (const p of this.pts) p.age += dt; this.pts = this.pts.filter(p => p.age < .13);
+    for (const p of this.pts) p.age += dt; this.pts = this.pts.filter(p => p.age < this.life);
     const n = this.pts.length; this.mesh.visible = n >= 2;
     for (let i = 0; i < TRAIL_N; i++) {
       const p = this.pts[Math.min(i, n - 1)]; if (!p) break;
       this.pos.set([p.b.x, p.b.y, p.b.z], i * 6); this.pos.set([p.t.x, p.t.y, p.t.z], i * 6 + 3);
-      const a = i < n ? Math.pow(Math.max(0, 1 - p.age / .13), 1.5) * (1 - i / TRAIL_N) * this.k : 0; this.al[i * 2] = a; this.al[i * 2 + 1] = a;
+      const a = i < n ? Math.min(1, Math.pow(Math.max(0, 1 - p.age / this.life), 1.5) * (1 - i / TRAIL_N) * this.k * this.boost) : 0; this.al[i * 2] = a; this.al[i * 2 + 1] = a;
     }
     this.mesh.geometry.attributes.position.needsUpdate = true; this.mesh.geometry.attributes.alpha.needsUpdate = true;
   }
@@ -152,7 +164,7 @@ export class Vfx {
       const id = owner + key, on = active.find(a => a.at === key), A = anchors[key];
       let tr = this.trails.get(id);
       if (!on && !tr) continue;
-      if (!tr) { tr = new Trail(this.scene); this.trails.set(id, tr); }
+      if (!tr) { tr = new Trail(this.scene, key[0] === 'w' ? { life: .22, boost: 1.35 } : {}); this.trails.set(id, tr); } // armas: estela más larga y luminosa
       tr.mat.uniforms.c1.value.copy(colors.a); tr.mat.uniforms.c2.value.copy(colors.b);
       if (on && A) { A.base.getWorldPosition(_b); A.tip.getWorldPosition(_t); if (key[0] !== 'w') _t.addScaledVector(_w.copy(_t).sub(_b).normalize(), .25); tr.push(_b, _t, true, on.k); }
     }
@@ -227,7 +239,8 @@ export class Vfx {
     }
   }
   dust(x, k = 1) { this.burst(_w.set(x, .1, .2), ELEM.terra, { n: 10 * k, speed: 2.5, up: .8, g: 1, life: .55, size: .45, size1: .8, spread: .25, z: 1, cA: new THREE.Color(0x4a4a58), cB: new THREE.Color(0x18181e) }); }
-  flash(pos, color, size = 2.5) { this.shapes.sprite('flash', _v.set(pos.x, pos.y, .7), { color, size, grow: 1.6, life: .22 }); this.shapes.sprite('ring', _v, { color, size: 1, grow: 4, life: .35 }); }
+  flash(pos, color, size = 2.5) { if (A11Y.reduceFlash) size *= .5; // (F9) reducir destellos
+    this.shapes.sprite('flash', _v.set(pos.x, pos.y, .7), { color, size, grow: 1.6, life: .22 }); this.shapes.sprite('ring', _v, { color, size: 1, grow: 4, life: .35 }); }
   aura(root, who) { const E = elemOf(who); this.burst(_w.set(root.x + rnd(-.3, .3), rnd(.3, 2.8), .3), E, { n: 2, speed: .6, up: 1.8, g: -1, life: .5, size: .22, size1: 0, drag: 1 }); }
 
   // ── proyectiles: crea / actualiza / quita su apariencia ──

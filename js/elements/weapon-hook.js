@@ -10,6 +10,8 @@ import { Animator } from '../game/animation/animator.js';
 import { IDX } from '../game/animation/pose.js';
 import { ArtSet, buildArt } from '../game/animation/weapon-art.js';
 import { WeaponVfx, W_KINDS } from '../game/weapon-vfx.js';
+import { themeOf } from '../game/chroma-vfx.js';
+import { elemOf } from '../game/vfx.js';
 import { WP, patchFighter, patchCpu, weaponMove, stepWeapons, fanCopies, cpuWeapon, elementKey } from '../game/weapon-arts.js';
 import { weaponIcon } from '../ui/weapon-icons.js';
 import { t } from '../systems/localization.js';
@@ -77,7 +79,7 @@ export function installWeapons({ scene, roster = [], save = null, data = null, u
       if (an?.rig) {
         try {
           an.art?.dispose(); an.dir.clips.wp = buildArt(w.kind, an.S);
-          an.art = new ArtSet(an.rig, m.v[i].c.holder, w, colorOf(f.def.id)); st.arts.push(an);
+          an.art = new ArtSet(an.rig, m.v[i].c.holder, w, colorOf(f.def.id), (themeOf(m.v[i].c.pal, f.def.id)?.c || elemOf(f.def.id).c).getHex()); // aura del filo: color de sus técnicas (o de su chroma) st.arts.push(an);
           an.artReady = ff => w.after === 'return' ? !(m.proj || []).some(p => p.owner === ff && p.kind === 'w_boomerang' && !p.dead) : w.after === 'stow' ? true : !(ff.wcd > 0);
         } catch (e) { console.warn('[armas] modelo', w.id, e); }
       }
@@ -86,7 +88,7 @@ export function installWeapons({ scene, roster = [], save = null, data = null, u
     // efectos
     if (m.vfx && m.sm?.scene) {
       try {
-        const wv = new WeaponVfx(m.vfx, m.sm.scene, elOf, colorOf), V = m.vfx, own = p => W_KINDS.includes(p?.kind);
+        const wv = new WeaponVfx(m.vfx, m.sm.scene, elOf, colorOf), V = m.vfx, own = p => W_KINDS.includes(p?.kind); m.__wv = wv;
         const cue = V.cue.bind(V), pr = V.projectile.bind(V), pe = V.projectileEnd.bind(V), dis = V.dispose.bind(V);
         V.cue = (c, who, at, facing, root) => { if (!(/^(w_|gb_)/.test(c.kind) && wv.cue(c, who, at, facing, root))) cue(c, who, at, facing, root); };
         V.projectile = p => own(p) ? wv.projectile(p) : pr(p);
@@ -112,6 +114,7 @@ export function installWeapons({ scene, roster = [], save = null, data = null, u
     };
     const oh = m.onHit;
     m.onHit = function (ev, idx) {
+      if (ev.move === WP && !ev.blocked && ev.pos && this.__wv) try { const k = ev.a?.moves?.[WP]?.kind; this.__wv.impact(ev.pos, k, ev.a.def.id, Math.sign(ev.b?.x - ev.a?.x) || 1, Math.min(1.4, (ev.dmg || 6) / 8)); } catch { /* solo presentación */ }
       const r = oh.call(this, ev, idx);
       if (ev.move === WP && ev.proj && !ev.blocked && ev.a?.moves?.[WP]?.proj?.snare) this.note(tx('hud.snare', '¡Enredado!'), idx, 'counter');
       if (ev.move === 'gb' && ev.crush) this.event({ type: 'guardbreak', by: idx });

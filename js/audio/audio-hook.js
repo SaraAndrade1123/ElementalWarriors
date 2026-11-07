@@ -114,10 +114,10 @@ export function installAudio({ menu, scene, meta = null, stages = null, roster =
   addEventListener('ew:music', e => { if (e.detail) audio.music(e.detail.element, e.detail.mode); });
 
   // 8) Ajustes: bloque «Sonido» dentro de la pantalla existente (sin tocar menu-manager.js).
-  const pageSettings = menu.page_settings.bind(menu);
-  menu.page_settings = () => {
-    pageSettings();
-    const panel = menu.el.view.querySelector('.panel'); if (!panel) return;
+  // (F9) la pantalla de ajustes tiene pestañas: el bloque se dibuja en la de «Sonido»
+  menu.afterSettings = tab => {
+    if (tab !== 'sound') return;
+    const panel = menu.el.view.querySelector('.panel'), sec = panel?.querySelector('.set-sec[data-sec="sound"]'); if (!sec) return;
     const block = h('fieldset', { class: 'audio' }, h('legend', {}, t('set.audio')));
     if (!audio.available) block.append(h('p', { class: 'note' }, t('set.audio.none')));
     else {
@@ -146,10 +146,11 @@ export function installAudio({ menu, scene, meta = null, stages = null, roster =
       block.append(h('p', { class: 'note song-l' }, t('set.song')), songs, slider('music', t('set.music')), slider('sfx', t('set.sfx')),
         h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: s.muted, onchange: e => audio.setMuted(e.target.checked), onkeydown: nav }), t('set.mute')));
     }
-    const note = panel.querySelector('.note'); note ? panel.insertBefore(block, note) : panel.append(block);
+    sec.append(block);
   };
+  menu.audioReset = () => audio.reset();
   const reset = menu.settings.reset.bind(menu.settings);
-  menu.settings.reset = () => { reset(); audio.reset(); };
+  menu.settings.reset = (group = null) => { reset(group); if (!group) audio.reset(); };
 
   return audio;
 }

@@ -1,11 +1,876 @@
-{"achievements":[
- {"id":"first_win","stat":"wins","gte":1,"reward":50},
- {"id":"first_combo","stat":"maxCombo","gte":3,"reward":25},
- {"id":"combo_10","stat":"maxCombo","gte":10,"reward":100},
- {"id":"first_transform","stat":"transformations","gte":1,"reward":50},
- {"id":"win_all","stat":"charsWon","gte":4,"reward":200},
- {"id":"ten_matches","stat":"matches","gte":10,"reward":75},
- {"id":"first_purchase","stat":"purchases","gte":1,"reward":25},
- {"id":"collector","stat":"palettesOwned","gte":4,"reward":100},
- {"id":"arcade_clear","stat":"arcadeClears","gte":1,"reward":150}
-]}
+{
+ "achievements": [
+  {
+   "id": "first_win",
+   "stat": "wins",
+   "gte": 1,
+   "reward": 50,
+   "cat": "fight",
+   "tier": "bronze"
+  },
+  {
+   "id": "wins_10",
+   "stat": "wins",
+   "gte": 10,
+   "reward": 100,
+   "cat": "fight",
+   "tier": "bronze"
+  },
+  {
+   "id": "wins_50",
+   "stat": "wins",
+   "gte": 50,
+   "reward": 250,
+   "cat": "fight",
+   "tier": "silver"
+  },
+  {
+   "id": "wins_100",
+   "stat": "wins",
+   "gte": 100,
+   "reward": 500,
+   "cat": "fight",
+   "tier": "gold"
+  },
+  {
+   "id": "wins_250",
+   "stat": "wins",
+   "gte": 250,
+   "reward": 1000,
+   "cat": "fight",
+   "tier": "gold"
+  },
+  {
+   "id": "wins_500",
+   "stat": "wins",
+   "gte": 500,
+   "reward": 2000,
+   "cat": "fight",
+   "tier": "platinum"
+  },
+  {
+   "id": "ten_matches",
+   "stat": "matches",
+   "gte": 10,
+   "reward": 75,
+   "cat": "fight",
+   "tier": "bronze"
+  },
+  {
+   "id": "matches_100",
+   "stat": "matches",
+   "gte": 100,
+   "reward": 300,
+   "cat": "fight",
+   "tier": "silver"
+  },
+  {
+   "id": "matches_300",
+   "stat": "matches",
+   "gte": 300,
+   "reward": 700,
+   "cat": "fight",
+   "tier": "gold"
+  },
+  {
+   "id": "rounds_100",
+   "stat": "roundsWon",
+   "gte": 100,
+   "reward": 250,
+   "cat": "fight",
+   "tier": "silver"
+  },
+  {
+   "id": "first_combo",
+   "stat": "maxCombo",
+   "gte": 3,
+   "reward": 25,
+   "cat": "fight",
+   "tier": "bronze"
+  },
+  {
+   "id": "combo_10",
+   "stat": "maxCombo",
+   "gte": 10,
+   "reward": 100,
+   "cat": "fight",
+   "tier": "silver"
+  },
+  {
+   "id": "combo_15",
+   "stat": "maxCombo",
+   "gte": 15,
+   "reward": 250,
+   "cat": "fight",
+   "tier": "gold"
+  },
+  {
+   "id": "combo_20",
+   "stat": "maxCombo",
+   "gte": 20,
+   "reward": 500,
+   "cat": "fight",
+   "tier": "gold"
+  },
+  {
+   "id": "combo_30",
+   "stat": "maxCombo",
+   "gte": 30,
+   "reward": 1200,
+   "cat": "fight",
+   "tier": "platinum"
+  },
+  {
+   "id": "dmg_1k",
+   "stat": "dmgTotal",
+   "gte": 1000,
+   "reward": 150,
+   "cat": "fight",
+   "tier": "bronze"
+  },
+  {
+   "id": "dmg_10k",
+   "stat": "dmgTotal",
+   "gte": 10000,
+   "reward": 500,
+   "cat": "fight",
+   "tier": "silver"
+  },
+  {
+   "id": "dmg_50k",
+   "stat": "dmgTotal",
+   "gte": 50000,
+   "reward": 1500,
+   "cat": "fight",
+   "tier": "gold"
+  },
+  {
+   "id": "first_transform",
+   "stat": "transformations",
+   "gte": 1,
+   "reward": 50,
+   "cat": "skill",
+   "tier": "bronze"
+  },
+  {
+   "id": "transform_25",
+   "stat": "transformations",
+   "gte": 25,
+   "reward": 250,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "transform_100",
+   "stat": "transformations",
+   "gte": 100,
+   "reward": 700,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "perfect_1",
+   "stat": "perfects",
+   "gte": 1,
+   "reward": 100,
+   "cat": "skill",
+   "tier": "bronze"
+  },
+  {
+   "id": "perfect_10",
+   "stat": "perfects",
+   "gte": 10,
+   "reward": 350,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "flawless_1",
+   "stat": "flawless",
+   "gte": 1,
+   "reward": 300,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "flawless_10",
+   "stat": "flawless",
+   "gte": 10,
+   "reward": 1200,
+   "cat": "skill",
+   "tier": "platinum"
+  },
+  {
+   "id": "rank_s_1",
+   "stat": "rankS",
+   "gte": 1,
+   "reward": 150,
+   "cat": "skill",
+   "tier": "bronze"
+  },
+  {
+   "id": "rank_s_10",
+   "stat": "rankS",
+   "gte": 10,
+   "reward": 450,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "rank_s_50",
+   "stat": "rankS",
+   "gte": 50,
+   "reward": 1500,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "exko_1",
+   "stat": "exKOs",
+   "gte": 1,
+   "reward": 100,
+   "cat": "skill",
+   "tier": "bronze"
+  },
+  {
+   "id": "exko_25",
+   "stat": "exKOs",
+   "gte": 25,
+   "reward": 500,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "counter_50",
+   "stat": "counters",
+   "gte": 50,
+   "reward": 250,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "throws_50",
+   "stat": "throws",
+   "gte": 50,
+   "reward": 200,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "parry_10",
+   "stat": "parries",
+   "gte": 10,
+   "reward": 250,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "comeback_1",
+   "stat": "comebacks",
+   "gte": 1,
+   "reward": 200,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "comeback_10",
+   "stat": "comebacks",
+   "gte": 10,
+   "reward": 700,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "fast_1",
+   "stat": "fastWins",
+   "gte": 1,
+   "reward": 150,
+   "cat": "skill",
+   "tier": "bronze"
+  },
+  {
+   "id": "fast_10",
+   "stat": "fastWins",
+   "gte": 10,
+   "reward": 450,
+   "cat": "skill",
+   "tier": "silver"
+  },
+  {
+   "id": "win_all",
+   "stat": "charsWon",
+   "gte": 4,
+   "reward": 200,
+   "cat": "warriors",
+   "tier": "silver"
+  },
+  {
+   "id": "master_ignis",
+   "stat": "wins_ignis",
+   "gte": 25,
+   "reward": 300,
+   "cat": "warriors",
+   "tier": "silver"
+  },
+  {
+   "id": "legend_ignis",
+   "stat": "wins_ignis",
+   "gte": 100,
+   "reward": 900,
+   "cat": "warriors",
+   "tier": "gold"
+  },
+  {
+   "id": "master_aqua",
+   "stat": "wins_aqua",
+   "gte": 25,
+   "reward": 300,
+   "cat": "warriors",
+   "tier": "silver"
+  },
+  {
+   "id": "legend_aqua",
+   "stat": "wins_aqua",
+   "gte": 100,
+   "reward": 900,
+   "cat": "warriors",
+   "tier": "gold"
+  },
+  {
+   "id": "master_terra",
+   "stat": "wins_terra",
+   "gte": 25,
+   "reward": 300,
+   "cat": "warriors",
+   "tier": "silver"
+  },
+  {
+   "id": "legend_terra",
+   "stat": "wins_terra",
+   "gte": 100,
+   "reward": 900,
+   "cat": "warriors",
+   "tier": "gold"
+  },
+  {
+   "id": "master_zephyr",
+   "stat": "wins_zephyr",
+   "gte": 25,
+   "reward": 300,
+   "cat": "warriors",
+   "tier": "silver"
+  },
+  {
+   "id": "legend_zephyr",
+   "stat": "wins_zephyr",
+   "gte": 100,
+   "reward": 900,
+   "cat": "warriors",
+   "tier": "gold"
+  },
+  {
+   "id": "mirror_win",
+   "stat": "mirrorWins",
+   "gte": 1,
+   "reward": 100,
+   "cat": "warriors",
+   "tier": "bronze"
+  },
+  {
+   "id": "mirror_10",
+   "stat": "mirrorWins",
+   "gte": 10,
+   "reward": 350,
+   "cat": "warriors",
+   "tier": "silver"
+  },
+  {
+   "id": "extreme_win",
+   "stat": "extremeWins",
+   "gte": 1,
+   "reward": 250,
+   "cat": "warriors",
+   "tier": "silver"
+  },
+  {
+   "id": "extreme_all",
+   "stat": "extremeChars",
+   "gte": 4,
+   "reward": 1200,
+   "cat": "warriors",
+   "tier": "platinum"
+  },
+  {
+   "id": "extreme_50",
+   "stat": "extremeWins",
+   "gte": 50,
+   "reward": 1500,
+   "cat": "warriors",
+   "tier": "platinum"
+  },
+  {
+   "id": "arcade_clear",
+   "stat": "arcadeClears",
+   "gte": 1,
+   "reward": 150,
+   "cat": "modes",
+   "tier": "bronze"
+  },
+  {
+   "id": "arcade_5",
+   "stat": "arcadeClears",
+   "gte": 5,
+   "reward": 400,
+   "cat": "modes",
+   "tier": "silver"
+  },
+  {
+   "id": "arcade_20",
+   "stat": "arcadeClears",
+   "gte": 20,
+   "reward": 1000,
+   "cat": "modes",
+   "tier": "gold"
+  },
+  {
+   "id": "story_1",
+   "stat": "storyHeroes",
+   "gte": 1,
+   "reward": 200,
+   "cat": "modes",
+   "tier": "bronze"
+  },
+  {
+   "id": "story_all",
+   "stat": "storyHeroes",
+   "gte": 4,
+   "reward": 800,
+   "cat": "modes",
+   "tier": "gold"
+  },
+  {
+   "id": "survival_5",
+   "stat": "survivalBest",
+   "gte": 5,
+   "reward": 150,
+   "cat": "modes",
+   "tier": "bronze"
+  },
+  {
+   "id": "survival_15",
+   "stat": "survivalBest",
+   "gte": 15,
+   "reward": 450,
+   "cat": "modes",
+   "tier": "silver"
+  },
+  {
+   "id": "survival_30",
+   "stat": "survivalBest",
+   "gte": 30,
+   "reward": 1200,
+   "cat": "modes",
+   "tier": "platinum"
+  },
+  {
+   "id": "challenges_10",
+   "stat": "challengesDone",
+   "gte": 10,
+   "reward": 200,
+   "cat": "modes",
+   "tier": "bronze"
+  },
+  {
+   "id": "challenges_30",
+   "stat": "challengesDone",
+   "gte": 30,
+   "reward": 500,
+   "cat": "modes",
+   "tier": "silver"
+  },
+  {
+   "id": "challenges_all",
+   "stat": "challengesDone",
+   "gte": 58,
+   "reward": 2000,
+   "cat": "modes",
+   "tier": "platinum"
+  },
+  {
+   "id": "local_10",
+   "stat": "localMatches",
+   "gte": 10,
+   "reward": 150,
+   "cat": "modes",
+   "tier": "bronze"
+  },
+  {
+   "id": "local_50",
+   "stat": "localMatches",
+   "gte": 50,
+   "reward": 400,
+   "cat": "modes",
+   "tier": "silver"
+  },
+  {
+   "id": "first_purchase",
+   "stat": "purchases",
+   "gte": 1,
+   "reward": 25,
+   "cat": "collection",
+   "tier": "bronze"
+  },
+  {
+   "id": "collector",
+   "stat": "palettesOwned",
+   "gte": 4,
+   "reward": 100,
+   "cat": "collection",
+   "tier": "bronze"
+  },
+  {
+   "id": "collector_10",
+   "stat": "palettesOwned",
+   "gte": 10,
+   "reward": 400,
+   "cat": "collection",
+   "tier": "silver"
+  },
+  {
+   "id": "collector_all",
+   "stat": "palettesOwned",
+   "gte": 20,
+   "reward": 1500,
+   "cat": "collection",
+   "tier": "platinum"
+  },
+  {
+   "id": "arsenal_1",
+   "stat": "weaponsOwned",
+   "gte": 1,
+   "reward": 100,
+   "cat": "collection",
+   "tier": "bronze"
+  },
+  {
+   "id": "arsenal_all",
+   "stat": "weaponsOwned",
+   "gte": 8,
+   "reward": 1000,
+   "cat": "collection",
+   "tier": "gold"
+  },
+  {
+   "id": "rich_5k",
+   "stat": "goldEarned",
+   "gte": 5000,
+   "reward": 200,
+   "cat": "collection",
+   "tier": "bronze"
+  },
+  {
+   "id": "rich_25k",
+   "stat": "goldEarned",
+   "gte": 25000,
+   "reward": 600,
+   "cat": "collection",
+   "tier": "silver"
+  },
+  {
+   "id": "rich_100k",
+   "stat": "goldEarned",
+   "gte": 100000,
+   "reward": 2000,
+   "cat": "collection",
+   "tier": "platinum"
+  },
+  {
+   "id": "time_1h",
+   "stat": "playMin",
+   "gte": 60,
+   "reward": 150,
+   "cat": "collection",
+   "tier": "bronze"
+  },
+  {
+   "id": "time_10h",
+   "stat": "playMin",
+   "gte": 600,
+   "reward": 800,
+   "cat": "collection",
+   "tier": "gold"
+  },
+  {
+   "id": "ach_25",
+   "stat": "achCount",
+   "gte": 25,
+   "reward": 500,
+   "cat": "legend",
+   "tier": "silver"
+  },
+  {
+   "id": "ach_50",
+   "stat": "achCount",
+   "gte": 50,
+   "reward": 1500,
+   "cat": "legend",
+   "tier": "gold"
+  },
+  {
+   "id": "wins_1000",
+   "stat": "wins",
+   "gte": 1000,
+   "reward": 5000,
+   "cat": "fight",
+   "tier": "mythic"
+  },
+  {
+   "id": "matches_1000",
+   "stat": "matches",
+   "gte": 1000,
+   "reward": 2500,
+   "cat": "fight",
+   "tier": "platinum"
+  },
+  {
+   "id": "rounds_500",
+   "stat": "roundsWon",
+   "gte": 500,
+   "reward": 1200,
+   "cat": "fight",
+   "tier": "gold"
+  },
+  {
+   "id": "rounds_2000",
+   "stat": "roundsWon",
+   "gte": 2000,
+   "reward": 3500,
+   "cat": "fight",
+   "tier": "platinum"
+  },
+  {
+   "id": "combo_40",
+   "stat": "maxCombo",
+   "gte": 40,
+   "reward": 2500,
+   "cat": "fight",
+   "tier": "platinum"
+  },
+  {
+   "id": "combo_50",
+   "stat": "maxCombo",
+   "gte": 50,
+   "reward": 5000,
+   "cat": "fight",
+   "tier": "mythic"
+  },
+  {
+   "id": "dmg_250k",
+   "stat": "dmgTotal",
+   "gte": 250000,
+   "reward": 4000,
+   "cat": "fight",
+   "tier": "platinum"
+  },
+  {
+   "id": "transform_250",
+   "stat": "transformations",
+   "gte": 250,
+   "reward": 2500,
+   "cat": "skill",
+   "tier": "platinum"
+  },
+  {
+   "id": "perfect_50",
+   "stat": "perfects",
+   "gte": 50,
+   "reward": 1500,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "flawless_50",
+   "stat": "flawless",
+   "gte": 50,
+   "reward": 5000,
+   "cat": "skill",
+   "tier": "mythic"
+  },
+  {
+   "id": "rank_s_200",
+   "stat": "rankS",
+   "gte": 200,
+   "reward": 4000,
+   "cat": "skill",
+   "tier": "platinum"
+  },
+  {
+   "id": "exko_100",
+   "stat": "exKOs",
+   "gte": 100,
+   "reward": 2000,
+   "cat": "skill",
+   "tier": "platinum"
+  },
+  {
+   "id": "counter_250",
+   "stat": "counters",
+   "gte": 250,
+   "reward": 1200,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "throws_200",
+   "stat": "throws",
+   "gte": 200,
+   "reward": 1000,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "parry_50",
+   "stat": "parries",
+   "gte": 50,
+   "reward": 1200,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "comeback_50",
+   "stat": "comebacks",
+   "gte": 50,
+   "reward": 3000,
+   "cat": "skill",
+   "tier": "platinum"
+  },
+  {
+   "id": "fast_50",
+   "stat": "fastWins",
+   "gte": 50,
+   "reward": 1500,
+   "cat": "skill",
+   "tier": "gold"
+  },
+  {
+   "id": "mirror_50",
+   "stat": "mirrorWins",
+   "gte": 50,
+   "reward": 1500,
+   "cat": "warriors",
+   "tier": "gold"
+  },
+  {
+   "id": "extreme_250",
+   "stat": "extremeWins",
+   "gte": 250,
+   "reward": 6000,
+   "cat": "warriors",
+   "tier": "mythic"
+  },
+  {
+   "id": "avatar_ignis",
+   "stat": "wins_ignis",
+   "gte": 300,
+   "reward": 2500,
+   "cat": "warriors",
+   "tier": "platinum"
+  },
+  {
+   "id": "avatar_aqua",
+   "stat": "wins_aqua",
+   "gte": 300,
+   "reward": 2500,
+   "cat": "warriors",
+   "tier": "platinum"
+  },
+  {
+   "id": "avatar_terra",
+   "stat": "wins_terra",
+   "gte": 300,
+   "reward": 2500,
+   "cat": "warriors",
+   "tier": "platinum"
+  },
+  {
+   "id": "avatar_zephyr",
+   "stat": "wins_zephyr",
+   "gte": 300,
+   "reward": 2500,
+   "cat": "warriors",
+   "tier": "platinum"
+  },
+  {
+   "id": "arcade_50",
+   "stat": "arcadeClears",
+   "gte": 50,
+   "reward": 2500,
+   "cat": "modes",
+   "tier": "platinum"
+  },
+  {
+   "id": "survival_50",
+   "stat": "survivalBest",
+   "gte": 50,
+   "reward": 4000,
+   "cat": "modes",
+   "tier": "mythic"
+  },
+  {
+   "id": "local_250",
+   "stat": "localMatches",
+   "gte": 250,
+   "reward": 1500,
+   "cat": "modes",
+   "tier": "gold"
+  },
+  {
+   "id": "rich_500k",
+   "stat": "goldEarned",
+   "gte": 500000,
+   "reward": 6000,
+   "cat": "collection",
+   "tier": "mythic"
+  },
+  {
+   "id": "time_25h",
+   "stat": "playMin",
+   "gte": 1500,
+   "reward": 1500,
+   "cat": "collection",
+   "tier": "platinum"
+  },
+  {
+   "id": "time_100h",
+   "stat": "playMin",
+   "gte": 6000,
+   "reward": 5000,
+   "cat": "collection",
+   "tier": "mythic"
+  },
+  {
+   "id": "ach_75",
+   "stat": "achCount",
+   "gte": 75,
+   "reward": 3000,
+   "cat": "legend",
+   "tier": "platinum"
+  },
+  {
+   "id": "ach_100",
+   "stat": "achCount",
+   "gte": 100,
+   "reward": 6000,
+   "cat": "legend",
+   "tier": "mythic"
+  },
+  {
+   "id": "legend",
+   "stat": "achCount",
+   "gte": 108,
+   "reward": 10000,
+   "cat": "legend",
+   "tier": "mythic"
+  }
+ ]
+}

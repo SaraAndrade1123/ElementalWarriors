@@ -99,7 +99,38 @@ const MODELS = {
   },
 };
 export const WEAPON_KINDS = Object.keys(MODELS);
-export const makeWeaponModel = (kind, color = 0xffffff) => { const m = (MODELS[kind] || MODELS.dagger)(color); try { addOutlines(m.g); } catch { /* sin contorno */ } return m; };
+// (v1.8) AURA ELEMENTAL del arma en la mano: lenguas de energía que envuelven el filo (dos planos cruzados con un
+// sombreador de llama animado, aditivo) del color del elemento / chroma de quien la empuña. Zona que cubre en cada arma:
+const AURA = { dagger: [.26, .06, .56], hooks: [.32, .12, 1.22], knives: [.42, .02, .44], mace: [.62, .62, 1.3], boomerang: [.56, -.02, .64, .2],
+  fan: [1.15, .08, .76], bola: [.5, .3, .66], bow: [.3, -.8, .8, -.16] };
+const AURA_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }';
+const AURA_FS = `uniform float uT; uniform vec3 uC; uniform float uA; uniform float uSeed; varying vec2 vUv;
+float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f); return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
+float fb(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 4; i++) { s += a * n2(p); p = p * 2.03 + 5.1; a *= .5; } return s; }
+void main(){
+  vec2 p = vec2(vUv.x * 3.2 + uSeed, vUv.y * 2.4 - uT * 2.6);
+  float n = fb(p), core = 1. - abs(vUv.x - .5) * 2.;
+  float body = smoothstep(0., .14, vUv.y) * (1. - smoothstep(.82, 1., vUv.y));
+  float f = core * 1.25 + (n - .5) * 1.35 - (1. - body) * .9;
+  float fl = smoothstep(.28, .82, f);
+  float hot = smoothstep(.7, 1.05, f);
+  vec3 col = mix(uC * .62, mix(uC * 1.15, vec3(1.), .6), hot); // borde saturado y oscuro, núcleo casi blanco
+  gl_FragColor = vec4(col, fl * uA * (.78 + .22 * hot));
+}`;
+function addAura(m, kind, color) {
+  const a = AURA[kind]; if (!a) return;
+  const [w, y0, y1, x = 0] = a, H = y1 - y0, U = { uT: { value: 0 }, uC: { value: new THREE.Color(color) }, uA: { value: 1 }, uSeed: { value: Math.random() * 20 } };
+  const mat = new THREE.ShaderMaterial({ uniforms: U, vertexShader: AURA_VS, fragmentShader: AURA_FS, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.NormalBlending, fog: false, toneMapped: false }); // mezcla normal: se ve también sobre fondos claros
+  const geo = new THREE.PlaneGeometry(w * 1.3, H * 1.2);
+  for (const ry of [0, Math.PI / 2]) {
+    const q = new THREE.Mesh(geo, mat); q.position.set(x, (y0 + y1) / 2 + H * .05, 0); q.rotation.y = ry; q.renderOrder = 10; q.userData.noOutline = true; q.frustumCulled = false;
+    q.onBeforeRender = () => { U.uT.value = performance.now() / 1000; }; m.g.add(q);
+  }
+  m.aura = { mat, U };
+}
+export const makeWeaponModel = (kind, color = 0xffffff, { aura = false, auraColor = null } = {}) => { const m = (MODELS[kind] || MODELS.dagger)(color); if (aura) addAura(m, kind, auraColor ?? color); try { addOutlines(m.g); } catch { /* sin contorno */ } return m; };
+export const auraKinds = () => Object.keys(AURA);
 // Cómo se agarra cada una
 const GRIP = { knives: { along: .6 }, bola: { along: .5 }, boomerang: { along: .5 }, dagger: { along: .55 }, fan: { along: .5 }, hooks: { along: .55 }, mace: { along: .55 }, bow: { along: .5 } };
 
@@ -168,13 +199,13 @@ export function buildArt(kind, S) {
 
 // ── el arma equipada: modelo en la mano (los dos lados, porque el lado adelantado cambia al girarse) y envainado ──
 export class ArtSet {
-  constructor(rig, holder, w, color) {
+  constructor(rig, holder, w, color, auraColor = null) {
     this.w = w; this.kind = w.kind; this.after = w.after || 'stow'; this.hands = w.hands || 'F'; this.items = { L: null, R: null, BL: null, BR: null }; this.aim = {};
     holder.updateMatrixWorld(true);
     const spec = { grip: GRIP[this.kind] || { along: .55 } };
     for (const side of ['L', 'R']) {
       const fr = handFrame(rig, side, spec); this.aim[side] = fr.Yw.clone();
-      const m = makeWeaponModel(this.kind, color); mount(rig, holder, fr.hi, m.g, fr.M); m.g.visible = false; this.items[side] = m;
+      const m = makeWeaponModel(this.kind, color, { aura: true, auraColor }); mount(rig, holder, fr.hi, m.g, fr.M); m.g.visible = false; this.items[side] = m; // en la mano: con aura
     }
     // envainada: cadera izquierda o espalda (en diagonal), según el arma
     const I = rig.I, P = rig.P0, Hh = Math.max(1, (P[I.head]?.y ?? 3) - Math.min(P[I.foL]?.y ?? 0, P[I.foR]?.y ?? 0));

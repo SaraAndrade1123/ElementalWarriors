@@ -7,15 +7,25 @@ export class Progression {
   constructor(save, { economy, achievements }) {
     this.save = save; this.eco = economy; this.achs = achievements; this.onUnlock = null;
   }
-  derive(d) {
-    return { ...d.stats, charsWon: Object.values(d.stats.winsBy).filter(v => v > 0).length, palettesOwned: d.owned.filter(id => !id.startsWith('wp_')).length };
+  derive(d) { // a prueba de guardados incompletos o antiguos (cada parte con su valor por defecto)
+    const s = d.stats || {}, by = s.winsBy || {}, owned = d.owned || [], rec = d.records || {}, gold = d.gold || {};
+    const v = { ...s, charsWon: Object.values(by).filter(n => n > 0).length, palettesOwned: owned.filter(id => id.startsWith('pal_')).length,
+      weaponsOwned: owned.filter(id => id.startsWith('wp_')).length, challengesDone: (d.challenges || []).length, storyHeroes: Object.values(d.story || {}).filter(n => n >= 3).length,
+      survivalBest: rec.survival?.wins || 0, arcadeScore: rec.arcade?.score || 0, goldEarned: gold.earned || 0, playMin: Math.floor((s.playSec || 0) / 60),
+      extremeChars: Object.values(s.extremeBy || {}).filter(n => n > 0).length, achCount: (d.done || []).length };
+    for (const [id, n] of Object.entries(by)) v['wins_' + id] = n; // victorias de cada guerrero (logros de maestría)
+    return v;
   }
   progressOf(a, d = this.save.data) { return { value: this.derive(d)[a.stat] ?? 0, target: a.gte }; }
   _unlock(d) { // marca y paga cada logro UNA sola vez, dentro de la misma operación atómica
-    const out = [], v = this.derive(d);
-    for (const a of this.achs) {
-      if (d.done.includes(a.id) || (v[a.stat] ?? 0) < a.gte) continue;
-      d.done.push(a.id); d.gold.balance += a.reward; d.gold.earned += a.reward; out.push(a);
+    const out = [];
+    for (let pass = 0; pass < 4; pass++) { // un logro puede desbloquear otros (Rose Gold ganado, número de logros…)
+      const v = this.derive(d); let any = false;
+      for (const a of this.achs) {
+        if (d.done.includes(a.id) || (v[a.stat] ?? 0) < a.gte) continue;
+        d.done.push(a.id); d.gold.balance += a.reward; d.gold.earned += a.reward; out.push(a); any = true;
+      }
+      if (!any) break;
     }
     return out;
   }
@@ -40,6 +50,12 @@ export class Progression {
       else if (r.outcome === 'loss') s.losses++; else s.draws++;
       s.maxCombo = Math.max(s.maxCombo, clamp(raw.maxCombo, 999)); s.maxDamage = Math.max(s.maxDamage, clamp(raw.maxDamage, 99999));
       s.playSec += clamp(raw.durationSec, 3600); s.transformations += clamp(raw.transformations, 20);
+      const f = raw.feats && typeof raw.feats === 'object' ? raw.feats : {}, won = r.outcome === 'win', b = x => (x ? 1 : 0); // hazañas (validadas y con tope)
+      for (const k of ['rankS', 'perfects', 'flawless', 'exKOs', 'counters', 'throws', 'parries', 'dmgTotal', 'comebacks', 'fastWins', 'mirrorWins', 'localMatches', 'extremeWins']) s[k] = s[k] || 0; s.extremeBy ??= {};
+      s.rankS += b(f.rank === 'S'); s.perfects += clamp(f.perfects, 3); s.flawless += b(won && f.flawless); s.exKOs += clamp(f.exKOs, 3);
+      s.counters += clamp(f.counters, 50); s.throws += clamp(f.throws, 50); s.parries += clamp(f.parries, 50); s.dmgTotal += clamp(f.dmg, 2000);
+      s.comebacks += b(won && f.comeback); s.fastWins += b(won && f.fast); s.mirrorWins += b(won && f.mirror); s.localMatches += b(r.mode === 'versus_local');
+      if (won && r.difficulty === 'expert' && r.mode !== 'versus_local') { s.extremeWins++; s.extremeBy[r.characterId] = (s.extremeBy[r.characterId] || 0) + 1; }
       d.gold.balance += gold; d.gold.earned += gold;
       unlocked = this._unlock(d);
       return { ok: true };

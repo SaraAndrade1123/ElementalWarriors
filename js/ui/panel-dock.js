@@ -14,6 +14,7 @@ export function installPanelDock(menu) {
     sec.append(body, foot); view.classList.add('docked');
     if (lastPage === menu.page) body.scrollTop = lastTop;
     if (focus && sec.contains(focus)) focus.focus({ preventScroll: true });
+    requestAnimationFrame(() => { body.style.minHeight = '0.5px'; void body.offsetHeight; body.style.minHeight = ''; }); // recalcula la cuadrícula (filas con tarjetas)
   };
   menu.panel = function (...a) {
     const b = view.querySelector('.pbody'); lastTop = b ? b.scrollTop : 0; lastPage = view.dataset.page || null;

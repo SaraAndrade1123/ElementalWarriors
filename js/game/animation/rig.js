@@ -185,7 +185,9 @@ export class Rig {
       const ci = this.I.com, Dc = this.D[ci];
       _w.copy(_T).sub(this.P0[ci]).applyQuaternion(Dc).add(this.Pn[ci]); _T.lerp(_w, free);
     }
-    _pole.set(s * .22, 0, 1); if (free > 0) _pole.applyQuaternion(_c.copy(qI).slerp(this.D[this.I.com], free));
+    // tumbado o sentado en el suelo (cadera inclinada hacia atrás): la rodilla dobla hacia ARRIBA, no hacia el suelo
+    const cp = c('comPitch'), lie = free < 1 ? Math.max(0, Math.min(1, (-Math.atan2(Math.sin(cp), Math.cos(cp)) - .3) / .7)) : 0;
+    _pole.set(s * .22, lie * 1.3, 1 - lie * .75).normalize(); if (free > 0) _pole.applyQuaternion(_c.copy(qI).slerp(this.D[this.I.com], free));
     const D2 = _d.copy(this._limbIK(L, Dp, _T, _pole, dq[L.A], dq[L.B])); has[L.B] = 1;
     // pie: orientación objetivo = reposo (plano) · yaw · pitch; compensa el Δ acumulado de la pierna
     rot(Y, s * c('ft' + f + 'yaw'), _a); rot(X, -c('ft' + f + 'pitch'), _c); _a.multiply(_c);

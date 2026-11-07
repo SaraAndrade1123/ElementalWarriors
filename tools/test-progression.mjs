@@ -1,6 +1,7 @@
 // Pruebas de F8: guardado, Rose Gold, tienda, recompensas, logros y paletas (npm test)
 import { readFileSync } from 'node:fs';
-import { SaveSystem, MemoryStorage, sanitize } from '../js/systems/save-system.js';
+import { SaveSystem, MemoryStorage, sanitize, defaults } from '../js/systems/save-system.js';
+import { Progression } from '../js/systems/progression-system.js';
 import { Wallet } from '../js/systems/currency-system.js';
 import { createMeta } from '../js/systems/meta.js';
 import { hueShift, applyPalette } from '../js/systems/palette.js';
@@ -70,7 +71,7 @@ ok('sanitize limita números y limpia listas', s0.gold.balance === 0 && s0.gold.
 // Datos
 ok('ids de objetos únicos y precios enteros > 0', new Set(items.map(i => i.id)).size === items.length && items.every(i => Number.isInteger(i.price) && i.price > 0));
 ok('cada objeto pertenece a un guerrero existente (las armas son de todos: char "*")', items.every(i => i.type === 'weapon' ? i.char === '*' : roster.some(r => r.id === i.char)));
-{ const keys = new Set(['wins', 'maxCombo', 'transformations', 'charsWon', 'matches', 'purchases', 'palettesOwned', 'arcadeClears', 'losses', 'draws', 'roundsWon']);
+{ const P = new Progression({ data: defaults() }, { economy: {}, achievements: [] }), keys = new Set(Object.keys(P.derive(defaults()))); for (const r of roster) keys.add('wins_' + r.id); // todo lo que deriva la progresión
   ok('logros usan estadísticas válidas', achievements.every(a => keys.has(a.stat) && a.gte > 0 && a.reward > 0)); }
 
 // Paletas

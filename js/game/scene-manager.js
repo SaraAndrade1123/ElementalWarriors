@@ -133,16 +133,26 @@ export class SceneManager {
   }
 
   apply(s) {
-    this.q = QUALITY[s.quality]; this.reduce = s.reduceMotion; this._prOverride = null; if (this._ad) this._ad.pr = null; for (const c of [...(this.chars?.values() ?? []), ...(this.mirrors?.values() ?? [])]) c.anim?.setReduce(this.reduce);
+    // (F9) la calidad elige la base y cada ajuste fino puede sobrescribirla (resolución, sombras, partículas, posprocesado)
+    const q = { ...QUALITY[s.quality] };
+    if (s.shadows === 'on' || s.shadows === 'off') q.shadows = s.shadows === 'on';
+    if (s.particles && s.particles !== 'auto') q.particles = { low: 120, medium: 300, high: 600 }[s.particles] ?? q.particles;
+    if (s.post === 'on' || s.post === 'off') q.post = s.post === 'on';
+    q.res = (s.res || 100) / 100; this.outlines = s.outlines !== false;
+    this.q = q; this.reduce = s.reduceMotion; this._prOverride = null; if (this._ad) this._ad.pr = null; for (const c of [...(this.chars?.values() ?? []), ...(this.mirrors?.values() ?? [])]) c.anim?.setReduce(this.reduce);
     this.renderer.shadowMap.enabled = this.q.shadows; this.key.castShadow = this.q.shadows; this.post.setQuality(this.q);
     this.pts.geometry.setDrawRange(0, this.q.particles);
     this.scene.traverse(o => { if (o.material && !Array.isArray(o.material)) o.material.needsUpdate = true; });
+    this.syncOutlines();
     this.resize();
   }
 
+  // (F9) contornos de tinta: se ocultan o muestran todos (guerreros, espejos y armas)
+  syncOutlines() { const on = this.outlines !== false; this.scene.traverse(o => { if (o.userData?.outline && (o.isMesh || o.isSkinnedMesh)) o.visible = on; }); }
+
   resize() {
     const w = this.canvas.clientWidth || innerWidth, h = this.canvas.clientHeight || innerHeight;
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.q.dpr, this._prOverride ?? 9)); this.renderer.setSize(w, h, false);
+    this.renderer.setPixelRatio(Math.max(.35, Math.min(devicePixelRatio, this.q.dpr, this._prOverride ?? 9) * (this.q.res || 1))); this.renderer.setSize(w, h, false); // (F9) resolución de renderizado
     const pr = this.renderer.getPixelRatio(); this.post.setSize(w * pr, h * pr); OUTLINE.uRes.value.set(w * pr, h * pr); OUTLINE.uW.value = Math.max(1, 1.45 * pr * Math.min(1.25, h / 720));
     const aspect = w / h; this.camera.aspect = aspect;
     if (aspect > 1.15) { // horizontal: el guerrero queda centrado en el hueco libre a la derecha del panel del menú
@@ -276,6 +286,7 @@ export class SceneManager {
     Object.assign(this.key.shadow.camera, { left: -13, right: 13, top: 7, bottom: -3 }); this.key.shadow.camera.updateProjectionMatrix();
     this.tint.light.set((a.fx ?? a.def.fx).light); this.tint.color.set((a.fx ?? a.def.fx).color);
     this.match = new Match(this, input, a, b, opts);
+    if (this.outlines === false) this.syncOutlines();
   }
 
   endMatch() {

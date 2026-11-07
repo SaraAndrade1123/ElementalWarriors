@@ -55,17 +55,21 @@ export function makeClip(name, dur, keys, meta = {}) {
     const ks = track[c];
     for (let i = 1; i < ks.length - 1; i++) {
       const a = ks[i - 1].v, b = ks[i].v, n = ks[i + 1].v;
-      if ((b - a) * (n - b) < 0 && FAST_IN[ks[i].e] && FAST_OUT[ks[i + 1].e]) ks[i + 1] = { ...ks[i + 1], e: 'io' };
+      const nx = ks[i + 1].e, burst = nx === 'out2' || nx === 'out3' || nx === 'back';
+      if ((b - a) * (n - b) < 0 && ((FAST_IN[ks[i].e] && FAST_OUT[nx]) || (burst && Math.abs(n - b) > .05))) ks[i + 1] = { ...ks[i + 1], e: 'io' }; // (v1.8) en todo cambio de sentido, la salida arranca desde quieto (sacar el arma de la funda, preparar el golpe…)
     }
   }
   return { name, dur, track, chs: Object.keys(track).map(Number), lastT: Math.max(0, ...keys.map(k => k.t)), ...meta };
 }
+// canales de giro completo (volteretas, molinetes): 2π equivale a 0
+const TURN = new Set(['comPitch', 'comYaw', 'comRoll', 'wpSpin'].map(k => IDX[k]));
 export function evalClip(clip, t, base, out) {
   out.set(base);
   for (const c of clip.chs) {
     const ks = clip.track[c]; let t0 = 0, v0 = base[c];
     for (let i = 0; i <= ks.length; i++) {
-      const k = i < ks.length ? ks[i] : { t: clip.dur, v: base[c], e: 'io' };
+      let k = i < ks.length ? ks[i] : { t: clip.dur, v: clip.hold ? v0 : base[c], e: 'io' }; // un clip que se mantiene (victoria, derrota) no vuelve a la base canal a canal
+      if (i === ks.length && TURN.has(+c)) { const d = v0 - base[c], w = d - Math.round(d / (2 * Math.PI)) * 2 * Math.PI; v0 = base[c] + w; } // al volver a la base, un giro completo no se deshace hacia atrás
       if (t <= k.t) { out[c] = k.t - t0 < 1e-6 ? k.v : v0 + (k.v - v0) * EASE[k.e]((t - t0) / (k.t - t0)); break; } // clave en t = 0: vale desde el primer instante
       t0 = k.t; v0 = k.v;
     }

@@ -15,6 +15,27 @@ export const SCHEMES = {
       s: ['Numpad4', 'KeyL'], r: ['Numpad5', 'Semicolon'], w: ['Numpad6', 'KeyK'], t: ['Numpad7', 'Quote'], guard: ['Numpad0', 'ShiftRight'] },
   ],
 };
+// (F9) Teclas configurables: keys = { solo: { acción: código }, vs1: {…}, vs2: {…} } (solo lo que el jugador cambió). La tecla
+// elegida pasa a ser la principal de esa acción y se quita de las demás del mismo esquema (sin conflictos).
+export function buildSchemes(keys = {}) {
+  const apply = (base, over) => {
+    const m = Object.fromEntries(Object.entries(base).map(([a, c]) => [a, [...c]]));
+    for (const [a, code] of Object.entries(over || {})) { if (!m[a]) continue; for (const k in m) m[k] = m[k].filter(c => c !== code); m[a] = [code, ...m[a]]; }
+    return m;
+  };
+  return { solo: [apply(KEYMAP, keys.solo)], versus: [apply(SCHEMES.versus[0], keys.vs1), apply(SCHEMES.versus[1], keys.vs2)] };
+}
+// Nombre legible de una tecla (para la guía y los ajustes).
+export function keyName(code) {
+  if (!code) return '—';
+  const M = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Space: 'Espacio', ShiftLeft: 'Mayús izq.', ShiftRight: 'Mayús der.', ControlLeft: 'Ctrl izq.', ControlRight: 'Ctrl der.',
+    AltLeft: 'Alt', AltRight: 'Alt Gr', Comma: ',', Period: '.', Slash: '-', Semicolon: 'Ñ', Quote: "'", Backquote: 'º', Minus: "'", Equal: '¡', BracketLeft: '`', BracketRight: '+', Backslash: 'Ç', IntlBackslash: '<', Backspace: '⌫' };
+  if (M[code]) return M[code];
+  if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+  if (/^Digit\d$/.test(code)) return code.slice(5);
+  if (/^Numpad/.test(code)) return 'Num ' + code.slice(6).replace('Add', '+').replace('Subtract', '-').replace('Multiply', '*').replace('Divide', '/').replace('Decimal', '.').replace('Enter', '↵');
+  return code;
+}
 const EDGE = ['jump', 'l', 'm', 'h', 's', 'r', 'w', 't'];
 const PAD = [['left', '◀'], ['right', '▶'], ['down', '▼'], ['jump', '▲'], ['l', 'L'], ['m', 'M'], ['h', 'H'], ['s', '✦'], ['r', '◈'], ['guard', '🛡'], ['lm', 'L+M'], ['mh', 'M+H'], ['w', '✠'], ['t', '✹']];
 const EMPTY = Object.freeze({ x: 0, down: false, guard: false, jump: false, l: false, m: false, h: false, s: false, r: false, w: false, t: false });
@@ -23,7 +44,7 @@ export class Input {
   // keymap: mapa propio para un solo jugador (compatibilidad con v0.6); si no, se usan los esquemas.
   constructor(root, onPause, keymap = null) {
     this.root = root; this.onPause = onPause; this.paused = false; this.keys = new Set(); this.pad = {}; this.pr = [{}, {}]; this.log = [];
-    this.custom = keymap; this.scheme = 'solo';
+    this.custom = keymap; this.scheme = 'solo'; this.schemes = buildSchemes();
     this.kd = e => {
       if (e.code === 'Escape' || e.code === 'KeyP') { e.preventDefault(); if (!e.repeat) this.onPause?.(); return; }
       const hit = this.#hits(e.code); if (this.paused || !hit.length) return; e.preventDefault();
@@ -42,7 +63,8 @@ export class Input {
       return b;
     }));
   }
-  get maps() { return this.custom && this.scheme === 'solo' ? [this.custom] : SCHEMES[this.scheme]; }
+  get maps() { return this.custom && this.scheme === 'solo' ? [this.custom] : this.schemes[this.scheme]; }
+  setBindings(keys) { this.schemes = buildSchemes(keys); this.clear(); } // (F9) teclas elegidas por el jugador
   get map() { return this.maps[0]; }
   get players() { return this.maps.length; }
   // Cambia el esquema de teclas (antes de empezar un combate). Limpia lo pulsado.

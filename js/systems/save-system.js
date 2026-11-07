@@ -8,7 +8,10 @@ const counts = o => { const r = {}; if (o && typeof o === 'object') for (const [
 export const defaults = () => ({
   v: VERSION, gold: { balance: 0, earned: 0, spent: 0 }, rewards: [], owned: [], equipped: {}, done: [],
   challenges: [], story: {}, records: { arcade: { score: 0, char: '' }, survival: { wins: 0, score: 0, sec: 0, char: '' } },
-  stats: { matches: 0, wins: 0, losses: 0, draws: 0, roundsWon: 0, maxCombo: 0, maxDamage: 0, playSec: 0, transformations: 0, purchases: 0, arcadeClears: 0, storyClears: 0, winsBy: {} }
+  stats: { matches: 0, wins: 0, losses: 0, draws: 0, roundsWon: 0, maxCombo: 0, maxDamage: 0, playSec: 0, transformations: 0, purchases: 0, arcadeClears: 0, storyClears: 0,
+    // (v1.8) hazañas para los logros
+    rankS: 0, perfects: 0, flawless: 0, exKOs: 0, counters: 0, throws: 0, parries: 0, comebacks: 0, fastWins: 0, mirrorWins: 0, extremeWins: 0, localMatches: 0, dmgTotal: 0,
+    winsBy: {}, extremeBy: {} }
 });
 
 export function sanitize(raw) {
@@ -20,8 +23,9 @@ export function sanitize(raw) {
   const rc = raw.records || {}, ra = rc.arcade || {}, rs = rc.survival || {}, ch = v => (typeof v === 'string' && ID.test(v) ? v : '');
   d.records = { arcade: { score: int(ra.score), char: ch(ra.char) }, survival: { wins: int(rs.wins, 9999), score: int(rs.score), sec: int(rs.sec, 1e9), char: ch(rs.char) } };
   const s = raw.stats || {};
-  for (const k of Object.keys(d.stats)) if (k !== 'winsBy') d.stats[k] = int(s[k], k === 'playSec' ? 1e9 : 1e6);
-  d.stats.winsBy = counts(s.winsBy);
+  const MAPS = ['winsBy', 'extremeBy'];
+  for (const k of Object.keys(d.stats)) if (!MAPS.includes(k)) d.stats[k] = int(s[k], k === 'playSec' || k === 'dmgTotal' ? 1e9 : 1e6);
+  for (const k of MAPS) d.stats[k] = counts(s[k]);
   return d;
 }
 

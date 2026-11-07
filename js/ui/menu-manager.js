@@ -2,6 +2,13 @@ import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { t } from '../systems/localization.js';
 import { movesFor } from '../game/fighter.js';
 
+// Tarjeta del guerrero elegido (Jugar / Entrenamiento): gema y franja de su elemento, nombre en letra de título y su apodo.
+export const heroCard = me => {
+  const alias = t(`char.${me.id}.alias`), col = me.fx?.color || '#c9a44c';
+  return h('div', { class: 'hero-card', style: `--c:${col}` }, h('span', { class: 'hc-gem', 'aria-hidden': 'true' }),
+    h('div', { class: 'hc-txt' }, h('span', { class: 'hc-el' }, t(`elem.${me.element}`)), h('b', { class: 'hc-name' }, me.name),
+      alias && alias !== `char.${me.id}.alias` ? h('span', { class: 'hc-alias' }, alias) : null));
+};
 const h = (tag, props = {}, ...kids) => {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
@@ -89,7 +96,7 @@ export class MenuManager {
     const me = this.roster[this.idx]; if (!this.roster[this.rival]) this.rival = (this.idx + 1) % this.roster.length;
     const rivals = this.roster.map((r, i) => [r, i]); // incluye al mismo guerrero: duelo espejo con su chroma especial
     this.panel(t('play.title'),
-      h('p', { class: 'lead' }, me.name),
+      heroCard(me),
       h('p', { class: 'note' }, t('play.mode')),
       h('div', { class: 'tabs', role: 'group' }, ...[['cpu', 'play.cpu'], ['training', 'play.train']].map(([m, k]) => h('button', { 'aria-pressed': String(this.mode === m), onclick: () => { this.mode = m; this.page_play(); } }, t(k)))),
       ...(this.mode === 'training' ? [] : [h('p', { class: 'note' }, t('play.level')),
@@ -135,7 +142,6 @@ export class MenuManager {
       h('fieldset', {}, h('legend', {}, t('set.quality')), h('div', { class: 'tabs' }, ...['low', 'medium', 'high'].map(q =>
         h('button', { 'aria-pressed': String(s.quality === q), onclick: () => { this.settings.set({ quality: q }); this.page_settings(); } }, t('set.q.' + q))))),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: s.reduceMotion, onchange: e => this.settings.set({ reduceMotion: e.target.checked }) }), t('set.reduce')),
-      h('p', { class: 'note' }, t('set.later')),
       h('button', { class: 'ghost', onclick: () => { this.settings.reset(); this.page_settings(); this.toast(t('set.reset')); } }, t('set.resetbtn')));
   }
 

@@ -8,6 +8,7 @@
 // No depende del combate: usa la escena del menú (scene.showPair + scene.cineCam), así sirve antes, entre y después de los combates.
 import * as THREE from 'three';
 import { t } from '../systems/localization.js';
+import { typed as typedN } from '../systems/a11y.js';
 
 const ease = x => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
 export const readTime = text => Math.max(2.6, Math.min(6.5, 1.4 + String(text).length * .05));
@@ -143,7 +144,7 @@ export function createStoryCine({ scene, roster = [], doc = globalThis.document,
       cam.position.copy(_p); cam.lookAt(_l);
       // texto que se escribe solo y avance automático cuando ya se ha podido leer
       if (el && s.kind !== 'card') {
-        const f = full(s); typed = Math.min(f.length, Math.max(typed, Math.floor(st * 42)));
+        const f = full(s); typed = Math.min(f.length, Math.max(typed, typedN(st, 42)));
         const node = s.kind === 'line' ? txt : el.querySelector('.snarr'); if (node.textContent.length !== typed) node.textContent = f.slice(0, typed);
         node.classList.toggle('done', typed >= f.length); el.classList.toggle('ready', typed >= f.length);
         if (typed >= f.length && (auto += dt) > readTime(f) * (s.tour ? .4 + .2 : .9) && (!s.tour || st > readTime(f) * 1.1)) go();

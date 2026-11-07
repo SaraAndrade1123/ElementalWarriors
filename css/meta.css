@@ -18,3 +18,44 @@
 .ach .mark{font-size:1.2rem;color:var(--muted);width:1.4rem;text-align:center}.ach.done .mark{color:var(--gold-hi)}.ach.done{border-color:var(--gold)}
 .note.warn{color:#ffb4a2;border-color:#7a3a2c}
 @media (max-width:760px){.item{grid-template-columns:auto 1fr}.acts{grid-column:1/-1;justify-content:flex-start}}
+
+/* ── (v1.8) Progreso: títulos de sección, fichas, guerreros y logros ── */
+.sect{display:grid;gap:2px;margin-top:6px}
+.sect h3{font:800 1.12rem/1.1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;background:linear-gradient(180deg,#fff6d6,var(--gilt-hi,#f1dc9a) 45%,var(--gilt,#c9a44c));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.sect h3::after{content:"";display:block;height:12px;margin-top:6px;background:var(--orn-div) left center/96px 10px no-repeat,linear-gradient(90deg,rgba(201,164,76,.55),transparent 85%) 0 50%/100% 1px no-repeat}
+.sect-sub{font:600 .82rem var(--f-body);color:#b9c4d9;letter-spacing:.03em}
+.stiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
+.stile{display:grid;gap:2px;padding:8px 10px;border:1px solid rgba(201,164,76,.28);background:linear-gradient(180deg,rgba(26,38,80,.55),rgba(8,12,28,.7));border-radius:3px}
+.stile b{font:800 clamp(.95rem,1.6vw,1.18rem)/1 var(--f-display);color:#fff3cc;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stile span{font:600 .72rem/1.2 var(--f-body);color:#97a3bb;letter-spacing:.04em;text-transform:uppercase}
+.wcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.wcard{position:relative;display:grid;gap:1px;padding:10px 12px 12px;clip-path:inset(0);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-radius:3px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 30%,transparent),rgba(8,12,28,.85) 70%);box-shadow:inset 3px 0 0 var(--c)}
+.wcard::after{content:"";position:absolute;right:-18px;top:-18px;width:62px;height:62px;transform:rotate(45deg);border:2px solid color-mix(in srgb,var(--c) 45%,transparent);opacity:.6}
+.wc-el{font:700 .66rem var(--f-body);letter-spacing:.24em;text-transform:uppercase;color:var(--c)}
+.wc-name{font:800 1.25rem/1.05 var(--f-display);letter-spacing:.05em;color:#fff6dc;text-shadow:0 0 14px color-mix(in srgb,var(--c) 60%,transparent)}
+.wc-alias{font:500 .74rem var(--f-body);color:#aab5ca}
+.wc-n{margin-top:6px;font:800 1.5rem/1 var(--f-display);color:#fff;font-variant-numeric:tabular-nums}.wc-n small{font:600 .74rem var(--f-body);color:#97a3bb}
+.wc-bar{display:block;height:4px;margin-top:5px;background:rgba(255,255,255,.08);border-radius:2px;position:relative}
+.wc-bar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:linear-gradient(90deg,var(--c),#fff8);border-radius:2px;box-shadow:0 0 8px var(--c)}
+.wc-x{margin-top:6px;font:700 .68rem var(--f-body);letter-spacing:.08em;color:#ffe08a;text-transform:uppercase}
+.ach-head{height:8px;border-radius:4px;background:rgba(255,255,255,.07);border:1px solid rgba(201,164,76,.3);overflow:hidden}
+.ach-total{display:block;height:100%;width:var(--p);background:linear-gradient(90deg,#8a6a24,#f1dc9a,#fff6d6);box-shadow:0 0 10px rgba(241,220,154,.6)}
+.ach-group{display:grid;gap:6px}
+.ach-cat{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;font:700 .86rem var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#e4c46a;border-bottom:1px solid rgba(201,164,76,.25);padding-bottom:3px}
+.ach-cat span{font:600 .76rem var(--f-body);letter-spacing:.04em;color:#97a3bb}
+.achs .ach{grid-template-columns:auto 1fr auto}
+.achs .ach .price{grid-column:3}
+.medal{width:30px;height:30px;display:grid;place-items:center;font:800 .9rem/1 var(--f-body);color:#0b1020;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);opacity:.38;filter:grayscale(.6)}
+.medal.bronze{background:linear-gradient(160deg,#ffcf9a,#b06a2c 55%,#6b3a14)}.medal.silver{background:linear-gradient(160deg,#ffffff,#b8c2d4 55%,#6c7890)}
+.medal.gold{background:linear-gradient(160deg,#fff6c8,#e4b240 55%,#8a5e10)}.medal.platinum{background:linear-gradient(160deg,#f4fffe,#9fe6f0 45%,#5a7ad8 80%,#c9a8ff)}
+.ach.done .medal{opacity:1;filter:none;box-shadow:0 0 12px rgba(255,230,160,.5)}
+.ach.done.t-platinum .medal{animation:platGlow 2.4s ease-in-out infinite}
+@keyframes platGlow{50%{filter:brightness(1.25) drop-shadow(0 0 6px #9fe6f0)}}
+.ach-bar{display:block;height:3px;margin-top:4px;background:rgba(255,255,255,.08);border-radius:2px;position:relative}
+.ach-bar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p);background:linear-gradient(90deg,#8a6a24,#f1dc9a);border-radius:2px}
+.ach.done{border-color:rgba(241,220,154,.45)}
+.medal.mythic{background:conic-gradient(from 0deg,#ff7a35,#ffd257,#5fd0ff,#9cff5a,#c9a8ff,#ff7a35)}
+.ach.done.t-mythic .medal{animation:mythSpin 3s linear infinite}
+@keyframes mythSpin{to{filter:hue-rotate(360deg) brightness(1.15)}}
+.ach.t-mythic{border-color:rgba(201,168,255,.35)}
