@@ -37,6 +37,7 @@ export function installAudio({ menu, scene, meta = null, stages = null, roster =
     if (song === 'shuffle') { if (!shuffled || (mode === 'battle' && audio.nowPlaying?.mode !== 'battle')) { const pool = ['epic', 'synth', 'lofi', 'drums', 'fire', 'water', 'earth', 'wind'].filter(x => x !== shuffled); shuffled = pool[Math.floor(Math.random() * pool.length)]; } return rawMusic(shuffled, mode); }
     return rawMusic(song, mode);
   };
+  menu.audioApi = { songs: () => SONGS.filter(v => v !== 'shuffle'), song: () => song, setSong: v => audio.setSong(v) }; // (v1.9) Colección › Música
   audio.setSong = v => { if (!SONGS.includes(v)) return; song = v; ls.set(v); shuffled = null; audio.music(lastEl ?? elementOf(menu.idx), lastMode); };
   audio.song = () => song;
   const menuMusic = () => audio.music(elementOf(menu.idx), 'menu');

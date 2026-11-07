@@ -31,7 +31,7 @@ import { renderResult } from './ui/result-screen.js';
 import { installPanelDock } from './ui/panel-dock.js';
 import { installChromaVfx } from './game/chroma-vfx.js';
 import { patchFighter as patchTransform, patchCpu as patchTransformCpu, installTransform } from './game/transform.js';
-import { Fighter, RULES } from './game/fighter.js';
+import { Fighter, RULES, movesFor } from './game/fighter.js';
 import { installOutro } from './game/cinematic-end.js';
 import { createWeaponPreview } from './ui/weapon-preview.js';
 
@@ -69,6 +69,12 @@ async function boot() {
       bar.style.width = `${(done / total) * 100}%`; meter.setAttribute('aria-valuenow', Math.round((done / total) * 100));
       status.textContent = t('ui.loading', { done, total }); stage(`guerreros ${done}/${total}`);
     });
+    // (v1.9) al elegir un guerrero dice una frase propia (sin repetir la anterior) en un bocadillo junto a su placa
+    { const say = $('#say'), last = {}; let hideT = 0;
+      scene.onShow = def => { if (!say || !def) return; const n = [0, 1, 2, 3, 4].filter(i => t(`menu.say.${def.id}.${i}`) !== `menu.say.${def.id}.${i}`); if (!n.length) return;
+        let i = n[Math.floor(Math.random() * n.length)]; if (n.length > 1 && i === last[def.id]) i = n[(n.indexOf(i) + 1) % n.length]; last[def.id] = i;
+        say.querySelector('b').textContent = def.name; say.querySelector('p').textContent = t(`menu.say.${def.id}.${i}`);
+        say.hidden = true; void say.offsetWidth; say.hidden = false; clearTimeout(hideT); hideT = setTimeout(() => { say.hidden = true; }, 6000); }; }
     scene.show(roster[0].id); scene.start();
     status.classList.remove('error'); status.textContent = failed.length ? t('ui.partial', { n: failed.length }) : t('ui.ready'); if (failed.length && scene.loadErrors?.length) status.title = scene.loadErrors.join('\n'); // detalle al pasar el ratón
     // Dificultad de la CPU para los combates sueltos (Jugar / Entrenamiento con maniquí CPU); se guarda en este navegador.
@@ -83,6 +89,25 @@ async function boot() {
     const meta = createMeta({ items: shopData.items, achievements: achData.achievements, economy });
     roster.forEach(r => scene.setPalette(r.id, meta.shop.paletteOf(r.id)));
     installMetaPanels(menu, { meta, scene, roster, dev });
+    // (v1.9) perfil del jugador local en la pantalla principal: rango (según logros), Rose Gold, victorias y guerrero favorito
+    { const RANKS = [[0, 'novice'], [5, 'apprentice'], [15, 'warrior'], [35, 'veteran'], [60, 'master'], [90, 'legend']];
+      menu.profile = () => { const d = meta.save.data, n = d.done.length, rank = [...RANKS].reverse().find(([k]) => n >= k)[1], s = d.stats;
+        const fav = Object.entries(s.winsBy || {}).sort((a, b) => b[1] - a[1])[0], favDef = fav && fav[1] > 0 ? roster.find(r => r.id === fav[0]) : null;
+        const e = (tag, cls, txt) => { const x = document.createElement(tag); if (cls) x.className = cls; if (txt != null) x.textContent = txt; return x; };
+        const card = e('button', 'pcard'); card.type = 'button'; card.onclick = () => menu.go('progress'); card.setAttribute('aria-label', t('menu.progress'));
+        if (favDef) card.style.setProperty('--c', favDef.fx?.color || '#c9a44c');
+        const av = e('span', 'pc-av'); av.textContent = (favDef?.name || '?')[0];
+        const tx = e('span', 'pc-tx'); tx.append(e('small', null, t('profile.rank.' + rank)), e('b', null, t('profile.title')),
+          e('i', null, [t('profile.gold', { n: d.gold.balance.toLocaleString() }), t('profile.wins', { n: s.wins }), favDef ? t('profile.fav', { name: favDef.name }) : null].filter(Boolean).join(' · ')));
+        const ach = e('span', 'pc-ach'); ach.append(e('b', null, String(n)), e('small', null, t('profile.ach')));
+        card.append(av, tx, ach); return card; }; }
+    // (v1.9) aviso de guardado: cada vez que el progreso se guarda aparece «Guardado» junto a la versión
+    { const ver = document.querySelector('#menu .ver'), mark = document.createElement('span'); mark.className = 'saved'; mark.setAttribute('role', 'status'); ver?.after(mark); let tm = 0;
+      meta.save.subscribe(() => { mark.textContent = meta.save.persistent === false ? t('profile.nosave') : t('profile.saved'); mark.classList.toggle('warn', meta.save.persistent === false); mark.classList.remove('on'); void mark.offsetWidth; mark.classList.add('on'); clearTimeout(tm); tm = setTimeout(() => mark.classList.remove('on'), 2600); }); }
+    // (v1.9) cifras reales del juego para los créditos (salen de los datos, no están escritas a mano)
+    menu.counts = () => { const its = shopData.items || [], st = stageData.stages || stageData;
+      return { stages: Array.isArray(st) ? st.length : 0, moves: roster.reduce((n, r) => n + Object.keys(movesFor(moves, r.id)).length, 0), challenges: CHALLENGES.length,
+        achievements: (achData.achievements || achData).length, items: its.filter(i => !i.hidden).length, songs: menu.audioApi?.songs().length || 0, chromas: its.filter(i => i.chroma).length + roster.length }; };
     if (dev) window.ew = meta; // consola: ew.progression.recordMatch({...})
     const stages = new StageManager(stageData.stages);
     stages.problems.forEach(p => console.warn('[stages]', p));
@@ -124,7 +149,7 @@ async function boot() {
     document.addEventListener('visibilitychange', () => { if (document.hidden) autoPause(); }); addEventListener('blur', autoPause);
     const dbgEl = $('#dbg'); let dbgOn = false, lastDbg = '';
     const H = { hp: [$('#hp1'), $('#hp2')], tr: [$('#tr1'), $('#tr2')], gd: [$('#gd1'), $('#gd2')], res: [$('#res1'), $('#res2')], pips: [$('#pips1'), $('#pips2')], timer: $('#timer'), ann: $('#announce'), combo: $('#combo'), notes: $('#notes') };
-    let lastAnn = '', lastPips = '', lastNotes = '', lastRes = '';
+    let lastAnn = '', lastPips = '', lastNotes = '', lastRes = '', lastIlog = '';
     const hud = s => {
       s.hp.forEach((v, i) => { const w = (v * 100).toFixed(1) + '%'; H.hp[i].style.width = w; H.tr[i].style.width = w; });
       s.guard?.forEach((v, i) => { H.gd[i].style.width = (v * 100).toFixed(0) + '%'; });
@@ -133,6 +158,9 @@ async function boot() {
         el.querySelector('.rlbl').innerHTML = `${t('hud.res')} <em>${n}</em>`; }); }
       const nk = (s.notes || []).map(n => n.text + n.side).join('|'); if (nk !== lastNotes) { lastNotes = nk; H.notes.replaceChildren(...(s.notes || []).map(n => { const p = document.createElement('p'); p.className = (n.side ? 'r ' : 'l ') + n.kind; p.textContent = n.text; return p; })); }
       const tr = s.mode === 'training'; H.timer.hidden = tr;
+      { const il = $('#ilog'); il.hidden = !tr || !s.inlog; if (tr && s.inlog) { const k = s.inlog.map(x => x.tok + x.n).join('|'); if (k !== lastIlog) { lastIlog = k;
+        il.querySelector('ol').replaceChildren(...s.inlog.map(x => { const li = document.createElement('li'); li.innerHTML = `<span>${x.tok || '·'}</span><small>${x.n}</small>`; return li; })); }
+        const av = s.adv ? t(s.adv.blocked ? 'hud.adv.block' : 'hud.adv.hit', { n: (s.adv.n > 0 ? '+' : '') + s.adv.n }) : ''; const ap = il.querySelector('.adv'); if (ap.textContent !== av) { ap.textContent = av; ap.className = 'adv ' + (s.adv ? s.adv.n >= 0 ? 'pos' : 'neg' : ''); } } }
       const need = s.need ?? 2, p = tr ? ['', ''] : s.wins.map(w => '●'.repeat(w) + '○'.repeat(Math.max(0, need - w))); if (p.join() !== lastPips) { lastPips = p.join(); p.forEach((x, i) => { H.pips[i].textContent = x; }); }
       H.timer.textContent = Number.isFinite(s.timer) ? s.timer : '∞';
       if (s.text !== lastAnn) { lastAnn = s.text; H.ann.textContent = s.text; H.ann.classList.remove('pop'); void H.ann.offsetWidth; if (s.text) H.ann.classList.add('pop'); }
@@ -147,7 +175,7 @@ async function boot() {
     const sideFx = (c, i) => { const id = i ? c.b : c.a, def = roster.find(r => r.id === id); return (i && c.a === c.b ? scene.mirrors.get(id)?.fx : scene.chars.get(id)?.fx) ?? def.fx; };
     // Cartel de duelo de la pausa: dos placas enfrentadas (quién controla cada lado, nombre, elemento) y emblema VS.
     const sideTag = (c, i) => { const md = c.mode || 'cpu'; if (md === 'versus') return t(i ? 'pause.side.p2' : 'pause.side.p1');
-      if (md === 'training') return t(i ? 'pause.side.dummy' : 'pause.side.you'); return i ? t('pause.side.cpu', { level: t('level.' + (scene.match?.brain?.level || c.level || cpuLevel)) }) : t('pause.side.you'); };
+      if (md === 'training') return t(i ? 'pause.side.dummy' : 'pause.side.you'); return i || c.watch ? t('pause.side.cpu', { level: t('level.' + (scene.match?.brain?.level || c.level || cpuLevel)) }) : t('pause.side.you'); };
     const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
     const renderDuel = () => {
       if (!cur) return; const box = $('#pause-vs'), E = scene.__elements;
@@ -226,12 +254,12 @@ async function boot() {
       cur = c; const { a, b, mode = 'cpu' } = c, vs = mode === 'versus';
       try {
         input.setScheme(vs ? 'versus' : 'solo');
-        scene.startMatch(a, b, input, { moves, mode, level: c.level || cpuLevel, wins: c.wins, maxRounds: c.maxRounds, roundTime: c.roundTime, startHp: c.startHp, dummy: c.dummy, infinite: c.infinite, stage: c.stage,
+        scene.startMatch(a, b, input, { moves, mode, level: c.level || cpuLevel, wins: c.wins, maxRounds: c.maxRounds, roundTime: c.roundTime, startHp: c.startHp, dummy: c.dummy, infinite: c.infinite, stage: c.stage, watch: !!c.watch, level1: c.level1,
           onEvent: e => flow.onEvent(e), onHud: hud, onResult: showResult, onFx: (n, d = {}) => audio.sfx(n, { ...d, element: ELEMENT_OF[d.who] }), onReact: p => stages.react(p) });
       } catch (e) { console.error('[match]', e); return menu.toast(t('play.err', { e: e.message })); }
       $('#hud-n1').textContent = sideName(c, 0); $('#hud-n2').textContent = sideName(c, 1);
       [0, 1].forEach(i => { const fx = sideFx(c, i); H.res[i].style.setProperty('--rc1', fx.light); H.res[i].style.setProperty('--rc2', fx.color); }); lastRes = ''; lastNotes = '';
-      renderDuel(); showHint(t(vs ? 'hud.hint.versus' : mode === 'training' ? 'hud.hint.train' : 'hud.hint.cpu'));
+      renderDuel(); showHint(t(c.watch ? 'hud.hint.watch' : vs ? 'hud.hint.versus' : mode === 'training' ? 'hud.hint.train' : 'hud.hint.cpu')); document.body.classList.toggle('watching', !!c.watch);
       $('#guide-solo').hidden = vs; $('#guide-vs').hidden = !vs;
       for (const li of document.querySelectorAll('.train-only')) li.hidden = mode !== 'training';
       for (const li of document.querySelectorAll('.cpu-only')) li.hidden = mode !== 'cpu';

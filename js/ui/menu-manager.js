@@ -2,13 +2,8 @@ import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { t } from '../systems/localization.js';
 import { movesFor } from '../game/fighter.js';
 
-// Tarjeta del guerrero elegido (Jugar / Entrenamiento): gema y franja de su elemento, nombre en letra de título y su apodo.
-export const heroCard = me => {
-  const alias = t(`char.${me.id}.alias`), col = me.fx?.color || '#c9a44c';
-  return h('div', { class: 'hero-card', style: `--c:${col}` }, h('span', { class: 'hc-gem', 'aria-hidden': 'true' }),
-    h('div', { class: 'hc-txt' }, h('span', { class: 'hc-el' }, t(`elem.${me.element}`)), h('b', { class: 'hc-name' }, me.name),
-      alias && alias !== `char.${me.id}.alias` ? h('span', { class: 'hc-alias' }, alias) : null));
-};
+import { heroCard } from './track-ui.js';
+export { heroCard };
 const h = (tag, props = {}, ...kids) => {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
@@ -80,7 +75,7 @@ export class MenuManager {
   }
 
   page_home() {
-    this.el.view.replaceChildren(h('ul', { class: 'nav', role: 'list' }, ...this.menu.map(m => {
+    this.el.view.replaceChildren(this.profile?.() || '', h('ul', { class: 'nav', role: 'list' }, ...this.menu.map(m => {
       const dev = m.status !== 'ready', name = t('menu.' + m.id);
       return h('li', {}, h('button', {
         class: 'nav-item' + (dev ? ' is-dev' : ''), 'aria-disabled': dev ? 'true' : null,
@@ -96,7 +91,7 @@ export class MenuManager {
     const me = this.roster[this.idx]; if (!this.roster[this.rival]) this.rival = (this.idx + 1) % this.roster.length;
     const rivals = this.roster.map((r, i) => [r, i]); // incluye al mismo guerrero: duelo espejo con su chroma especial
     this.panel(t('play.title'),
-      heroCard(me),
+      heroCard(me, t('play.with')),
       h('p', { class: 'note' }, t('play.mode')),
       h('div', { class: 'tabs', role: 'group' }, ...[['cpu', 'play.cpu'], ['training', 'play.train']].map(([m, k]) => h('button', { 'aria-pressed': String(this.mode === m), onclick: () => { this.mode = m; this.page_play(); } }, t(k)))),
       ...(this.mode === 'training' ? [] : [h('p', { class: 'note' }, t('play.level')),
@@ -117,6 +112,7 @@ export class MenuManager {
       h('div', { class: 'stats' }, ...Object.entries(d.stats).map(([k, v]) => h('div', { class: 'stat' },
         h('span', {}, t('stat.' + k)), h('span', { class: 'bar' }, h('i', { style: `width:${v * 10}%` })), h('b', {}, `${v}/10`)))),
       h('dl', {}, ...['weapon', 'style', 'special', 'transformation'].flatMap(k => [h('dt', {}, t('field.' + k)), h('dd', {}, this.c(d, k))])),
+      h('details', { class: 'moves lore' }, h('summary', {}, t('field.story')), h('p', { class: 'note story-txt' }, t(`char.${d.id}.story`))), // (v1.9) historia del guerrero
       this.moveList(d),
       h('p', { class: 'note' }, t('ui.provisional', { title: d.provisional.title, author: d.provisional.author })));
   }
@@ -131,7 +127,7 @@ export class MenuManager {
     return h('details', { class: 'moves' }, h('summary', {}, t('field.moves')),
       h('table', {}, h('tr', {}, ...['mvh.name', 'mvh.input', 'mvh.startup', 'mvh.dmg', 'mvh.notes'].map(k => h('th', {}, t(k)))),
         ...Object.keys(IN).filter(id => M[id]).map(id => { const m = M[id], dmg = m.proj ? m.proj.dmg * (m.proj.multi || 1) : m.dmg * (m.multi || 1);
-          return h('tr', {}, h('td', {}, name(id, m)), h('td', {}, h('kbd', {}, IN[id])), h('td', {}, String(Math.round(m.startup * 60)) + 'f'), h('td', {}, String(Math.round(dmg))), h('td', {}, [tags(m), m.meter ? t('mvt.cost', { n: m.meter }) : ''].filter(Boolean).join(' · '))); })));
+          return h('tr', {}, h('td', { class: 'mvn' }, name(id, m)), h('td', { class: 'mvi' }, h('kbd', {}, IN[id])), h('td', { class: 'mvs', 'data-l': t('mvh.startup') }, String(Math.round(m.startup * 60)) + 'f'), h('td', { class: 'mvd', 'data-l': t('mvh.dmg') }, String(Math.round(dmg))), h('td', { class: 'mvp' }, [tags(m), m.meter ? t('mvt.cost', { n: m.meter }) : ''].filter(Boolean).join(' · '))); })));
   }
 
   page_settings() {
@@ -146,14 +142,26 @@ export class MenuManager {
   }
 
   page_credits() {
+    // (v1.9) créditos completos: proyecto, equipo, cifras reales, tecnologías, audio y gráficos originales, modelos y licencias
+    const sec = (k, ...kids) => h('section', { class: 'cr-sec' }, h('h3', { class: 'cr-h' }, t('cr.' + k)), ...kids);
+    const li = (...a) => h('li', {}, ...a), ul = (...a) => h('ul', { class: 'credits' }, ...a);
+    const n = this.counts?.() || {};
+    const facts = [['roster', this.roster.length], ['stages', n.stages], ['moves', n.moves], ['challenges', n.challenges], ['achievements', n.achievements], ['items', n.items], ['songs', n.songs], ['chromas', n.chromas]].filter(([, v]) => v);
     this.panel(t('menu.credits'),
-      h('p', { class: 'lead' }, t('cr.project')),
-      h('div', { class: 'cr-team' }, h('p', { class: 'lead' }, t('cr.team')), h('ul', { class: 'credits team' },
-        h('li', {}, h('strong', { class: 'cr-name' }, 'Sara Andrade Rodriguez'), h('span', { class: 'cr-role' }, t('cr.dev'))),
-        h('li', {}, h('strong', { class: 'cr-name' }, 'Claude'), h('span', { class: 'cr-role' }, t('cr.ai'))))),
-      h('div', {}, h('p', { class: 'lead' }, t('cr.tools')), h('ul', { class: 'credits' }, h('li', {}, 'Three.js r170 (MIT) · threejs.org'), h('li', {}, 'Cinzel · Rajdhani (SIL Open Font License 1.1)'))),
-      h('div', {}, h('p', { class: 'lead' }, t('cr.models')), h('ul', { class: 'credits' }, ...this.roster.map(r =>
-        h('li', {}, h('a', { href: r.provisional.url, target: '_blank', rel: 'noopener' }, r.provisional.title), ` · ${r.provisional.author}`)))),
-      h('p', { class: 'note' }, t('cr.note')));
+      h('div', { class: 'cr-hero' }, h('b', {}, 'Elemental Warriors'), h('span', {}, t('cr.tagline')), h('small', {}, t('cr.project') + ' · ' + (document.querySelector('.ver')?.textContent || ''))),
+      sec('team', h('ul', { class: 'credits team' },
+        h('li', {}, h('strong', { class: 'cr-name' }, 'Sara Andrade Rodriguez'), h('span', { class: 'cr-role' }, t('cr.dev')), h('span', { class: 'cr-desc' }, t('cr.dev.desc'))),
+        h('li', {}, h('strong', { class: 'cr-name' }, 'Claude'), h('span', { class: 'cr-role' }, t('cr.ai')), h('span', { class: 'cr-desc' }, t('cr.ai.desc'))))),
+      sec('facts', h('div', { class: 'stiles' }, ...facts.map(([k, v]) => h('div', { class: 'stile' }, h('b', {}, String(v)), h('span', {}, t('cr.f.' + k)))))),
+      sec('tools', ul(li(h('b', {}, 'Three.js r170'), ' — WebGL · MIT · threejs.org'), li(h('b', {}, 'Web Audio API'), ' — ' + t('cr.t.audio')), li(h('b', {}, 'HTML5 · CSS3 · JavaScript (ES2020)'), ' — ' + t('cr.t.web')),
+        li(h('b', {}, 'Node.js · esbuild'), ' — ' + t('cr.t.build')), li(h('b', {}, 'Playwright · Chromium'), ' — ' + t('cr.t.qa')), li(h('b', {}, 'Python · Pillow'), ' — ' + t('cr.t.py')))),
+      sec('original', ul(li(t('cr.o.anim')), li(t('cr.o.music')), li(t('cr.o.sfx')), li(t('cr.o.vfx')), li(t('cr.o.stages')), li(t('cr.o.ui')))),
+      sec('fonts', ul(li(h('b', {}, 'Cinzel'), ' — Natanael Gama · SIL Open Font License 1.1'), li(h('b', {}, 'Rajdhani'), ' — Indian Type Foundry · SIL Open Font License 1.1'))),
+      sec('models', ul(...this.roster.map(r => li(h('b', {}, r.name + ': '), h('a', { href: r.provisional.url, target: '_blank', rel: 'noopener' }, r.provisional.title), ` · ${r.provisional.author} · ${r.provisional.license || 'CC BY 4.0'}`))),
+        h('p', { class: 'note' }, t('cr.note'))),
+      sec('inspiration', h('p', { class: 'note' }, t('cr.insp'))),
+      sec('thanks', h('p', { class: 'note' }, t('cr.thanks.p'))),
+      h('p', { class: 'note cr-legal' }, t('cr.legal')));
   }
+
 }

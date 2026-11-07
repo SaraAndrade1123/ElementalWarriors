@@ -12,6 +12,8 @@ const h = (tag, props = {}, ...kids) => {
   for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
   return e;
 };
+import { section as tSection, totalBar, catTabs, trackItem, list as trackList, note as trackNote } from './track-ui.js';
+let achTab = null;
 const fmtTime = s => { const m = Math.floor(s / 60); return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : m ? `${m} min` : `${s % 60} s`; };
 
 export function installMetaPanels(menu, { meta, scene, roster, dev = false }) {
@@ -73,11 +75,24 @@ export function installMetaPanels(menu, { meta, scene, roster, dev = false }) {
       dev ? h('button', { class: 'ghost', onclick: () => { wallet.add(500); rerender(); } }, t('dev.gold')) : null, warn());
   };
 
+  // (v1.9) Colección con pestañas: Aspectos · Música (todas las canciones) · Archivos (historia del mundo y de cada guerrero)
+  let colTab = 'skins';
+  const colTabs = () => h('div', { class: 'tabs', role: 'group', 'aria-label': t('menu.collection') }, ...['skins', 'music', 'lore'].map(k => h('button', { 'aria-pressed': String(colTab === k), onclick: () => { colTab = k; rerender(); } }, t('col.tab.' + k))));
+  const page_music = () => { const A = menu.audioApi, cur = A?.song?.(); const L = A?.songs?.() || [];
+    menu.panel(t('menu.collection'), colTabs(), h('p', { class: 'note' }, t('col.music.desc')), h('ul', { class: 'items achs' }, ...L.map(v => h('li', { class: 'ach t-gold' + (v === cur ? ' done' : '') },
+      h('span', { class: 'medal gold', 'aria-hidden': 'true' }, v === cur ? '♪' : ''), h('div', { class: 'meta' }, h('b', {}, t('set.song.' + v)), h('span', {}, t('set.song.d.' + v))),
+      v === cur ? h('span', { class: 'tag ok' }, t('col.music.on')) : h('button', { class: 'mini', onclick: () => { A.setSong(v); rerender(); } }, t('col.music.play'))))));
+  };
+  const page_lore = () => { const art = (title, text, col) => h('article', { class: 'lore-card', style: col ? `--c:${col}` : '' }, h('h4', {}, title), h('p', {}, text));
+    menu.panel(t('menu.collection'), colTabs(), h('p', { class: 'note' }, t('col.lore.desc')), art(t('lore.world.title'), t('lore.world')),
+      ...roster.map(r => art(`${r.name} — ${t('char.' + r.id + '.alias')}`, t('char.' + r.id + '.story'), r.fx?.color)), art(t('lore.resonance.title'), t('lore.resonance')), art(t('lore.stages.title'), t('lore.stages')));
+  };
   menu.page_collection = () => {
+    if (colTab === 'music') return page_music(); if (colTab === 'lore') return page_lore();
     const d = roster[menu.idx], mine = shop.ownedOf(d.id), sale = [...shop.items.values()].filter(i => !i.hidden);
     const orig = h('li', { class: 'item' }, swatch(d, null), h('div', { class: 'meta' }, h('b', {}, t('col.original'))),
       h('div', { class: 'acts' }, shop.equippedId(d.id) ? h('button', { id: 'a-orig-eq', class: 'mini', onclick: () => { shop.unequip(d.id); apply(d.id); menu.keep = 'a-orig-eq'; rerender(); } }, t('shop.equip')) : h('span', { class: 'tag' }, '✔ ' + t('shop.equipped'))));
-    menu.panel(t('menu.collection'), tabs(), h('p', { class: 'lead' }, t('col.count', { a: sale.filter(i => shop.owns(i.id)).length, b: sale.length })),
+    menu.panel(t('menu.collection'), colTabs(), tabs(), h('p', { class: 'lead' }, t('col.count', { a: sale.filter(i => shop.owns(i.id)).length, b: sale.length })),
       h('ul', { class: 'items' }, orig, ...mine.map(row)), mine.length ? null : h('p', { class: 'note' }, t('col.none')), warn());
   };
 
@@ -100,19 +115,14 @@ export function installMetaPanels(menu, { meta, scene, roster, dev = false }) {
     }));
     // logros por categoría, con medalla del nivel y barra de avance
     const doneN = progression.achs.filter(a => d.done.includes(a.id)).length, won = progression.achs.filter(a => d.done.includes(a.id)).reduce((n, a) => n + a.reward, 0);
-    const cats = [...new Set(progression.achs.map(a => a.cat || 'fight'))];
-    const groups = cats.map(cat => {
-      const list = progression.achs.filter(a => (a.cat || 'fight') === cat), got = list.filter(a => d.done.includes(a.id)).length;
-      return h('div', { class: 'ach-group' }, h('h4', { class: 'ach-cat' }, t('ach.cat.' + cat), h('span', {}, `${got}/${list.length}`)),
-        h('ul', { class: 'items achs' }, ...list.map(a => {
-          const done = d.done.includes(a.id), p = progression.progressOf(a, d), pct = Math.min(100, Math.round(100 * Math.min(p.value, p.target) / p.target)), tier = a.tier || 'bronze';
-          return h('li', { class: `ach t-${tier}` + (done ? ' done' : ''), style: `--p:${pct}%` },
-            h('span', { class: 'medal ' + tier, role: 'img', 'aria-label': t('ach.tier.' + tier) + ' · ' + t(done ? 'prog.done' : 'prog.pending') }, done ? '✔' : ''),
-            h('div', { class: 'meta' }, h('b', {}, t(`ach.${a.id}.name`)), h('span', {}, t(`ach.${a.id}.desc`)), done ? null : h('i', { class: 'ach-bar' })),
-            h('span', { class: 'tag' }, done ? t('prog.done') : `${Math.min(p.value, p.target).toLocaleString()}/${p.target.toLocaleString()}`), h('span', { class: 'price' }, t('prog.reward', { n: a.reward })));
-        })));
-    });
-    const achHead = h('div', { class: 'ach-head', style: `--p:${Math.round(100 * doneN / progression.achs.length)}%` }, h('i', { class: 'ach-total' }));
+    // (v1.9) misma lógica e interfaz que los Desafíos: pestañas por categoría con su cuenta, descripción y fichas
+    const catIds = [...new Set(progression.achs.map(a => a.cat || 'fight'))]; if (!catIds.includes(achTab)) achTab = catIds[0];
+    const cats = catIds.map(id => { const all = progression.achs.filter(a => (a.cat || 'fight') === id); return { id, label: t('ach.cat.' + id), done: all.filter(a => d.done.includes(a.id)).length, total: all.length }; });
+    const groups = [catTabs(cats, achTab, k => { achTab = k; rerender(); }, t('prog.ach')), trackNote(t('ach.catdesc.' + achTab)),
+      trackList(progression.achs.filter(a => (a.cat || 'fight') === achTab).map(a => { const p = progression.progressOf(a, d);
+        return trackItem({ tier: a.tier || 'bronze', done: d.done.includes(a.id), name: t(`ach.${a.id}.name`), desc: t(`ach.${a.id}.desc`), value: p.value, target: p.target, reward: a.reward,
+          tags: [{ cls: 'kind', text: t('ach.tier.' + (a.tier || 'bronze')) }] }); }))];
+    const achHead = totalBar(doneN, progression.achs.length);
     const reset = resetAsk
       ? h('p', { class: 'confirm' }, t('prog.reset.confirm'), h('button', { id: 'a-reset-yes', class: 'mini buy', onclick: () => { save.reset(); roster.forEach(r => apply(r.id)); resetAsk = false; menu.toast(t('prog.reset.done')); rerender(); } }, t('prog.reset.yes')),
         h('button', { class: 'mini', onclick: () => { resetAsk = false; rerender(); } }, t('shop.cancel')))

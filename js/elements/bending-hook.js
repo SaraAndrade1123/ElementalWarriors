@@ -103,7 +103,7 @@ export function installBending({ menu = null, scene, roster = menu?.roster || []
     tb.dataset.bend = '1';
     for (const k of BEND_IDS) {
       const m = D[d.id][k]; if (!m) continue; const dmg = m.proj ? m.proj.dmg * (m.proj.multi || 1) : m.dmg * (m.multi || 1);
-      tb.append(h('tr', { class: 'bend' }, h('td', {}, tx('mv.' + m.name)), h('td', {}, h('kbd', {}, INPUT[k])), h('td', {}, Math.round(m.startup * 60) + 'f'), h('td', {}, String(Math.round(dmg))), h('td', {}, tags(m))));
+      tb.append(h('tr', { class: 'bend' }, h('td', { class: 'mvn' }, tx('mv.' + m.name)), h('td', { class: 'mvi' }, h('kbd', {}, INPUT[k])), h('td', { class: 'mvs', 'data-l': t('mvh.startup') }, Math.round(m.startup * 60) + 'f'), h('td', { class: 'mvd', 'data-l': t('mvh.dmg') }, String(Math.round(dmg))), h('td', { class: 'mvp' }, tags(m))));
     }
   }
   function guide() {

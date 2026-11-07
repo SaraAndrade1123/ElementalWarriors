@@ -28,6 +28,7 @@ export class Match {
     // Vida infinita (entrenamiento / desafíos): nadie cae y la vida se recupera al terminar cada combo; desactivada, el daño se acumula y hay K.O. de verdad.
     this.infinite = !!o.infinite;
     this.dummy = this.mode === 'training' ? DUMMY_ALIAS[o.dummy] || o.dummy || 'still' : null;
+    this.brain1 = o.watch && this.mode === 'cpu' ? makeBrain('cpu', Math.random, o.level1 || o.level) : null; // (v1.9) modo espectador: la CPU también lleva al J1
     this.brain = this.mode === 'cpu' ? makeBrain('cpu', Math.random, o.level) : this.mode === 'training' ? makeBrain(this.dummy, Math.random, o.level) : null;
     try { this.vfx = sm.scene ? new Vfx(sm.scene, sm.q, sm.reduce) : null; } catch (e) { console.warn('[vfx]', e); this.vfx = null; }
     this.v = [c1, c2].map((c, i) => {
@@ -87,7 +88,22 @@ export class Match {
   get introLen() { return this.round === 1 ? 2.4 : 1.6; }
 
   event(e) { try { this.o.onEvent?.(e); } catch (err) { console.warn('[event]', err); } }
+  // (v1.9) ENTRENAMIENTO: registro de entradas del J1 (dirección relativa al rival + botones, con los fotogramas que se mantiene)
+  logInput(i, f) {
+    const L = this.inlog ||= [], fw = (i.x || 0) * (f.facing || 1), d = i.jump ? (fw > 0 ? '↗' : fw < 0 ? '↖' : '↑') : i.down ? (fw > 0 ? '↘' : fw < 0 ? '↙' : '↓') : fw > 0 ? '→' : fw < 0 ? '←' : '';
+    const b = [['l', 'L'], ['m', 'M'], ['h', 'H'], ['s', 'U'], ['r', 'R'], ['w', 'E'], ['t', 'T'], ['guard', 'G']].filter(([k]) => i[k]).map(([, g]) => g).join('+');
+    const tok = [d, b].filter(Boolean).join(' '), top = L[0];
+    if (top && top.tok === tok) { top.n++; return; }
+    L.unshift({ tok, n: 1 }); if (L.length > 14) L.length = 14;
+  }
+  // (v1.9) ventaja en fotogramas tras un golpe o bloqueo: aturdimiento del que recibe − lo que le falta al atacante
+  frameAdv(ev) {
+    const a = ev.a, b = ev.b, act = a?.act; if (!a || !b || ev.proj) return null;
+    const d = act?.def, left = act ? Math.max(0, (act.end ?? d.startup + d.active + d.recovery) - act.t) : 0;
+    return Math.round(((b.stun || 0) - left) * 60);
+  }
   onHit(ev, idx) {
+    if (this.mode === 'training' && idx === 0) { const n = this.frameAdv(ev); if (n != null) this.adv = { n, blocked: !!ev.blocked, t: 2.5 }; }
     this.lastEv = ev; this.event({ type: ev.blocked ? 'block' : ev.armored ? 'armor' : ev.crush ? 'crush' : 'hit', by: idx, move: ev.move, combo: ev.combo + (ev.blocked || ev.armored || ev.crush ? 0 : 1), dmg: ev.dmg, ko: !!ev.ko, air: !!ev.b.air, counter: !!ev.counter, proj: !!ev.proj, chain: ev.a.chain || 0 }); const { a, b, pos } = ev, big = ev.ko || /^(h|ch|jh|s|ex)$/.test(ev.move) || ev.launch;
     if (ev.armored) { this.stop = .07; this.shake = Math.max(this.shake, .12); this.vfx?.hit(pos, a.def.id, { armored: true, power: .6 }); this.fx('block', a, { x: b.x }); this.note(t('hud.armor'), 1 - idx, 'armor'); return; }
     if (ev.crush) { this.stop = .14; this.shake = Math.max(this.shake, .3); this.vfx?.flash(pos, 0xffe066, 3); this.fx('guard_break', a, { x: b.x }); this.note(t('hud.crush'), idx, 'crush'); this.react(.7); return; }
@@ -139,7 +155,7 @@ export class Match {
   resetPositions() {
     this.f.forEach((f, i) => { const hp = f.hp, ko = f.ko; f.reset(i ? 2.2 : -2.2, i ? -1 : 1, true); f.hp = hp; f.ko = ko; });
     for (const p of this.proj) this.vfx?.projectileEnd(p); this.proj = [];
-    this.cb = null; this.stop = 0; this.brain?.reset?.(); this.prev = this.f.map(f => ({ x: f.x, y: f.y })); this.input.clear?.();
+    this.cb = null; this.stop = 0; this.brain?.reset?.(); this.brain1?.reset?.(); this.prev = this.f.map(f => ({ x: f.x, y: f.y })); this.input.clear?.();
   }
 
   // Lógica del combate: solo se llama con paso fijo.
@@ -148,8 +164,9 @@ export class Match {
     let dt = sdt; if (this.stop > 0) { this.stop -= dt; dt = 0; } // «hit-stop»: congela un instante al impactar
     const [a, b] = this.f, slow = this.phase === 'ko' ? .35 : 1, gdt = dt * slow, live = this.phase === 'fight';
     if (gdt > 0) {
-      const vs = this.mode === 'versus', i1 = live ? this.input.read(0) : (this.input.read(0), IDLE); // fuera de combate se vacían las pulsaciones
+      const vs = this.mode === 'versus', i1 = live ? (this.brain1 ? (this.input.read(0), this.brain1.think(gdt, a, b)) : this.input.read(0)) : (this.input.read(0), IDLE); // fuera de combate se vacían las pulsaciones
       const i2 = vs ? (live ? this.input.read(1) : (this.input.read(1), IDLE)) : !live ? IDLE : this.brain ? this.brain.think(gdt, b, a) : this.o.input2 ? this.o.input2.read() : IDLE;
+      if (this.mode === 'training' && live) this.logInput(i1, a);
       a.update(gdt, i1, b); b.update(gdt, i2, a); separate(a, b);
       if (this.infinite) for (const f of this.f) { if (f.ko) { f.revive(); f.hp = f.maxHp; } else if (f.hp < 1) f.hp = 1; } // vida infinita: nunca llega a 0
       if (live) {
@@ -240,12 +257,12 @@ export class Match {
     }
     this.dbgOverlay?.update(this.f, this.proj);
     this.o.onHud?.({ mode: this.mode, hp: [a.hp / a.maxHp, b.hp / b.maxHp], meter: [a.meter / RULES.meterMax, b.meter / RULES.meterMax], guard: [a.guard / RULES.guardMax, b.guard / RULES.guardMax],
-      wins: this.wins, timer: Math.max(0, Math.ceil(this.timer)), need: this.winsNeeded, text: this.announce, combo: this.cb, notes: this.notes, dbg: this.dbgOverlay ? infoLines(this) : null });
+      wins: this.wins, timer: Math.max(0, Math.ceil(this.timer)), need: this.winsNeeded, text: this.announce, combo: this.cb, notes: this.notes, dbg: this.dbgOverlay ? infoLines(this) : null, inlog: this.mode === 'training' ? this.inlog || [] : null, adv: this.adv && this.adv.t > 0 ? this.adv : null });
 
     // --- cámara lateral: sigue el punto medio, se aleja para encuadrar a ambos, sube con el salto y se acerca un instante en las técnicas reforzadas ---
     const ax = ix(a, 0), bx = ix(b, 1), gap = Math.abs(ax - bx), kc = 1 - Math.exp(-rdt * 6);
     const need = clamp((gap + 5.5) / (2 * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * cam.aspect), 11.5, 26);
-    this.zoom = Math.max(0, this.zoom - rdt * 1.6);
+    this.zoom = Math.max(0, this.zoom - rdt * 1.6); if (this.adv) this.adv.t -= rdt;
     this.cx += (clamp((ax + bx) / 2, -6, 6) - this.cx) * kc; this.cd += (need * (1 - this.zoom * .18 * A11Y.camK) - this.cd) * kc;
     this.cy += (Math.max(iy(a, 0), iy(b, 1)) * .55 - this.cy) * kc;
     let sx = 0, sy = 0; if (this.shake > .002 && !this.sm.reduce) { sx = (Math.random() - .5) * this.shake * A11Y.camK; sy = (Math.random() - .5) * this.shake * A11Y.camK; } // (F9) efectos de cámara / cámara tranquila this.shake *= Math.exp(-rdt * 9);

@@ -6,6 +6,7 @@ import { CHALLENGES, kindOf, rivalFor } from '../modes/challenges.js';
 import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { RANDOM } from '../stages/stage-manager.js';
 import { hasKeyboard, onKeyboard } from '../systems/keyboard-detect.js';
+import { heroCard, section, totalBar, catTabs, trackItem, list as trackList, note as trackNote } from './track-ui.js';
 
 const h = (tag, props = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -51,13 +52,14 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
   menu.page_versus = function () {
     const m = me(); if (!roster[S.rival]) S.rival = (menu.idx + 1) % roster.length;
     menu.rival = S.rival; // la tabla de enfrentamiento elemental (y otras ayudas) leen el rival elegido aquí
-    const local = S.vs === 'local', blocked = local && noKeys(), cur = stages.selected;
+    const local = S.vs === 'local', watch = S.vs === 'watch', blocked = local && noKeys(), cur = stages.selected;
     const st = [...stages.list.filter(s => stages.isUnlocked(s)).map(s => [s.id, t(`stage.${s.id}.name`)]), [RANDOM, t('stage.random')]];
-    const go = () => flow.begin({ kind: 'plain', cfg: { a: m.id, b: roster[S.rival].id, mode: local ? 'versus' : 'cpu', rec: local ? 'versus_local' : 'versus_ai', level: S.level, wins: (S.wins + 1) / 2, maxRounds: S.wins + 2, roundTime: S.time } });
+    const go = () => flow.begin({ kind: 'plain', cfg: { a: m.id, b: roster[S.rival].id, mode: local ? 'versus' : 'cpu', rec: local ? 'versus_local' : watch ? 'training' : 'versus_ai', watch, level: S.level, wins: (S.wins + 1) / 2, maxRounds: S.wins + 2, roundTime: S.time } });
     this.panel(t('menu.versus'),
-      tabs([['cpu', t('versus.tab.cpu')], ['local', t('versus.tab.local')]], S.vs, v => { S.vs = v; rerender(); }),
-      note('versus.p1'), heroTabs(),
-      note(local ? 'versus.p2' : 'versus.rival'), tabs(roster.map((r, i) => [i, r.name]), S.rival, i => { S.rival = i; rerender(); }, t('versus.rival'), 'rival'), // el mismo guerrero = duelo espejo
+      tabs([['cpu', t('versus.tab.cpu')], ['local', t('versus.tab.local')], ['watch', t('versus.tab.watch')]], S.vs, v => { S.vs = v; rerender(); }),
+      watch ? note('versus.watch.desc') : null,
+      note(watch ? 'versus.watch.a' : 'versus.p1'), heroTabs(),
+      note(local ? 'versus.p2' : watch ? 'versus.watch.b' : 'versus.rival'), tabs(roster.map((r, i) => [i, r.name]), S.rival, i => { S.rival = i; rerender(); }, t('versus.rival'), 'rival'), // el mismo guerrero = duelo espejo
       h('p', { class: 'note' + (S.rival === menu.idx ? ' mirror-note' : '') }, S.rival === menu.idx ? t('play.mirror', { name: m.name }) : t('versus.same')),
       ...(local ? [] : [note('modes.level'), ...levelTabs()]),
       note('versus.rounds'), tabs(ROUNDS.map(n => [n, String(n)]), S.wins, n => { S.wins = n; rerender(); }, t('versus.rounds')),
@@ -71,32 +73,30 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
   // ---------- Desafíos: por categorías (técnica, combate contra la CPU, modos y 2 jugadores) con su recompensa
   let chTab = 'train';
   menu.page_challenges = function () {
-    const m = me(), done = data().challenges, list = CHALLENGES.filter(c => kindOf(c) === chTab), eco = meta.progression.eco.challenge ?? 0;
-    const cats = ['train', 'fight', 'mode', 'pvp'].map(k => { const all = CHALLENGES.filter(c => kindOf(c) === k), n = all.filter(c => done.includes(c.id)).length; return [k, `${t('challenges.cat.' + k)} ${n}/${all.length}`]; });
-    const total = CHALLENGES.filter(c => done.includes(c.id)).length;
+    // (v1.9) misma lógica e interfaz que los Logros: sección, barra total, pestañas con cuenta, fichas con medalla y recompensa
+    const m = me(), done = data().challenges, eco = meta.progression.eco.challenge ?? 0;
+    const cats = ['train', 'fight', 'mode', 'pvp'].map(k => { const all = CHALLENGES.filter(c => kindOf(c) === k); return { id: k, label: t('challenges.cat.' + k), done: all.filter(c => done.includes(c.id)).length, total: all.length }; });
+    const total = CHALLENGES.filter(c => done.includes(c.id)), gold = total.reduce((n, c) => n + (c.gold ?? eco), 0);
+    const tierOf = c => { const g = c.gold ?? eco; return g >= 220 ? 'platinum' : g >= 120 ? 'gold' : g >= 60 ? 'silver' : 'bronze'; };
     const start = c => kindOf(c) === 'train' || kindOf(c) === 'fight' ? flow.begin({ kind: 'challenge', def: c, hero: m.id, rival: kindOf(c) === 'fight' ? rivalFor(c, m.id, roster) : roster[(menu.idx + 1) % roster.length].id }) : this.go(c.go);
+    const items = CHALLENGES.filter(c => kindOf(c) === chTab).map(c => {
+      const ok = done.includes(c.id), kind = kindOf(c), lvl = kind === 'fight' && c.level !== 'normal' ? t('level.' + c.level) : null, play = kind === 'train' || kind === 'fight';
+      return trackItem({ tier: tierOf(c), done: ok, kind, name: t(`ch.${c.id}.name`), desc: t(`ch.${c.id}.goal`), reward: c.gold ?? eco,
+        tags: [lvl ? { cls: 'lvl', text: lvl } : null, { cls: 'kind', text: t('challenges.cat.' + kind) }].filter(Boolean),
+        action: { label: ok && play ? t('challenges.again') : play ? t('challenges.start') : t('challenges.go'), fn: () => start(c) } });
+    });
     this.panel(t('menu.challenges'),
-      h('p', { class: 'lead' }, t('challenges.hero', { name: m.name })), heroTabs(),
-      h('p', { class: 'note ch-total' }, t('challenges.total', { n: total, of: CHALLENGES.length })),
-      tabs(cats, chTab, k => { chTab = k; rerender(); }, t('menu.challenges'), 'chcat'),
-      h('p', { class: 'note' }, t('challenges.desc.' + chTab)),
-      h('ul', { class: 'items ch-list' }, ...list.map(c => {
-        const ok = done.includes(c.id), kind = kindOf(c), lvl = kind === 'fight' && c.level !== 'normal' ? t('level.' + c.level) : null;
-        const act = kind === 'mode' || kind === 'pvp' ? t('challenges.go') : t('challenges.start');
-        return h('li', { class: 'item ch ' + kind + (ok ? ' done' : '') },
-          h('span', { class: 'mark', 'aria-hidden': 'true' }, ok ? '✓' : '◆'),
-          h('span', { class: 'meta' }, h('b', {}, t(`ch.${c.id}.name`)), h('span', {}, t(`ch.${c.id}.goal`)),
-            h('span', { class: 'ch-tags' }, lvl ? h('i', { class: 'tag lvl' }, lvl) : null, h('i', { class: 'tag gold' }, h('span', { class: 'gem', 'aria-hidden': 'true' }), `+${c.gold ?? eco}`))),
-          h('span', { class: 'acts' }, ok ? h('span', { class: 'tag ok' }, t('challenges.done')) : null,
-            h('button', { class: 'mini', onclick: () => start(c) }, ok && kind !== 'mode' && kind !== 'pvp' ? t('challenges.again') : act)));
-      })));
+      heroCard(m, t('challenges.with')), heroTabs(),
+      section(t('challenges.title'), t('challenges.sub', { a: total.length, b: CHALLENGES.length, g: gold.toLocaleString() })), totalBar(total.length, CHALLENGES.length),
+      catTabs(cats, chTab, k => { chTab = k; rerender(); }, t('menu.challenges')),
+      trackNote(t('challenges.desc.' + chTab)), trackList(items));
   };
 
   // ---------- Historia
   menu.page_story = function () {
     const m = me(), order = cfg.order[m.id], got = Math.min(order.length, data().story[m.id] || 0), L = i => new Ladder(cfg, { kind: 'story', hero: m.id, level: S.level, from: i });
     const play = i => flow.begin({ kind: 'story', obj: L(i), from: i });
-    this.panel(t('menu.story'), h('p', { class: 'lead' }, t('story.intro', { name: m.name })), heroTabs(), note('modes.level'), ...levelTabs(),
+    this.panel(t('menu.story'), heroCard(m, t('story.with')), heroTabs(), h('p', { class: 'note' }, t('story.intro', { name: m.name })), note('modes.level'), ...levelTabs(),
       h('p', { class: 'note' }, t('story.progress', { a: got, b: order.length })),
       h('ol', { class: 'ladder chapters' }, ...order.map((id, i) => {
         const open = i <= got, done = i < got;

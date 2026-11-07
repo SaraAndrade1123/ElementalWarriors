@@ -85,7 +85,7 @@ export function installTransform({ scene, t = k => k, doc = globalThis.document,
   };
   function hook(m, opts) {
     if (!m?.f || m.__tfHook) return; m.__tfHook = true;
-    m.f.forEach((f, i) => { f.tfAI = i === 1 && m.mode === 'cpu'; });
+    m.f.forEach((f, i) => { f.tfAI = m.mode === 'cpu' && (i === 1 || !!m.brain1); });
     const col = i => new THREE.Color(colorOf?.(m.f[i].def.id) || m.f[i].def.fx?.color || '#ffd257');
     let bars = null;
     if (hasDom && !opts.preview) {

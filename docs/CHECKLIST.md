@@ -262,3 +262,20 @@ La F7 recibida partía de la F3 (sin F4 ni las animaciones de v0.6.0). Se hizo u
 | `npm test` = 22 suites | tools/test-v18.mjs | npm test | OK |
 
 Limitaciones: no probado en dispositivos reales (solo emulación de Android y escritorio con Chromium); las voces no existen todavía (no hay control de volumen de voces).
+
+## v1.9.0 — Estado de las fases (revisión completa de las indicaciones)
+| Fase | Estado | Notas |
+|---|---|---|
+| F0 Inspección | COMPLETADA | |
+| F1 Base visual y menú | COMPLETADA | menú con santuario animado por guerrero, frases, título con emblema, perfil y aviso de guardado (v1.9) |
+| F2 Arena y movimiento | COMPLETADA | |
+| F3 Combate básico | COMPLETADA | |
+| F4 Combos y Resonancia | COMPLETADA | |
+| F5 Identidad de los 4 elementos | COMPLETADA | transformaciones (v1.5) |
+| F6 Escenarios y presentación | COMPLETADA | 6 escenarios + aleatorio, cinemáticas |
+| F7 Modos e IA | COMPLETADA | + Espectador (v1.9), registro de entradas y ventaja en Entrenamiento (v1.9) |
+| F8 Progresión | COMPLETADA | 109 logros, colección con música y archivos (v1.9) |
+| F9 Móvil, accesibilidad y sonido | COMPLETADA | ajustes en 6 pestañas (v1.8) |
+| F10 Validación y entrega | EN PROGRESO | 23 suites automáticas + capturas en escritorio y celular emulado; falta probar en dispositivos reales |
+
+Limitaciones registradas: no hay voces (por eso no hay volumen de voces); multijugador en línea no implementado (fase avanzada, no se simula); modelos provisionales de terceros (CC BY 4.0) a sustituir por definitivos; no probado en celulares ni GPU reales.

@@ -40,7 +40,7 @@ const es = js('data/localization/es.json'), en = js('data/localization/en.json')
     feats: { rank: 'S', perfects: 1, flawless: true, exKOs: 1, counters: 2, throws: 1, parries: 1, dmg: 400, comeback: false, fast: true, mirror: false } });
   const st = save.data.stats; ok(st.rankS === 1 && st.flawless === 1 && st.fastWins === 1 && st.extremeWins === 1 && st.extremeBy.terra === 1, 'las hazañas de cada combate se registran (rango S, sin recibir golpes, rápido, Extremo)');
   ok(['first_win', 'rank_s_1', 'flawless_1', 'fast_1', 'extreme_win'].every(id => save.data.done.includes(id)), 'y desbloquean sus logros una sola vez');
-  const meta = rd('js/ui/meta-panels.js'); ok(/wcards/.test(meta) && /stiles/.test(meta) && /ach-group/.test(meta) && /prog\.statsTitle/.test(meta), 'Progreso: fichas de estadísticas, tarjetas por guerrero y logros por categoría con título'); }
+  const meta = rd('js/ui/meta-panels.js'); ok(/wcards/.test(meta) && /stiles/.test(meta) && /catTabs/.test(meta) && /prog\.statsTitle/.test(meta), 'Progreso: fichas de estadísticas, tarjetas por guerrero y logros por categoría con título'); }
 
 // 3 · animaciones
 { const { buildAttacks } = await import('../js/game/animation/attacks.js'); const { STYLES } = await import('../js/game/animation/styles.js');
@@ -62,5 +62,5 @@ const es = js('data/localization/es.json'), en = js('data/localization/en.json')
 // 5 · interfaz
 { ok(/heroCard/.test(rd('js/ui/menu-manager.js')) && /hero-card/.test(rd('css/theme.css')), 'Combate de prueba: tarjeta con el nombre del guerrero');
   ok(/\.song-arrow::before/.test(rd('css/audio.css')), 'flechas de la canción con chevrón dibujado y bordes limpios'); }
-ok(js('package.json').version === '1.8.0' && /v1\.8\.0/.test(es['ui.version']), 'versión 1.8.0');
+ok(/^1\.([8-9]|\d\d)\./.test(js('package.json').version), 'versión 1.8 o posterior');
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.8: todo correcto'); process.exit(bad ? 1 : 0);

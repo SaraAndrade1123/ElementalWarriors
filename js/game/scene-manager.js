@@ -9,6 +9,7 @@ import { Match } from './match.js';
 import { Animator } from './animation/animator.js';
 import { cloneModel, applyChroma } from './mirror.js';
 import { mirrorSpec } from '../systems/mirror-spec.js';
+import { MenuBackdrop } from './menu-backdrop.js';
 
 const QUALITY = {
   low: { dpr: 1, shadows: false, particles: 120, post: false, msaa: 0 },
@@ -82,6 +83,7 @@ export class SceneManager {
     this.stage = new THREE.Group(); this.scene.add(this.stage);
     this.backdrop = new THREE.Group(); this.scene.add(this.backdrop); this.match = null; this.arena = null;
     this._buildStage(); this._buildLights(); this._buildParticles();
+    this.themeBg = new MenuBackdrop(this.stage); // (v1.9) santuario animado del elemento detrás del guerrero
     this.q = QUALITY[settings.quality]; this.reduce = settings.reduceMotion;
     addEventListener('resize', () => this.resize());
     this.apply(settings);
@@ -247,6 +249,7 @@ export class SceneManager {
     if (this.active) this.active.holder.visible = false;
     this.active = c; c.holder.visible = !this.pair; c.t0 = this.time; if (!this.pair) this._tintFx(c);
     if (c.anim) { c.anim.reset(); c.intro = this.reduce ? null : { name: 'intro', t: 0 }; } // al elegirlo hace su presentación
+    this.themeBg?.set(c.def); this.onShow?.(c.def);
   }
 
   // Anima al guerrero del menú: reposo con su personalidad + gesto de presentación al elegirlo.
@@ -317,6 +320,7 @@ export class SceneManager {
     this.rune.rotation.z += dt * .15 * m;
     for (const r of this.rocks) { r.position.y = r.userData.y + Math.sin(t * .5 * m + r.userData.ph) * .25; r.rotation.y += dt * .1 * m; }
     this._particles(dt * m, t);
+    try { this.themeBg?.update(dt, t, this.reduce); } catch (e) { console.warn('[menú] fondo', e); this.themeBg = null; }
     const c = this.active;
     if (this.pair) { // selección de Versus: los dos guerreros frente a frente
       this.pair.forEach((p, i) => { const a = ease(Math.min((t - p.t0) / .45, 1)), s = i ? 1 : -1;

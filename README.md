@@ -1,4 +1,4 @@
-# Elemental Warriors (v1.8.0 · ajustes completos, logros y armas)
+# Elemental Warriors (v1.9.0 · menú vivo, espectador y archivos)
 
 ## Cómo abrirlo
 - **Jugar (PC o celular)**: abre `index.html`. Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet. En el celular lo más fácil es el enlace en línea (se abre en Chrome y listo); también puedes pasar `index.html` al teléfono y abrirlo con Chrome. Pon el móvil en horizontal y pulsa **Pantalla completa**.
@@ -128,3 +128,12 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Zephyr**: su voltereta de presentación ya no hace un giro extra hacia atrás al terminar (los giros completos vuelven por el camino corto).
 - **Armas**: aura elemental animada en el filo (del color de las técnicas / del chroma), estelas más largas y curvas, impacto propio por tipo (tajo en cruz, onda de choque, estocada), animaciones sin tirones al sacar el arma. Vista previa con cámara más cercana, cámara lenta al conectar y ficha del arma con su efecto según el elemento.
 - **Interfaz**: tarjeta con el nombre y el elemento del guerrero en Combate de prueba; flechas de la canción con borde y chevrón limpios.
+
+## v1.9.0 — Menú vivo, Logros y Desafíos unificados, espectador y archivos
+- **Menú**: detrás de cada guerrero aparece el santuario de su elemento, animado (`js/game/menu-backdrop.js`): sello de runas que gira, llamas y sol carmesí (Ignis), ondas y arco de marea (Aqua), rocas en órbita y cristales que laten (Terra), cintas de viento y hojas (Zephyr). Al elegir un guerrero dice una de sus 5 frases propias en un bocadillo. **Título** monumental con el emblema, destello dorado y subtítulo. **Perfil del jugador** (rango según logros, Rose Gold, victorias, guerrero favorito) y aviso «✓ Progreso guardado».
+- **Logros y Desafíos** usan las mismas piezas (`js/ui/track-ui.js`): tarjeta del guerrero («Practicas con · Fuego»), título de sección con resumen, barra total, pestañas por categoría con su cuenta, descripción de la categoría y fichas con medalla, barra, recompensa y acción.
+- **Luchadores**: la lista de movimientos son fichas que nunca se desbordan (ningún ancho), y cada guerrero tiene su **historia**.
+- **Colección**: pestañas Aspectos · **Música** (escuchar cada canción) · **Archivos** (historia del mundo, de cada guerrero, la Resonancia y los escenarios).
+- **Versus › Espectador**: dos CPU pelean solas (modo 13.8 de las indicaciones); no da Rose Gold ni cuenta en estadísticas.
+- **Entrenamiento**: registro de entradas del J1 (dirección relativa al rival + botones y fotogramas mantenidos) y **ventaja en fotogramas** tras cada golpe o bloqueo.
+- **Créditos** ampliados: equipo con su papel, el juego en cifras (calculadas de los datos), tecnologías, lo creado para el juego, tipografías, modelos con licencia, inspiración, agradecimientos y aviso legal.
