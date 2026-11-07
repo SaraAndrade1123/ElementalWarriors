@@ -33,10 +33,13 @@
   #story .panel{max-height:calc(100dvh - 16px);overflow:auto;padding:12px 16px;gap:8px}
   #story .line{padding:7px 12px;margin-bottom:6px;font-size:.88rem}
 
-  /* versus: placas más bajas para no tapar a los luchadores */
-  #vsprev .vsp{padding:4px 12px}
-  #vsprev .vsp b{font-size:1.05rem}
-  #vsprev .vsp i{font-size:.62rem}
+  /* versus: placas compactas ARRIBA del hueco libre para no tapar a los luchadores */
+  #vsprev{top:max(8px,env(safe-area-inset-top));bottom:auto;left:calc(min(430px,100vw - 24px) + 22px);right:max(10px,env(safe-area-inset-right));align-items:start}
+  #vsprev .vsp{padding:4px 10px 5px;border-bottom-width:2px}
+  #vsprev .vsp b{font-size:1rem}
+  #vsprev .vsp i{font-size:.56rem;letter-spacing:.14em}
+  #vsprev .vsp span{font-size:.72rem}
+  #vsprev .vsm{width:40px;height:40px;align-self:start;margin-top:6px}#vsprev .vsm span{font-size:1rem}
 }
 
 /* ── Muy bajo (celulares pequeños en horizontal) ── */
@@ -48,3 +51,23 @@
 @media (max-width:560px) and (min-height:521px){
   .left{width:calc(100vw - 24px);left:12px}
 }
+
+/* ── Celular: botón de pantalla completa y aviso de girar el teléfono durante el combate ── */
+.loader .fullscr{margin-top:10px;padding:8px 22px;font-size:.9rem}
+.rotate-hint{display:none;position:fixed;inset:0;z-index:30;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;background:rgba(5,7,16,.94);color:#f1dc9a;font:700 1.1rem var(--f-display)}
+.rotate-hint b{font-size:3rem;animation:spin 2.4s linear infinite}
+@media (orientation:portrait) and (max-width:700px) and (pointer:coarse){body:has(#hud:not([hidden])) .rotate-hint{display:grid}}
+/* táctil: sin «hover pegado» (en el celular el último botón tocado quedaba desplazado y con otro relleno) */
+@media (hover:none){
+  .nav-item:hover{transform:none;background:var(--gilt-edge)}
+  .nav-item:hover::before{background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 38%),linear-gradient(90deg,#18264f,#0d1530 62%,#0a1126)}
+  .nav-item:hover::after{background:linear-gradient(135deg,#2a3866,#0b1226);box-shadow:0 0 0 2px rgba(6,10,22,.8)}
+  .nav-item:focus-visible,.nav-item:active{transform:none}
+  .nav-item:active::before{background:linear-gradient(180deg,rgba(255,255,255,.1),transparent 40%),linear-gradient(90deg,color-mix(in srgb,var(--accent) 34%,#18264f),#101a3a 70%)}
+}
+
+/* botones del pie de los paneles: una sola línea, el secundario discreto debajo */
+#view .pdock .cta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.08em;font-size:clamp(.92rem,2.4vh,1.08rem);padding:11px 18px}
+#view .pdock .row.story-acts{display:grid;gap:6px}
+#view .pdock .ghost.restart{justify-self:center;padding:5px 14px;font:600 .82rem var(--f-body);letter-spacing:.06em;color:#c9b88a;background:none;border:0;border-bottom:1px solid rgba(201,164,76,.4);clip-path:none}
+#view .pdock .ghost.restart:hover,#view .pdock .ghost.restart:focus-visible{color:#fff3cc;border-bottom-color:#f1dc9a}

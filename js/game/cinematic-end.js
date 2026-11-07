@@ -87,7 +87,10 @@ export function installOutro({ scene, roster = [], data = null, doc = globalThis
       const out = render.call(this, rdt, cam);
       if (!cur || this.paused) return out;
       st += rdt; let cut = false;
-      while (k < shots.length && st > shots[k].dur) { st -= shots[k].dur; k++; cut = true; }
+      while (k < shots.length && st > shots[k].dur) { st -= shots[k].dur; k++; cut = true;
+        if (shots[k]?.lose) { // el vencido se incorpora mirando al ganador y hace su gesto de derrota (propio de cada guerrero)
+          const L = this.f[l], Wf = this.f[w], v = this.v[l]; L.ko = false; L.down = 0; L.getup = 0; L.air = false; L.y = 0; L.vx = L.vy = L.kv = 0; L.act = null; L.stun = 0;
+          L.facing = Math.sign(Wf.x - L.x) || L.facing; if (v) v.cel = { name: v.c.anim?.dir?.clips?.lose ? 'lose' : 'intro', t: 0 }; } }
       if (k >= shots.length) { finish(); return out; }
       const s = shots[k], u = st / s.dur, F = this.f[w], H = i => this.f[i].def.height || 3.3, dir = F.facing || 1;
       if (s.kind === 'slam') { // giro de grúa alrededor del ganador, de abajo a la altura del pecho
@@ -98,7 +101,7 @@ export function installOutro({ scene, roster = [], data = null, doc = globalThis
       } else if (s.kind === 'line') {
         const f = this.f[s.who], fd = f.facing || 1, h = H(s.who), e = ease(u);
         if (!s.lose) { _p.set(f.x + fd * (3.1 - .4 * e), h * .3, 5.6 - .7 * e); _l.set(f.x + fd * .1, h * .64, 0); } // contrapicado heroico
-        else { const down = f.ko || f.down; _p.set(f.x + fd * 2.2, down ? 3.6 : h * 1.15, 4.4 - .4 * e); _l.set(f.x, down ? .3 : h * .55, 0); } // picado sobre el vencido
+        else { const Wf = this.f[w], d = Math.sign(Wf.x - f.x) || 1; _p.set(Wf.x + d * .5, h * .78, 2.4 - .2 * e); _l.set(f.x, h * .3, 0); } // sobre el hombro del ganador: el vencido le mira desde el suelo
       } else { const e = ease(u); _p.set(F.x + dir * (2.6 - .3 * e), H(w) * .58, 5.4 - .8 * e); _l.set(F.x - dir * .55, H(w) * .6, 0); } // retrato (el nombre queda a un lado)
       cam.position.copy(_p); cam.lookAt(_l);
       if (el) {

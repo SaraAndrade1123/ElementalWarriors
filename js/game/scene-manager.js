@@ -145,9 +145,12 @@ export class SceneManager {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.q.dpr, this._prOverride ?? 9)); this.renderer.setSize(w, h, false);
     const pr = this.renderer.getPixelRatio(); this.post.setSize(w * pr, h * pr); OUTLINE.uRes.value.set(w * pr, h * pr); OUTLINE.uW.value = Math.max(1, 1.45 * pr * Math.min(1.25, h / 720));
     const aspect = w / h; this.camera.aspect = aspect;
-    if (aspect > 1.15) { // horizontal: el guerrero queda a la derecha del menú
+    if (aspect > 1.15) { // horizontal: el guerrero queda centrado en el hueco libre a la derecha del panel del menú
       this.camera.position.set(0, 2, 9.5); this.look = new THREE.Vector3(0, 1.7, 0);
-      this.stage.position.x = 9.5 * Math.tan(THREE.MathUtils.degToRad(16)) * aspect * .36;
+      const halfW = 9.5 * Math.tan(THREE.MathUtils.degToRad(16)) * aspect, left = globalThis.document?.querySelector?.('.left'), menuOn = left && !document.getElementById('menu')?.hidden;
+      const x0 = menuOn ? Math.min(.72, Math.max(.2, left.getBoundingClientRect().right / w)) : .3;
+      this.stage.position.x = ((x0 + 1) / 2 * 2 - 1) * halfW; this.freeW = (1 - x0) * 2 * halfW;
+      this.pairScale = Math.max(.55, Math.min(.95, this.freeW / 5.2));
     } else { // vertical: el guerrero queda arriba del panel
       this.camera.position.set(0, 2.4, 17); this.look = new THREE.Vector3(0, .5, 0); this.stage.position.x = 0;
     }
@@ -303,7 +306,8 @@ export class SceneManager {
     const c = this.active;
     if (this.pair) { // selección de Versus: los dos guerreros frente a frente
       this.pair.forEach((p, i) => { const a = ease(Math.min((t - p.t0) / .45, 1)), s = i ? 1 : -1;
-        p.holder.position.set(s * (1.55 + (1 - a) * 1.2), 0, -.2); p.holder.scale.setScalar(.86); p.holder.rotation.y = -s * .82; this.animate(p, dt); });
+        const sc = this.cineCam ? .86 : (this.pairScale ?? .86), gap = this.cineCam ? 1.55 : 1.3 * sc / .86; // Versus: más juntos y del tamaño del hueco libre
+        p.holder.position.set(s * (gap + (1 - a) * 1.2), 0, -.2); p.holder.scale.setScalar(sc); p.holder.rotation.y = -s * .78; this.animate(p, dt); });
     } else if (c) {
       const a = ease(Math.min((t - c.t0) / .5, 1));
       c.holder.scale.setScalar(.92 + .08 * a); c.holder.position.y = (1 - a) * -.35;

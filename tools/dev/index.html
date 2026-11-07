@@ -2,6 +2,23 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<base href="../../"><!-- SOLO PARA DESARROLLAR (módulos sin empaquetar). Para JUGAR usa index.html de la carpeta principal. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='29' fill='%230b1226' stroke='%23d9b45a' stroke-width='3.5'/><path d='M32 32 27.5 21 32 6 36.5 21Z' fill='%23ff6a2a'/><path d='M32 32 43 27.5 58 32 43 36.5Z' fill='%2342b0ff'/><path d='M32 32 36.5 43 32 58 27.5 43Z' fill='%2386c94a'/><path d='M32 32 21 36.5 6 32 21 27.5Z' fill='%23eaf4ff'/><path d='M32 25 39 32 32 39 25 32Z' fill='%23f6dc8c' stroke='%230b1226' stroke-width='1.5'/></svg>">
+<meta name="theme-color" content="#0b1226">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<script>/* Vigilante de arranque (ES5, se ejecuta aunque el resto falle): si el juego no termina de cargar, dice por qué y ofrece reintentar. */
+(function(){var E=window.__EW_ERRS=[];
+window.addEventListener('error',function(e){E.push((e.message||'error')+(e.lineno?' (línea '+e.lineno+')':''));});
+window.addEventListener('unhandledrejection',function(e){var r=e.reason;E.push(String(r&&r.message||r));});
+function el(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x)n.textContent=x;return n;}
+function help(msg){var s=document.getElementById('status');if(!s||document.getElementById('bootfix'))return;s.textContent=msg;s.className+=' error';
+var b=el('div','bootfix');b.id='bootfix';var r=el('button','cta','Reintentar');r.onclick=function(){location.reload();};
+var l=el('button','ghost','Modo ligero');l.onclick=function(){try{var k='ew.settings.v1',o=JSON.parse(localStorage.getItem(k)||'{}');o.quality='low';o.reduceMotion=true;localStorage.setItem(k,JSON.stringify(o));}catch(x){}location.reload();};
+b.appendChild(r);b.appendChild(l);if(E.length)b.appendChild(el('p','bootlog',E.slice(-3).join(' · ')));s.parentNode.insertBefore(b,s.nextSibling);}
+window.__EW_HELP=help;
+document.addEventListener('DOMContentLoaded',function(){var c=document.createElement('canvas'),g=null;try{g=c.getContext('webgl2')||c.getContext('webgl');}catch(x){}
+if(!g)help('Este navegador no tiene WebGL activado (gráficos 3D). Ábrelo en Chrome o Firefox actualizados.');});
+setTimeout(function(){if(window.__EW_BOOT!=='ok')help('La carga se ha detenido'+(window.__EW_BOOT?' en: '+window.__EW_BOOT:'')+'. Puedes reintentar o abrir en modo ligero.');},30000);})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Elemental Warriors</title>
 <link rel="stylesheet" href="css/fonts.css">
@@ -42,6 +59,7 @@
   <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="bar"></i></div>
   <p id="status" class="status" role="status">Cargando / Loading…</p>
   <button id="start" class="cta" data-i18n="ui.start" hidden>Comenzar</button>
+  <button id="fullscr" class="ghost fullscr" type="button" hidden data-i18n="ui.fullscreen">Pantalla completa</button>
   <p class="tfoot" aria-hidden="true"><span data-i18n="cr.project">Elemental Warriors · proyecto formativo ADSO</span></p>
 </section>
 
@@ -76,6 +94,7 @@
   <pre id="dbg" class="dbg" hidden aria-hidden="true"></pre>
 </div>
 <div id="touch" hidden></div>
+<div class="rotate-hint" aria-hidden="true"><b>⟳</b><span data-i18n="ui.rotate">Gira el celular para jugar en horizontal</span></div>
 <div id="pause" hidden role="dialog" aria-modal="true" aria-labelledby="pause-t">
   <div class="pz">
     <header class="panel pz-head">

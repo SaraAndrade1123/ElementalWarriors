@@ -3,7 +3,7 @@
 // meta.trails: [ancla, t0, t1] estelas del arma (wF/wB), manos (hF/hB) o pies (fF/fB).
 // meta.fx: [{t, kind, at}] efectos elementales sincronizados con la animación.
 import { makeClip } from './pose.js';
-export const ATTACKS = ['l', 'm', 'h', 'cl', 'cm', 'ch', 'jl', 'jm', 'jh', 'throw', 's', 'ex', 'gb', 'intro', 'win', 'getup'];
+export const ATTACKS = ['l', 'm', 'h', 'cl', 'cm', 'ch', 'jl', 'jm', 'jh', 'throw', 's', 'ex', 'gb', 'intro', 'win', 'lose', 'getup'];
 
 // Levantarse (común): de tumbado boca arriba → sentado apoyando manos → rodilla → de pie.
 const getup = () => makeClip('getup', 1, [
@@ -124,6 +124,13 @@ export function buildAttacks(S) {
         { t: 1.05, e: 'in3', hnFx: -.05, hnFy: .05, hnFz: .9, hnFpitch: .25, wpSpin: 6.28, spPitch: .2, comZ: .1, hdPitch: -.1 },
         { t: 1.6, e: 'io', wpSpin: 6.28 },
       ], { trails: [['wF', .3, 1.1]], fx: [{ t: .75, kind: 'ignite', at: 'wF' }, { t: 1.05, kind: 'fire_burst', at: 'wF' }] }),
+      // derrota (cinemática final): se incorpora sobre una rodilla, golpea el suelo con rabia y levanta la mirada, puño cerrado
+      lose: mk('lose', 1.6, [
+        { t: .3, e: 'out2', comY: -.78, comZ: .05, spPitch: .55, hdPitch: .45, ftFz: .38, ftFy: 0, ftBz: -.42, ftBy: 0, ftBpitch: -1.1, hnFx: -.05, hnFy: -.95, hnFz: .5, hnFfist: 1, hnBx: .1, hnBy: -.6, hnBz: .45, hnBfist: 1 },
+        { t: .55, e: 'in3', hnFy: -1.02, spPitch: .62, hdPitch: .55 },
+        { t: 1.1, e: 'io', comY: -.68, spPitch: .18, hdPitch: -.32, hdYaw: -.1, hnFx: -.08, hnFy: .02, hnFz: .42, hnBx: .1, hnBy: -.75, hnBz: .38 },
+        { t: 1.6, e: 'io', hdPitch: -.36, hnFy: .06 },
+      ], { hold: true, fx: [{ t: .55, kind: 'dust', at: 'hF' }] }),
       // victoria: espada en alto, puño cerrado, llamas
       win: mk('win', 1.4, [
         { t: .3, e: 'out2', hnFx: .3, hnFy: -.4, hnFz: .3, hnFpitch: -1.0, comY: -.2, spPitch: .3 },
@@ -219,6 +226,13 @@ export function buildAttacks(S) {
         { t: 1.3, e: 'io', hnFpitch: 1.57, wpSpin: 6.28 * 1.5, hdPitch: .3 },
         { t: 1.6, e: 'io', wpSpin: 6.28 * 2 },
       ], { trails: [['wF', .2, .7]], fx: [{ t: .9, kind: 'splash_floor', at: 'wF' }] }),
+      // derrota: de rodillas, recoge el aliento con una mano en el pecho y mira al ganador con calma
+      lose: mk('lose', 1.6, [
+        { t: .35, e: 'out2', comY: -.92, comZ: -.05, spPitch: .3, hdPitch: .3, ftFz: -.15, ftFy: 0, ftFpitch: -1.2, ftBz: -.3, ftBpitch: -1.2, ftFx: .05, ftBx: .08,
+          hnFx: -.25, hnFy: -.15, hnFz: .3, hnFfist: .2, hnBx: .2, hnBy: -.7, hnBz: .25, hnBfist: .1 },
+        { t: 1.0, e: 'io', spPitch: .08, hdPitch: -.28, hdRoll: .12, hnFx: -.42, hnFy: .05, hnFz: .18 },
+        { t: 1.6, e: 'io', hdPitch: -.3, hdRoll: .08 },
+      ], { hold: true }),
       // victoria: la lanza clavada a su lado, mano libre sobre el pecho, serena
       win: mk('win', 1.4, [
         { t: .5, e: 'io', hnFx: .35, hnFy: -.3, hnFz: .15, hnFpitch: 1.57, hnBx: -.45, hnBy: .05, hnBz: .3, hnBfist: 0, hnBflare: .1, hdPitch: .1, hdRoll: .12, spPitch: -.05, spYaw: sy * .3, pelYaw: hy * .3, comY: .02, ftFz: .12, ftBz: -.12 },
@@ -324,6 +338,14 @@ export function buildAttacks(S) {
         { t: .95, e: 'in3', ftFy: 0, ftFz: .3, comY: -.32, spPitch: .25, hnFx: -.2, hnFy: .1, hnFz: .55, hnBx: -.28, hnBy: .05, hnBz: .45 },
         { t: 1.6, e: 'io', comY: -.25 },
       ], { fx: [{ t: .45, kind: 'rock_impact', at: 'wF' }, { t: .95, kind: 'quake', at: 'fF' }] }),
+      // derrota: se sienta en el suelo, se cruza de brazos de mala gana, aparta la cara y vuelve a mirar al ganador
+      lose: mk('lose', 1.8, [
+        { t: .35, e: 'out2', comY: -1.02, comZ: -.12, spPitch: -.12, hdPitch: .05, ftFz: .55, ftFy: .05, ftBz: .45, ftBy: .02, ftFx: .25, ftBx: .3, ftFpitch: .3, ftBpitch: .3,
+          hnFx: .35, hnFy: -.85, hnFz: -.3, hnBx: .4, hnBy: -.85, hnBz: -.35 },
+        { t: .8, e: 'io', hnFx: -.55, hnFy: -.12, hnFz: .28, hnFfist: 1, hnBx: -.6, hnBy: -.08, hnBz: .24, hnBfist: 1, hdYaw: .7, hdPitch: -.05 },
+        { t: 1.4, e: 'io', hdYaw: -.05, hdPitch: -.22 },
+        { t: 1.8, e: 'io', hdPitch: -.26 },
+      ], { hold: true }),
       // victoria: brazos cruzados, barbilla alta (estoica)
       win: mk('win', 1.4, [
         { t: .55, e: 'io', hnFx: -.55, hnFy: -.05, hnFz: .32, hnBx: -.58, hnBy: -.02, hnBz: .28, hnFflare: .1, hnBflare: .1, spPitch: -.12, hdPitch: -.18, comY: .04, spYaw: sy * .3, pelYaw: hy * .3, ftFx: .2, ftBx: .2, ftFz: .1, ftBz: -.1 },
@@ -426,6 +448,14 @@ export function buildAttacks(S) {
         { t: 1.05, e: 'io', comPitch: -6.283, hnBpitch: -.2 }, { t: 1.2, e: 'io', comPitch: -6.283, hnBpitch: .9 },
         { t: 1.6, e: 'io', comPitch: -6.283 },
       ], { fx: [{ t: .15, kind: 'wind_burst', at: 'fF' }, { t: .66, kind: 'dust', at: 'fF' }] }),
+      // derrota: sentado con una pierna doblada, se rasca la nuca avergonzado y sonríe al ganador
+      lose: mk('lose', 1.7, [
+        { t: .3, e: 'out2', comY: -1.0, comZ: -.15, spPitch: -.15, ftFz: .45, ftFy: .3, ftFpitch: .2, ftBz: .6, ftBy: .02, ftBpitch: .4, ftFx: .15, ftBx: .2,
+          hnFx: .1, hnFy: .72, hnFz: -.2, hnFfist: .3, hnBx: .35, hnBy: -.9, hnBz: -.45, hnBfist: 0 },
+        { t: .7, e: 'io', hnFx: .05, hnFy: .78, hdRoll: .22, hdPitch: -.2 },
+        { t: 1.1, e: 'io', hnFx: .14, hnFy: .7, hdRoll: .3 },
+        { t: 1.7, e: 'io', hnFx: .08, hnFy: .76, hdRoll: .24, hdPitch: -.25 },
+      ], { hold: true }),
       // victoria: voltereta y pose despreocupada (hoja al hombro, cabeza ladeada)
       win: mk('win', 1.4, [
         { t: .1, e: 'out2', comY: -.2 },

@@ -5,3 +5,13 @@ fieldset.audio { display: grid; gap: 10px; }
 .vol output { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
 .vol input[type=range]:focus-visible, .check input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 @media (max-height: 480px) { .vol { grid-template-columns: 5rem 1fr 3rem; gap: 8px; } }
+
+/* selector de canción: una sola con flechas */
+.song-pick{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:6px;border:1px solid rgba(201,164,76,.35);background:linear-gradient(90deg,rgba(10,16,36,.8),rgba(22,34,74,.6),rgba(10,16,36,.8))}
+.song-pick:focus-visible{outline:2px solid var(--gilt,#c9a44c);outline-offset:2px}
+.song-arrow{width:38px;height:38px;display:grid;place-items:center;font:800 1.6rem/1 var(--f-display,serif);color:#f1dc9a;background:rgba(5,8,18,.7);border:1px solid rgba(201,164,76,.45);clip-path:polygon(25% 0,100% 0,100% 100%,25% 100%,0 50%)}
+.song-arrow:last-child{clip-path:polygon(0 0,75% 0,100% 50%,75% 100%,0 100%)}
+.song-arrow:hover,.song-arrow:focus-visible{background:rgba(201,164,76,.25);color:#fff}
+.song-mid{display:grid;justify-items:center;text-align:center;gap:2px;min-width:0}
+.song-name{font:800 1.05rem var(--f-display,serif);letter-spacing:.06em;color:#fff3cc}
+.song-sub{font:500 .78rem var(--f-body,sans-serif);font-style:normal;color:#97a3bb}

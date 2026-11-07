@@ -232,7 +232,7 @@ export function installElements({ menu = null, scene, roster = menu?.roster || [
     const e = menu?.el?.elem; if (!hasDom || !e || e.querySelector('.elico')) return;
     const d = roster[menu.idx]; if (!d) return; const el = elementOf(d, R);
     e.prepend(h('span', { class: 'elico', 'aria-hidden': 'true' })); // marcador (sin emoji) para no decorar dos veces
-    if (R.elements[el]?.neutral) e.append(h('span', { class: 'elrel-mini rel-neutral' }, ' · ' + tx('elem.rel.neutral')));
+    // (v1.6) sin «· Neutro» junto al elemento en el menú: la relación elemental se explica al empezar el combate
   }
   function refreshMenu() { // reglas nuevas: vuelve a pintar la pantalla actual del menú (si ya se está mostrando)
     if (!hasDom || !menu?.el?.view?.children.length || menu.enabled === false) return;

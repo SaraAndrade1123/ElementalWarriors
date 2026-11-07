@@ -79,7 +79,7 @@ export class Director {
     else { this.lieW += ((lying ? 1 : 0) - this.lieW) * rate(dt, ko || down ? 16 : 9); }
     if (down) this.downT += dt; else this.downT = 0;
     if (this.lieW > .005) {
-      const air = f.air ? clamp01(.4 + (f.vy || 0) / 10) : 0; lyingPose(b.base, b.base, smooth(this.lieW), air, this.koT || this.t);
+      const air = f.air ? clamp01(.4 + (f.vy || 0) / 10) : 0; lyingPose(b.base, b.base, smooth(this.lieW), air, this.koT || this.t, S.id);
       if (down && this.downT < .2) b.base[IDX.comY] += Math.sin(this.downT / .2 * Math.PI) * .08; // rebote al caer
     }
 

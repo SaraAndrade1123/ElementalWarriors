@@ -139,7 +139,14 @@ export function backdashPose(out, p, idle) {
 }
 
 // Tumbado boca arriba (derribo / K.O.). k: 0 = de pie … 1 = tumbado; air: 1 mientras va despedido.
-export function lyingPose(out, base, k, air, t) {
+// Cómo queda cada guerrero en el suelo tras el K.O. (se aplica solo una vez caído, no en el aire): cada uno distinto.
+const KO = {
+  ignis: { ftFy: .5, ftFz: .28, ftFpitch: .1, ftFx: .14, ftBx: .2, hnFx: -.15, hnFy: .05, hnFz: .32, hnFfist: .9, hnBx: .78, hnBy: .45, hnBz: -.2, hdYaw: .6, hdRoll: .1 },  // una rodilla arriba, mano al pecho
+  aqua: { ftFx: .02, ftBx: .1, ftFy: .3, ftBy: .22, ftFz: .2, ftBz: .12, ftFpitch: .5, ftBpitch: .5, hnFx: .2, hnFy: .62, hnFz: .05, hnFfist: .15, hnBx: -.05, hnBy: -.1, hnBz: .28, hnBfist: .1, hdYaw: .75, hdRoll: .35, spRoll: .12 }, // recogida, brazo bajo la cabeza
+  terra: { ftFx: .45, ftBx: .5, ftFy: .05, ftBy: .05, ftFz: .02, ftBz: -.08, hnFx: .95, hnFy: .1, hnFz: -.05, hnBx: .95, hnBy: .15, hnBz: -.05, hnFfist: .2, hnBfist: .2, hdYaw: -.2 }, // abierta en estrella, agotada
+  zephyr: { ftFy: .38, ftFz: .2, ftFx: -.05, ftBy: .1, ftBx: .12, hnFx: .35, hnFy: .85, hnFz: -.05, hnBx: .4, hnBy: .8, hnBz: -.1, hnFfist: .4, hnBfist: .4, hdYaw: .3, hdRoll: -.15 }, // brazos sobre la cabeza
+};
+export function lyingPose(out, base, k, air, t, id) {
   if (k <= .001) return out;
   const s = (n, v) => { const i = IDX[n]; out[i] = out[i] + (v - out[i]) * k; }, fl = Math.sin(t * 9) * .1 * air;
   s('comPitch', mixv(-1.5, -.9, air)); s('comY', mixv(-.83, -.25, air)); s('comZ', mixv(-.45, -.1, air)); s('comYaw', 0); s('comRoll', 0); s('ftFree', 1);
@@ -150,5 +157,7 @@ export function lyingPose(out, base, k, air, t) {
   s('hnFx', mixv(.75, .7, air)); s('hnFy', mixv(.2, .35 + fl, air)); s('hnFz', mixv(-.15, -.2, air)); s('hnBx', mixv(.82, .8, air)); s('hnBy', mixv(.35, .25 - fl, air)); s('hnBz', mixv(-.1, -.3, air));
   s('hnFflare', .7); s('hnBflare', .7); s('hnFfist', mixv(.3, .2, air)); s('hnBfist', 0); s('hnFpitch', 0); s('hnBpitch', 0); s('hnFroll', 0); s('hnBroll', 0);
   s('shFup', mixv(.3, .4, air)); s('shBup', mixv(.3, .4, air)); s('shFfwd', 0); s('shBfwd', 0);
+  const ko = KO[id]; if (ko) { const w = k * (1 - air); for (const n in ko) { const i = IDX[n]; out[i] = out[i] + (ko[n] - out[i]) * w; } }
+  if (!air) { const br = Math.sin(t * 2.2) * .02 * k; out[IDX.spPitch] += br; } // respiración leve en el suelo
   return out;
 }

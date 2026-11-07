@@ -1,3 +1,4 @@
+import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { t } from '../systems/localization.js';
 import { movesFor } from '../game/fighter.js';
 
@@ -91,6 +92,9 @@ export class MenuManager {
       h('p', { class: 'lead' }, me.name),
       h('p', { class: 'note' }, t('play.mode')),
       h('div', { class: 'tabs', role: 'group' }, ...[['cpu', 'play.cpu'], ['training', 'play.train']].map(([m, k]) => h('button', { 'aria-pressed': String(this.mode === m), onclick: () => { this.mode = m; this.page_play(); } }, t(k)))),
+      ...(this.mode === 'training' ? [] : [h('p', { class: 'note' }, t('play.level')),
+        h('div', { class: 'tabs', role: 'group', 'data-role': 'level' }, ...LEVEL_IDS.map(l => h('button', { id: 'lvl-' + l, 'aria-pressed': String((this.level || 'normal') === l), onclick: () => { this.level = l; this.onLevel?.(l); this.keep = 'lvl-' + l; this.page_play(); } }, t('level.' + l)))),
+        h('p', { class: 'note lvl-desc' }, t('level.desc.' + (this.level || 'normal')))]),
       h('p', { class: 'note' }, t('play.rival')),
       h('div', { class: 'tabs', role: 'group', 'data-role': 'rival' }, ...rivals.map(([r, i]) => h('button', { 'aria-pressed': String(i === this.rival), onclick: () => { this.rival = i; this.page_play(); } }, r.name))),
       i18nMirror(this.roster[this.rival], me),

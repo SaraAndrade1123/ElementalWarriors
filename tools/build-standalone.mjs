@@ -1,6 +1,6 @@
 // Genera index.html: el juego COMPLETO en un solo archivo (código, estilos, datos, tipografías y modelos 3D dentro).
 // Se abre con doble clic (file://), sin servidor, y es la misma página que se publica en línea.
-//   npm run build        (fuente para desarrollar: index-dev.html + js/ con un servidor local)
+//   npm run build        (fuente: tools/dev/index.html + js/; solo para desarrollar)
 import { build } from 'esbuild';
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, extname, relative } from 'node:path';
@@ -42,12 +42,12 @@ var S=${JSON.stringify(SHEETS)};function skip(n){return n&&n.tagName==='LINK'&&n
 var ap=Element.prototype.append,ac=Node.prototype.appendChild;Element.prototype.append=function(){var a=[].filter.call(arguments,function(n){return !skip(n)});return ap.apply(this,a)};
 Node.prototype.appendChild=function(n){return skip(n)?n:ac.call(this,n)}})();`;
 
-let html = rd('index-dev.html').toString();
-html = html.replace(/<link rel="stylesheet" href="css\/[^"]+">\s*/g, '').replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '').replace(/<script type="module" src="js\/main.js"><\/script>/, '');
+let html = rd('tools/dev/index.html').toString();
+html = html.replace(/<base [^>]*>(<!--[^>]*-->)?\s*/, '').replace(/<link rel="stylesheet" href="css\/[^"]+">\s*/g, '').replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '').replace(/<script type="module" src="js\/main.js"><\/script>/, '');
 const esc = s => s.replace(/<\/script/gi, '<\\/script');
 html = html.replace('</head>', () => `<style>\n${css}\n</style>\n</head>`); // (función: el código puede contener $& / $')
 html = html.replace('</body>', () => `<script>window.__EW_ASSETS=${esc(JSON.stringify(assets))};</script>\n<script>${esc(shim)}</script>\n<script>${esc(js)}</script>\n</body>`);
-html = html.replace('<!doctype html>', '<!doctype html>\n<!-- Archivo GENERADO por tools/build-standalone.mjs a partir de index-dev.html: no editar a mano. -->');
+html = html.replace('<!doctype html>', '<!doctype html>\n<!-- Archivo GENERADO por tools/build-standalone.mjs a partir de tools/dev/index.html: no editar a mano. -->');
 writeFileSync(join(ROOT, 'index.html'), html);
 console.log(`index.html listo: ${(html.length / 1048576).toFixed(1)} MB (código ${(js.length / 1024).toFixed(0)} KB, ${Object.keys(assets).length} recursos)`);
 

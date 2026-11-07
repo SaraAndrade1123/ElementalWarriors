@@ -181,3 +181,8 @@ body[data-reduce="1"] *{animation:none!important;transition:none!important}
 #touch .w{right:calc(var(--e) + var(--g) * .3);bottom:calc(5% + var(--g) * 2);width:calc(var(--u) * .85);background:rgba(120,90,20,.55)}
 
 #touch .t{right:calc(var(--e) + var(--g) * .3);bottom:calc(5% + var(--g) * 3);width:calc(var(--u) * .85);background:radial-gradient(circle,rgba(255,226,140,.55),rgba(120,60,160,.55));font-size:1.2rem}
+
+/* vigilante de arranque: reintentar / modo ligero */
+.bootfix{display:grid;justify-items:center;gap:10px;margin-top:14px;position:relative;z-index:3}
+.bootfix .cta{padding:10px 34px}.bootfix .ghost{padding:8px 22px}
+.bootfix .bootlog{max-width:min(90vw,560px);font:500 .8rem var(--f-body,sans-serif);color:#ffb3a6;text-align:center;margin:0}

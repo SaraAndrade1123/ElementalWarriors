@@ -99,6 +99,14 @@ export class Rig {
         for (const j of kids[i]) if (this.kind[j] === K.FINGER) walk(j, depth + 1, thumb);
       };
       for (const o of out) walk(o.i, 0, o === th);
+      // PULGAR en el puño: en una mano real no queda levantado, se cruza por DELANTE de los dedos índice y medio,
+      // apoyado sobre sus falanges medias. Se guarda la rotación (en reposo) que lleva la base del pulgar hacia ese punto.
+      if (rest.length >= 2) {
+        const child = i => kids[i].find(j => this.kind[j] === K.FINGER), seg = i => { const c = child(i); return c !== undefined ? this.P0[c].distanceTo(this.P0[i]) : .03; };
+        const q = rest[0].base.clone().add(rest[1].base).multiplyScalar(.5).addScaledVector(n, seg(rest[0].i) * 1.25).addScaledVector(along, -seg(rest[0].i) * .15);
+        const aim = q.sub(th.base).normalize(), d0 = chainDir(th.i);
+        this.curl.get(th.i).tq = new THREE.Quaternion().setFromUnitVectors(d0, aim);
+      }
     }
     for (const i of this.fingers) if (!this.curl.has(i)) this.curl.set(i, { axis: new THREE.Vector3(1, 0, 0), depth: 0, thumb: false });
     // buffers de trabajo
@@ -139,8 +147,9 @@ export class Rig {
         case K.UARM: this._arm(i, side[i], fr(side[i]), P, Dp); d = dq[i]; break;
         case K.FINGER: {
           const s = side[i], f = fr(s), fist = Math.max(0, Math.min(1, c('hn' + f + 'fist'))), cv = this.curl.get(i);
-          const base = cv.thumb ? [.55, .75, .6] : [1.4, 1.55, 1.15], ang = base[Math.min(cv.depth, 2)] * fist;
-          _w.copy(cv.axis).applyQuaternion(Dp); d = dq[i].setFromAxisAngle(_w, ang);
+          const base = cv.thumb ? [0, .35, .45] : [1.4, 1.55, 1.15], ang = base[Math.min(cv.depth, 2)] * fist;
+          if (cv.tq) { _a.copy(qI).slerp(cv.tq, fist); _b.copy(Dp); d = dq[i].copy(_b).multiply(_a).multiply(_b.invert()); } // base del pulgar: cruza por delante
+          else { _w.copy(cv.axis).applyQuaternion(Dp); d = dq[i].setFromAxisAngle(_w, ang); }
           break; }
         case K.SEC: if (this.springs && this.springsOn) d = this.springs.solve(i, Pn[i], Dp, ctx, dq[i]); break;
       }

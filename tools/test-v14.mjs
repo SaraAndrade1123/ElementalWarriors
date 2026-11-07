@@ -59,7 +59,7 @@ const I = o => ({ x: 0, down: false, guard: false, jump: false, l: false, m: fal
 { const ok2 = existsSync('index.html'), s = ok2 ? readFileSync('index.html', 'utf8') : '';
   ok(ok2 && s.includes('__EW_STANDALONE') && !/<script type="module"/.test(s) && !/<link rel="stylesheet" href=/.test(s), 'index.html es autónomo (sin módulos ni hojas externas): se abre con doble clic');
   ok(['data/characters.json', 'data/localization/es.json', 'assets/characters/ignis.glb'].every(k => s.includes(`"${k}"`)) && s.includes('data:font/woff2;base64'), 'lleva dentro datos, idiomas, modelos y tipografías');
-  ok(existsSync('index-dev.html') && readFileSync('index-dev.html', 'utf8').includes('js/main.js'), 'la versión para desarrollar (index-dev.html) sigue usando los módulos'); }
+  ok(!existsSync('index-dev.html') && existsSync('tools/dev/index.html') && readFileSync('tools/dev/index.html', 'utf8').includes('js/main.js'), 'un solo index.html en la carpeta principal (la fuente para desarrollar vive en tools/dev/)'); }
 
 // 5 · escenarios con fondo
 { const st = rd('data/stages.json').stages; ok(st.every(s => (s.extras || []).length >= 4), 'cada escenario tiene al menos 4 capas/adornos de fondo nuevos'); }

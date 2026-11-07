@@ -51,9 +51,10 @@ async function boot() {
   const L = MSG[lang];
   if (location.protocol === 'file:' && !globalThis.__EW_STANDALONE) return fail(L.file); // la versión de un solo archivo (index.html) funciona sin servidor
   try {
-    await loadLocale(lang);
+    const stage = n => { globalThis.__EW_BOOT = n; }; stage('idioma');
+    await loadLocale(lang); stage('datos');
     const [{ roster }, { items }, shopData, achData, economy, stageData, moves, modes, mirrorData, weaponData, introData, outroData] = await Promise.all([json('data/characters.json'), json('data/menu.json'), json('data/items.json'), json('data/achievements.json'), json('data/economy.json'), json('data/stages.json'), json('data/moves.json'), json('data/modes.json'), optional('data/mirror.json'), optional('data/weapons.json'), optional('data/intros.json'), optional('data/outros.json')]);
-    const scene = new SceneManager($('#stage'), settings.get()); scene.mirrorData = mirrorData;
+    stage('gráficos 3D'); const scene = new SceneManager($('#stage'), settings.get()); scene.mirrorData = mirrorData; stage('guerreros 0/' + roster.length);
     settings.subscribe(s => {
       scene.apply(s); document.body.dataset.reduce = s.reduceMotion ? '1' : '0';
       if (s.lang !== lang) { // cambio de idioma desde Ajustes
@@ -63,10 +64,10 @@ async function boot() {
     });
     const failed = await scene.loadCharacters(roster, (done, total) => {
       bar.style.width = `${(done / total) * 100}%`; meter.setAttribute('aria-valuenow', Math.round((done / total) * 100));
-      status.textContent = t('ui.loading', { done, total });
+      status.textContent = t('ui.loading', { done, total }); stage(`guerreros ${done}/${total}`);
     });
     scene.show(roster[0].id); scene.start();
-    status.textContent = failed.length ? t('ui.partial', { n: failed.length }) : t('ui.ready'); if (failed.length && scene.loadErrors?.length) status.title = scene.loadErrors.join('\n'); // detalle al pasar el ratón
+    status.classList.remove('error'); status.textContent = failed.length ? t('ui.partial', { n: failed.length }) : t('ui.ready'); if (failed.length && scene.loadErrors?.length) status.title = scene.loadErrors.join('\n'); // detalle al pasar el ratón
     // Dificultad de la CPU para los combates sueltos (Jugar / Entrenamiento con maniquí CPU); se guarda en este navegador.
     const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } } };
     let cpuLevel = LEVEL_IDS.includes(store.get('ew.cpuLevel')) ? store.get('ew.cpuLevel') : 'normal';
@@ -74,6 +75,7 @@ async function boot() {
       menu: items, roster, scene, settings, moves, onPlay: (a, b, m) => flow.begin({ kind: 'plain', cfg: { a, b, mode: m, rec: m === 'training' ? 'training' : 'versus_ai', level: cpuLevel } }),
       el: { view: $('#view'), prev: $('#prev'), next: $('#next'), dots: $('#pl-dots'), name: $('#pl-name'), alias: $('#pl-alias'), elem: $('#pl-el'), toast: $('#toast') }
     });
+    menu.level = cpuLevel; menu.onLevel = l => { cpuLevel = l; store.set('ew.cpuLevel', l); }; // dificultad elegida en «Jugar»
     const dev = new URLSearchParams(location.search).has('dev');
     const meta = createMeta({ items: shopData.items, achievements: achData.achievements, economy });
     roster.forEach(r => scene.setPalette(r.id, meta.shop.paletteOf(r.id)));
@@ -222,7 +224,7 @@ async function boot() {
     };
     const leave = () => {
       if (menu.enabled) return; onMenu?.(); onMenu = null; flow.abandon(); paused = input.paused = false; pz.hidden = true; rz.hidden = true; $('#story').hidden = true; input.detach(); scene.endMatch();
-      $('#hud').hidden = true; $('#menu').hidden = false; menu.enabled = true; menu.select(menu.idx); menu.go('home');
+      $('#hud').hidden = true; $('#menu').hidden = false; menu.enabled = true; menu.select(menu.idx); menu.go('home'); scene.resize();
     };
     installModes(menu, { cfg: modes, roster, stages, meta, flow });
     installVersusPreview(menu, { scene, roster }); // Versus: los dos elegidos frente a frente
@@ -240,7 +242,7 @@ async function boot() {
     $('#p-reset').addEventListener('click', () => { scene.match.resetPositions(); pause(false); });
     $('#p-opt').addEventListener('click', () => {
       const m = scene.match; if (m?.mode !== 'cpu') return; const now = m.brain?.level || cpuLevel;
-      cpuLevel = LEVEL_IDS[(LEVEL_IDS.indexOf(now) + 1) % LEVEL_IDS.length]; store.set('ew.cpuLevel', cpuLevel); m.brain = new CpuBrain(Math.random, cpuLevel); if (cur) cur.level = cpuLevel; optLabels();
+      cpuLevel = LEVEL_IDS[(LEVEL_IDS.indexOf(now) + 1) % LEVEL_IDS.length]; store.set('ew.cpuLevel', cpuLevel); menu.level = cpuLevel; m.brain = new CpuBrain(Math.random, cpuLevel); if (cur) cur.level = cpuLevel; optLabels();
     });
     addEventListener('keydown', e => { if (e.code === 'KeyR' && !e.repeat && !paused && scene.match?.mode === 'training' && rz.hidden && pz.hidden && input.scheme === 'solo') scene.match.resetPositions(); }); // R: reinicia posiciones
     addEventListener('keydown', e => { // F1: herramientas de depuración del combate (cajas de golpe/daño y datos de fotogramas)
@@ -261,14 +263,18 @@ async function boot() {
       b[(i + (e.key === 'ArrowDown' ? 1 : -1) + b.length) % b.length]?.focus(); e.preventDefault();
     });
     document.addEventListener('visibilitychange', () => { if (document.hidden && !paused) pause(true); });
-    const start = $('#start'); start.hidden = false; start.focus();
+    // Celular: pantalla completa en horizontal con un toque (si el navegador lo permite; dentro de otra página puede no estarlo)
+    const fs = $('#fullscr'), canFs = !!document.documentElement.requestFullscreen && document.fullscreenEnabled !== false && matchMedia('(pointer:coarse)').matches;
+    const goFull = () => document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).then(() => screen.orientation?.lock?.('landscape').catch(() => {})).catch(() => {});
+    if (fs && canFs) { fs.hidden = false; fs.addEventListener('click', goFull); }
+    const start = $('#start'); start.hidden = false; start.focus(); stage('ok'); document.getElementById('bootfix')?.remove(); status.classList.remove('error');
     start.addEventListener('click', () => {
-      stopTitle(); $('#loader').classList.add('out'); $('#menu').hidden = false; menu.init();
+      stopTitle(); if (canFs && !document.fullscreenElement) goFull(); $('#loader').classList.add('out'); $('#menu').hidden = false; menu.init(); scene.resize();
       setTimeout(() => { $('#loader').hidden = true; }, 650);
     }, { once: true });
   } catch (e) {
     console.error('[boot]', e);
-    fail(L.boot.replace('{e}', e.message));
+    fail(L.boot.replace('{e}', e.message)); globalThis.__EW_HELP?.(L.boot.replace('{e}', e.message));
   }
 }
 boot();

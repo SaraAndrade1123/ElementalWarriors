@@ -103,7 +103,8 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
         return h('li', { class: done ? 'done' : open ? '' : 'lock' }, h('span', {}, t(i === order.length - 1 ? 'story.chapter.final' : 'story.chapter', { n: i + 1, name: name(id) })),
           h('span', { class: 'acts' }, done ? h('span', { class: 'tag ok' }, t('story.done')) : null, open ? h('button', { class: 'mini', onclick: () => play(i) }, t('story.play')) : h('span', { class: 'tag' }, t('story.locked'))));
       })),
-      h('div', { class: 'row' }, h('button', { class: 'cta', onclick: () => play(0) }, t('story.start')),
-        got > 0 && got < order.length ? h('button', { class: 'cta', onclick: () => play(got) }, t('story.continue', { n: got + 1 })) : null));
+      got > 0 && got < order.length
+        ? h('div', { class: 'row story-acts' }, h('button', { class: 'cta', onclick: () => play(got) }, t('story.continue', { n: got + 1 })), h('button', { class: 'ghost restart', onclick: () => play(0) }, t('story.restart')))
+        : h('button', { class: 'cta', onclick: () => play(0) }, t('story.start')));
   };
 }

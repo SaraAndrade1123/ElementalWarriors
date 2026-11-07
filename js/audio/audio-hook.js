@@ -136,8 +136,13 @@ export function installAudio({ menu, scene, meta = null, stages = null, roster =
           onkeydown: nav });
         return h('label', { class: 'vol' }, h('span', {}, label), input, out);
       };
-      const songs = h('div', { class: 'tabs songs', role: 'group', 'aria-label': t('set.song') }, ...SONGS.map(v => h('button', { id: 'song-' + v, 'aria-pressed': String(song === v), onkeydown: nav,
-        onclick: () => { audio.setSong(v); menu.keep = 'song-' + v; menu.page_settings(); menu.toast(t('set.song.now', { name: t('set.song.' + v) })); } }, t('set.song.' + v))));
+      // selector de canción: una sola a la vista, con flechas para cambiarla (y ← → con el teclado)
+      const step = d => { const i = (SONGS.indexOf(song) + d + SONGS.length) % SONGS.length, v = SONGS[i]; audio.setSong(v); name.textContent = t('set.song.' + v); sub.textContent = t('set.song.d.' + v); menu.toast(t('set.song.now', { name: t('set.song.' + v) })); };
+      const name = h('b', { class: 'song-name', 'aria-live': 'polite' }, t('set.song.' + song)), sub = h('i', { class: 'song-sub' }, t('set.song.d.' + song));
+      const arrow = (d, g, lbl) => h('button', { class: 'song-arrow', type: 'button', 'aria-label': lbl, onclick: () => step(d), onkeydown: nav }, g);
+      const songs = h('div', { class: 'song-pick', role: 'group', 'aria-label': t('set.song'), tabindex: '0',
+        onkeydown: e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); step(e.key === 'ArrowLeft' ? -1 : 1); } else nav(e); } },
+        arrow(-1, '‹', t('set.song.prev')), h('span', { class: 'song-mid' }, name, sub), arrow(1, '›', t('set.song.next')));
       block.append(h('p', { class: 'note song-l' }, t('set.song')), songs, slider('music', t('set.music')), slider('sfx', t('set.sfx')),
         h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: s.muted, onchange: e => audio.setMuted(e.target.checked), onkeydown: nav }), t('set.mute')));
     }
