@@ -1,5 +1,7 @@
 import { Settings } from './systems/settings-manager.js';
 import { loadLocale, t } from './systems/localization.js';
+import { shortNum } from './ui/format.js';
+import { installScrollbars } from './ui/scrollbar.js';
 import { SceneManager } from './game/scene-manager.js';
 import { MenuManager } from './ui/menu-manager.js';
 import { Input } from './game/input.js';
@@ -33,6 +35,13 @@ import { installChromaVfx } from './game/chroma-vfx.js';
 import { patchFighter as patchTransform, patchCpu as patchTransformCpu, installTransform } from './game/transform.js';
 import { Fighter, RULES, movesFor } from './game/fighter.js';
 import { installOutro } from './game/cinematic-end.js';
+// emblema de la ficha: el símbolo del elemento del guerrero que se ve (lo elige el CSS con [data-el]) dentro de un sello, en su color
+const EMBLEM = `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" class="em-ring"/><circle cx="32" cy="32" r="23.5" class="em-ring2"/>`
+  + `<g class="em em-fire"><path d="M32 13c7 9 11 15 11 22a11 11 0 0 1-22 0c0-5 3-9 5-12 1 4 3 6 5 6-2-6-1-11 1-16z"/></g>`
+  + `<g class="em em-water"><path d="M17 26c5-5 10 5 15 0s10-5 15 0M17 34c5-5 10 5 15 0s10-5 15 0M17 42c5-5 10 5 15 0s10-5 15 0" fill="none" stroke-width="3.4" stroke-linecap="round"/></g>`
+  + `<g class="em em-earth"><path d="M15 45 26 22l6 10 6-14 11 27z"/><path d="M21 45h22" stroke-width="3" stroke-linecap="round"/></g>`
+  + `<g class="em em-wind"><path d="M16 27c8-10 26-9 24 1-1 6-9 6-9 1M14 36h28M18 44c7 0 19 1 22-4" fill="none" stroke-width="3.4" stroke-linecap="round"/></g></svg>`;
+let inputRef = null; // (v1.11) controles del jugador (antes era una variable global accesible desde la consola)
 import { createWeaponPreview } from './ui/weapon-preview.js';
 
 const $ = s => document.querySelector(s);
@@ -57,9 +66,10 @@ async function boot() {
     const stage = n => { globalThis.__EW_BOOT = n; }; stage('idioma');
     await loadLocale(lang); stage('datos');
     const [{ roster }, { items }, shopData, achData, economy, stageData, moves, modes, mirrorData, weaponData, introData, outroData] = await Promise.all([json('data/characters.json'), json('data/menu.json'), json('data/items.json'), json('data/achievements.json'), json('data/economy.json'), json('data/stages.json'), json('data/moves.json'), json('data/modes.json'), optional('data/mirror.json'), optional('data/weapons.json'), optional('data/intros.json'), optional('data/outros.json')]);
+    const legal = await optional('data/legal.json').catch(() => null); // (v1.11) titular y contacto para Créditos › Legal
     stage('gráficos 3D'); const scene = new SceneManager($('#stage'), settings.get()); scene.mirrorData = mirrorData; stage('guerreros 0/' + roster.length);
     settings.subscribe(s => {
-      scene.apply(s); document.body.dataset.reduce = s.reduceMotion ? '1' : '0'; applyA11y(s); globalThis.__ewInput?.setBindings(s.keys); // (F9)
+      scene.apply(s); document.body.dataset.reduce = s.reduceMotion ? '1' : '0'; applyA11y(s); inputRef?.setBindings(s.keys); // (F9)
       if (s.lang !== lang) { // cambio de idioma desde Ajustes
         lang = s.lang;
         loadLocale(lang).then(() => menu?.refresh()).catch(e => console.error('[i18n]', e));
@@ -85,26 +95,32 @@ async function boot() {
       el: { view: $('#view'), prev: $('#prev'), next: $('#next'), dots: $('#pl-dots'), name: $('#pl-name'), alias: $('#pl-alias'), elem: $('#pl-el'), toast: $('#toast') }
     });
     menu.level = cpuLevel; menu.onLevel = l => { cpuLevel = l; store.set('ew.cpuLevel', l); }; // dificultad elegida en «Jugar»
-    const dev = new URLSearchParams(location.search).has('dev');
+    // (v1.11) las herramientas de consola (?dev) solo existen en la versión de desarrollo: en la publicada no se incluyen
+    const dev = !globalThis.__EW_BUILD__ && new URLSearchParams(location.search).has('dev');
     const meta = createMeta({ items: shopData.items, achievements: achData.achievements, economy });
     roster.forEach(r => scene.setPalette(r.id, meta.shop.paletteOf(r.id)));
     installMetaPanels(menu, { meta, scene, roster, dev });
     // (v1.9) perfil del jugador local en la pantalla principal: rango (según logros), Rose Gold, victorias y guerrero favorito
     { const RANKS = [[0, 'novice'], [5, 'apprentice'], [15, 'warrior'], [35, 'veteran'], [60, 'master'], [90, 'legend']];
+      // (v1.11) color del guerrero y del chroma que se ven en el menú, disponible para la interfaz (ficha del jugador, etc.)
+      scene.onTint = (f, def) => { const r = document.documentElement.style; r.setProperty('--mc', f.color); r.setProperty('--ml', f.light || f.color); r.setProperty('--accent', f.light || f.color); document.documentElement.dataset.mel = def?.element || ''; };
+      if (scene.fx && scene.active) scene.onTint(scene.fx, scene.active.def);
       menu.profile = () => { const d = meta.save.data, n = d.done.length, rank = [...RANKS].reverse().find(([k]) => n >= k)[1], s = d.stats;
         const fav = Object.entries(s.winsBy || {}).sort((a, b) => b[1] - a[1])[0], favDef = fav && fav[1] > 0 ? roster.find(r => r.id === fav[0]) : null;
         const e = (tag, cls, txt) => { const x = document.createElement(tag); if (cls) x.className = cls; if (txt != null) x.textContent = txt; return x; };
-        const card = e('button', 'pcard'); card.type = 'button'; card.onclick = () => menu.go('progress'); card.setAttribute('aria-label', t('menu.progress'));
-        if (favDef) card.style.setProperty('--c', favDef.fx?.color || '#c9a44c');
-        const av = e('span', 'pc-av'); av.textContent = (favDef?.name || '?')[0];
+        // (v1.11) la ficha no lleva a ningún sitio (las estadísticas completas están en Progreso); su emblema toma el color
+        // del guerrero y del chroma que se ven en el menú (aunque el favorito sea otro) y las cifras grandes se abrevian (12,5k · 1,2M)
+        const card = e('div', 'pcard');
+        const av = e('span', 'pc-av'); av.setAttribute('aria-hidden', 'true'); av.innerHTML = EMBLEM;
         const tx = e('span', 'pc-tx'); tx.append(e('small', null, t('profile.rank.' + rank)), e('b', null, t('profile.title')),
-          e('i', null, [t('profile.gold', { n: d.gold.balance.toLocaleString() }), t('profile.wins', { n: s.wins }), favDef ? t('profile.fav', { name: favDef.name }) : null].filter(Boolean).join(' · ')));
-        const ach = e('span', 'pc-ach'); ach.append(e('b', null, String(n)), e('small', null, t('profile.ach')));
+          e('i', null, [t('profile.gold', { n: shortNum(d.gold.balance) }), t('profile.wins', { n: shortNum(s.wins) }), favDef ? t('profile.fav', { name: favDef.name }) : null].filter(Boolean).join(' · ')));
+        const ach = e('span', 'pc-ach'); ach.append(e('b', null, shortNum(n)), e('small', null, t('profile.ach')));
         card.append(av, tx, ach); return card; }; }
     // (v1.9) aviso de guardado: cada vez que el progreso se guarda aparece «Guardado» junto a la versión
     { const ver = document.querySelector('#menu .ver'), mark = document.createElement('span'); mark.className = 'saved'; mark.setAttribute('role', 'status'); ver?.after(mark); let tm = 0;
       meta.save.subscribe(() => { mark.textContent = meta.save.persistent === false ? t('profile.nosave') : t('profile.saved'); mark.classList.toggle('warn', meta.save.persistent === false); mark.classList.remove('on'); void mark.offsetWidth; mark.classList.add('on'); clearTimeout(tm); tm = setTimeout(() => mark.classList.remove('on'), 2600); }); }
     // (v1.9) cifras reales del juego para los créditos (salen de los datos, no están escritas a mano)
+    menu.legal = legal || {};
     menu.counts = () => { const its = shopData.items || [], st = stageData.stages || stageData;
       return { stages: Array.isArray(st) ? st.length : 0, moves: roster.reduce((n, r) => n + Object.keys(movesFor(moves, r.id)).length, 0), challenges: CHALLENGES.length,
         achievements: (achData.achievements || achData).length, items: its.filter(i => !i.hidden).length, songs: menu.audioApi?.songs().length || 0, chromas: its.filter(i => i.chroma).length + roster.length }; };
@@ -112,12 +128,13 @@ async function boot() {
     const stages = new StageManager(stageData.stages);
     stages.problems.forEach(p => console.warn('[stages]', p));
     installStages(scene, stages); installStageSelect(menu, { stages });
+    installScrollbars(); // (v1.11) una sola barra de desplazamiento por zona, por fuera, con botón para subir
     installSettingsPage(menu, { settings }); // (F9) ajustes completos en pestañas (antes que el audio: su bloque va en «Sonido»)
     const audio = installAudio({ menu, scene, meta, stages });
     const elements = installElements({ menu, scene, roster }); // triángulo elemental (docs/ELEMENTOS.md)
     const bending = installBending({ menu, scene, roster }); // control elemental (docs/CONTROL-ELEMENTAL.md)
     installWeapons({ scene, roster, save: meta.save, data: weaponData }); // armas de la tienda y rompeguardia (docs/ARMAS.md)
-    const wPreview = createWeaponPreview({ scene, roster, moves, sfx: (n, d = {}) => audio.sfx(n, { ...d, element: ELEMENT_OF[d.who] }) }); globalThis.ewPreview = wPreview;
+    const wPreview = createWeaponPreview({ scene, roster, moves, sfx: (n, d = {}) => audio.sfx(n, { ...d, element: ELEMENT_OF[d.who] }) }); if (dev) globalThis.ewPreview = wPreview;
     if (weaponData) installWeaponShop(menu, { meta, roster, data: weaponData, preview: wPreview });
     installFightFx({ scene, roster }); // impactos, congelado de técnica y K.O. con más producción (docs/PRESENTACION.md)
     installCinematic({ scene, roster, data: introData }); // cinemática con diálogo antes de cada combate
@@ -143,7 +160,7 @@ async function boot() {
       if (paused) { label(); optLabels(); renderDuel(); $('#p-resume').focus(); } else document.activeElement?.blur();
     };
     const input = new Input($('#touch'), () => pause());
-    input.setBindings(settings.get().keys); globalThis.__ewInput = input; // (F9) teclas elegidas por el jugador
+    input.setBindings(settings.get().keys); inputRef = input; // (F9) teclas elegidas por el jugador
     // (F9) pausa automática al cambiar de pestaña o de aplicación (si está activada)
     const autoPause = () => { if (settings.get().autoPause && scene.match && !menu.enabled && !paused && scene.match.phase === 'fight') pause(true); };
     document.addEventListener('visibilitychange', () => { if (document.hidden) autoPause(); }); addEventListener('blur', autoPause);

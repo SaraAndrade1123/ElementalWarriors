@@ -229,7 +229,7 @@ export class SceneManager {
     if (this.active === c) this._tintFx(c);
   }
 
-  _tintFx(c) { const f = c.fx ?? c.def.fx; this.fx = f; this.tint.light.set(f.light); this.tint.color.set(f.color); this.pts.material.size = f.size; }
+  _tintFx(c) { const f = c.fx ?? c.def.fx; this.fx = f; this.tint.light.set(f.light); this.tint.color.set(f.color); this.pts.material.size = f.size; try { this.onTint?.(f, c.def); } catch (e) { console.warn('[menú] tinte', e); } }
 
   // Versus: muestra a los dos elegidos (el segundo es el espejo si es el mismo guerrero). null/undefined = vuelve a uno solo.
   showPair(a, b, { quiet = false } = {}) {
@@ -320,7 +320,7 @@ export class SceneManager {
     this.rune.rotation.z += dt * .15 * m;
     for (const r of this.rocks) { r.position.y = r.userData.y + Math.sin(t * .5 * m + r.userData.ph) * .25; r.rotation.y += dt * .1 * m; }
     this._particles(dt * m, t);
-    try { this.themeBg?.update(dt, t, this.reduce); } catch (e) { console.warn('[menú] fondo', e); this.themeBg = null; }
+    try { this.themeBg?.update(dt, t, this.reduce, this.tint); } catch (e) { console.warn('[menú] fondo', e); this.themeBg = null; }
     const c = this.active;
     if (this.pair) { // selección de Versus: los dos guerreros frente a frente
       this.pair.forEach((p, i) => { const a = ease(Math.min((t - p.t0) / .45, 1)), s = i ? 1 : -1;

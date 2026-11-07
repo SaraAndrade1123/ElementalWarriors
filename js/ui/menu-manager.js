@@ -52,7 +52,7 @@ export class MenuManager {
   select(i) {
     const n = this.roster.length; this.idx = (i + n) % n; const d = this.roster[this.idx];
     this.scene.show(d.id);
-    document.documentElement.style.setProperty('--accent', d.fx.light);
+    document.documentElement.style.setProperty('--accent', (this.scene?.active?.def?.id === d.id && this.scene.fx || d.fx).light); // (v1.11) con el chroma equipado
     const { name, alias, dots, elem } = this.el;
     name.textContent = d.name; alias.textContent = this.c(d, 'alias');
     elem.replaceChildren(h('span', { class: `pip ${d.shape}` }), this.c(d, 'element'));
@@ -161,7 +161,16 @@ export class MenuManager {
         h('p', { class: 'note' }, t('cr.note'))),
       sec('inspiration', h('p', { class: 'note' }, t('cr.insp'))),
       sec('thanks', h('p', { class: 'note' }, t('cr.thanks.p'))),
-      h('p', { class: 'note cr-legal' }, t('cr.legal')));
+      // (v1.11) LEGAL completo: titularidad, términos, privacidad, licencias de terceros (con los cambios hechos), marcas y contacto
+      (() => { const lg = this.legal || {}, owner = lg.owner || 'Elemental Warriors', authors = [...new Set(this.roster.map(r => r.provisional?.author).filter(Boolean))].join(', ');
+        const det = (k, ...kids) => h('details', { class: 'moves lore lg' }, h('summary', {}, t('lg.' + k + '.h')), ...kids);
+        return h('section', { class: 'cr-sec cr-legalsec' }, h('h3', { class: 'cr-h' }, t('cr.legal.h')), h('p', { class: 'note cr-legal' }, t('cr.legal')),
+          det('own', h('p', { class: 'note' }, t('lg.own', { year: lg.year || new Date().getFullYear(), owner }))),
+          det('terms', h('p', { class: 'note' }, t('lg.terms'))),
+          det('priv', h('p', { class: 'note' }, t('lg.priv'))),
+          det('third', ul(li(t('lg.third.three')), li(t('lg.third.fonts')), li(t('lg.third.models', { author: authors })))),
+          det('tm', h('p', { class: 'note' }, t('lg.tm'))),
+          det('contact', h('p', { class: 'note' }, t('lg.contact', { contact: lg.contact || t('lg.contact.none') })), lg.site ? h('p', { class: 'note' }, h('a', { href: lg.site, target: '_blank', rel: 'noopener' }, lg.site)) : null)); })());
   }
 
 }

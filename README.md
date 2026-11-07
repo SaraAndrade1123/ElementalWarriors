@@ -1,4 +1,4 @@
-# Elemental Warriors (v1.10.0 · rival aleatorio, santuarios pulidos y derrotas reales)
+# Elemental Warriors (v1.11.0 · versión web que se actualiza sola, legal y seguridad)
 
 ## Cómo abrirlo
 - **Jugar (PC o celular)**: abre `index.html`. Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet. En el celular lo más fácil es el enlace en línea (se abre en Chrome y listo); también puedes pasar `index.html` al teléfono y abrirlo con Chrome. Pon el móvil en horizontal y pulsa **Pantalla completa**.
@@ -128,6 +128,14 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Zephyr**: su voltereta de presentación ya no hace un giro extra hacia atrás al terminar (los giros completos vuelven por el camino corto).
 - **Armas**: aura elemental animada en el filo (del color de las técnicas / del chroma), estelas más largas y curvas, impacto propio por tipo (tajo en cruz, onda de choque, estocada), animaciones sin tirones al sacar el arma. Vista previa con cámara más cercana, cámara lenta al conectar y ficha del arma con su efecto según el elemento.
 - **Interfaz**: tarjeta con el nombre y el elemento del guerrero en Combate de prueba; flechas de la canción con borde y chevrón limpios.
+
+## v1.11.0 — Versión web que se actualiza sola, legal, seguridad y menú más cuidado
+- **Distribución**: `npm run build` crea `dist/web/` (instalable como app, juega sin conexión, avisa «Hay una versión nueva» y se actualiza con un toque). `.github/workflows/pages.yml` la publica en GitHub Pages en cada cambio, solo si pasan las pruebas. Guía: `docs/DISTRIBUCION.md`.
+- **Legal**: Créditos › Legal (titularidad, términos de uso, privacidad, licencias de terceros con los cambios que exige CC BY, marcas y contacto, editable en `data/legal.json`); `docs/LEGAL.md` (qué falta y por qué) y `docs/THIRD-PARTY-NOTICES.md`. Los créditos ya no dicen que no se usan personajes ajenos.
+- **Seguridad**: guardado cifrado y firmado con copia de respaldo (si se edita a mano se recupera la copia buena), reglas de la economía, sin herramientas de consola en la versión publicada, política de seguridad de contenido (CSP) en la versión web.
+- **Menú**: ficha del jugador sin enlace, con el emblema del elemento en el color del guerrero y del chroma, y cifras abreviadas (12k · 1,3k). Fuego de verdad por shader detrás de Ignis; entradas y salidas propias (las rocas de Terra brotan y se retraen, las llamas prenden desde el suelo, los rayos de agua bajan, la espiral de viento entra girando); luna pintada en los cuatro santuarios. El chroma tiñe todo el santuario y los acentos de la interfaz (todo o nada).
+- **Desplazamiento**: una sola barra dorada por fuera de cada panel (sin barras nativas dobles) y botón ▲ para volver arriba cuando «Volver» deja de verse.
+- **Derrotas**: Aqua queda sentada sobre los talones con las piernas juntas (seiza); Zephyr con la palma abierta y luego la mano en la nuca. Frase nueva de Zephyr.
 
 ## v1.10.0 — Rival aleatorio, santuarios pulidos, Santuario del Viento y derrotas con contacto real
 - **Contra la CPU** (Combate de prueba y Versus): el rival se elige con fichas por guerrero (gema y color del elemento, ventaja/desventaja elemental, «Espejo») y una ficha **Aleatorio** que se sortea al empezar. En Versus la vista 3D hace de ruleta mientras está elegido.

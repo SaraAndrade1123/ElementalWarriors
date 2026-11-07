@@ -194,7 +194,7 @@ export class Rig {
     }
     // tumbado o sentado en el suelo (cadera inclinada hacia atrás): la rodilla dobla hacia ARRIBA, no hacia el suelo
     const cp = c('comPitch'), lie = free < 1 ? Math.max(0, Math.min(1, (-Math.atan2(Math.sin(cp), Math.cos(cp)) - .3) / .7)) : 0;
-    const up = Math.max(lie, Math.max(0, Math.min(1, c('seat'))) * .9 * Math.max(0, Math.min(1, (.42 - c('seatH')) / .14))), kn = c('kn' + f + 'x'); // sentado: rodillas arriba; kn: hacia fuera/dentro
+    const up = Math.max(lie, Math.max(0, Math.min(1, c('seat'))) * .9 * Math.max(0, Math.min(1, (.42 - c('seatH')) / .14, (oz + .05) / .2))), kn = c('kn' + f + 'x'); // sentado: rodillas arriba; kn: hacia fuera/dentro
     _pole.set(s * (.22 + kn * 1.6), up * 1.3 - Math.abs(kn) * .5, 1 - up * .75).normalize(); if (free > 0) _pole.applyQuaternion(_c.copy(qI).slerp(this.D[this.I.com], free));
     const D2 = _d.copy(this._limbIK(L, Dp, _T, _pole, dq[L.A], dq[L.B])); has[L.B] = 1;
     // pie: orientación objetivo = reposo (plano) · yaw · pitch; compensa el Δ acumulado de la pierna

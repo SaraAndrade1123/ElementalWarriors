@@ -12,7 +12,7 @@ const walk = d => readdirSync(join(ROOT, d)).flatMap(f => { const p = join(d, f)
 
 // 1 · código: un único script clásico (sin módulos: los navegadores bloquean módulos desde file://)
 const res = await build({
-  entryPoints: [join(ROOT, 'js/main.js')], bundle: true, format: 'iife', minify: true, write: false, target: 'es2020', legalComments: 'none',
+  entryPoints: [join(ROOT, 'js/main.js')], bundle: true, format: 'iife', minify: true, write: false, target: 'es2020', legalComments: 'none', define: { 'globalThis.__EW_BUILD__': 'true' }, drop: ['debugger'], // (v1.11) sin herramientas de depuración en la versión publicada
   alias: { three: join(ROOT, 'js/vendor/three/build/three.module.js') },
   plugins: [{ name: 'addons', setup(b) { b.onResolve({ filter: /^three\/addons\// }, a => ({ path: join(ROOT, 'js/vendor/three/examples/jsm', a.path.slice('three/addons/'.length)) })); } }],
 });
@@ -61,4 +61,47 @@ import { mkdirSync } from 'node:fs';
   mkdirSync(join(ROOT, 'dist'), { recursive: true });
   writeFileSync(join(ROOT, 'dist/elemental-warriors-online.html'), head.replace(/<title>[^<]*<\/title>/, '<title>Elemental Warriors</title>') + css + '\n' + boot + body);
   console.log('dist/elemental-warriors-online.html listo (para publicar en línea)');
+}
+
+// 6 · (v1.11) VERSIÓN WEB INSTALABLE para distribuir por un enlace (GitHub Pages, itch.io, Netlify…): dist/web/
+//   · index.html con manifiesto (se puede «instalar» como app en el celular y en PC), iconos y política de seguridad (CSP)
+//   · sw.js: guarda el juego para jugar sin conexión y, cuando se publica una versión nueva, avisa «Hay una versión nueva»
+//     y se actualiza con un toque (sin descargar zips). version.json siempre se pide a la red.
+import { createHash } from 'node:crypto';
+import { copyFileSync } from 'node:fs';
+{
+  const pkg = JSON.parse(rd('package.json')), build = createHash('sha256').update(html).digest('hex').slice(0, 10), V = `${pkg.version}-${build}`;
+  const W = join(ROOT, 'dist/web'); mkdirSync(join(W, 'icons'), { recursive: true });
+  for (const f of ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png']) copyFileSync(join(ROOT, 'assets/icons', f), join(W, 'icons', f));
+  const csp = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
+  const headAdd = `<meta http-equiv="Content-Security-Policy" content="${csp}">\n<meta name="referrer" content="no-referrer">\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">\n<meta name="ew-version" content="${V}">\n`;
+  const upd = `<script>/* actualización automática (versión web) */(function(){var want=false;if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
+function toast(reg){var es=(document.documentElement.lang||navigator.language||'es').slice(0,2)==='es';if(document.getElementById('ewupd'))return;var d=document.createElement('div');d.id='ewupd';d.setAttribute('role','status');
+d.style.cssText='position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9999;display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid #e2bd5e;border-radius:4px;background:rgba(8,12,28,.95);color:#f1e6c4;font:600 14px system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.6)';
+d.innerHTML='<span>'+(es?'Hay una versión nueva del juego':'A new version is available')+'</span>';var b=document.createElement('button');b.textContent=es?'Actualizar':'Update';
+b.style.cssText='padding:6px 12px;border:0;border-radius:3px;background:linear-gradient(#fff3c8,#c9a44c);color:#1a1206;font:800 13px system-ui,sans-serif;cursor:pointer';
+b.onclick=function(){want=true;if(reg.waiting)reg.waiting.postMessage('skip');else location.reload();};d.appendChild(b);document.body.appendChild(d);}
+var reloading=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(reloading||!want)return;reloading=true;location.reload();}); /* solo recarga si el jugador pidió actualizar (la primera instalación no interrumpe) */
+function go(){navigator.serviceWorker.register('sw.js').then(function(reg){if(reg.waiting&&navigator.serviceWorker.controller)toast(reg);
+reg.addEventListener('updatefound',function(){var w=reg.installing;w&&w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)toast(reg);});});
+setInterval(function(){reg.update().catch(function(){});},30*60*1000);document.addEventListener('visibilitychange',function(){if(!document.hidden)reg.update().catch(function(){});});}).catch(function(){});}
+/* se registra cuando el juego ya cargó: así la primera descarga no compite con la copia para jugar sin conexión */
+if(navigator.serviceWorker.controller)go();else window.addEventListener('load',function(){setTimeout(go,6000);});})();</script>\n`;
+  let web = html.replace('<head>', '<head>\n' + headAdd).replace('</body>', () => upd + '</body>');
+  writeFileSync(join(W, 'index.html'), web);
+  writeFileSync(join(W, 'manifest.webmanifest'), JSON.stringify({ name: 'Elemental Warriors', short_name: 'Elemental', description: 'Juego de lucha anime 2.5D de los cuatro elementos.', lang: 'es', start_url: './', scope: './', display: 'fullscreen', orientation: 'landscape', background_color: '#05070f', theme_color: '#0b1226',
+    icons: [{ src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' }, { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }, { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] }, null, 1));
+  writeFileSync(join(W, 'version.json'), JSON.stringify({ version: pkg.version, build: V }));
+  writeFileSync(join(W, '.nojekyll'), '');
+  writeFileSync(join(W, 'sw.js'), `// Generado por tools/build-standalone.mjs · ${V}
+const V = 'ew-${V}', FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
+self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(FILES))); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener('message', e => { if (e.data === 'skip') self.skipWaiting(); });
+self.addEventListener('fetch', e => {
+  const r = e.request; if (r.method !== 'GET') return; const u = new URL(r.url); if (u.origin !== location.origin || u.pathname.endsWith('version.json')) return;
+  e.respondWith(caches.match(r, { ignoreSearch: true }).then(hit => hit || fetch(r).then(res => { if (res.ok && res.type === 'basic') { const cp = res.clone(); caches.open(V).then(c => c.put(r, cp)); } return res; }).catch(() => caches.match('./index.html'))));
+});
+`);
+  console.log(`dist/web/ listo (versión web instalable ${V}: index.html, sw.js, manifest, iconos)`);
 }

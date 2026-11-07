@@ -289,3 +289,14 @@ Limitaciones registradas: no hay voces (por eso no hay volumen de voces); multij
 | Botones grandes solo en PC | css/settings.css | test-v110 §4 + capturas 1920×1080 y 1366×768 | OK |
 | Derrotas y K.O. con contacto real con el suelo | pose.js, rig.js, attacks.js, locomotion.js | test-v110 §5 + medición de la altura de la cadera en el laboratorio + capturas | OK |
 | `npm test` = 24 suites | tools/test-v110.mjs | npm test | OK |
+
+## v1.11.0 — Verificación
+| Cambio | Prueba | Estado |
+|---|---|---|
+| Ficha del jugador (emblema, k/M, sin clic) | test-v111 §1 + captura | OK |
+| Derrotas Aqua (seiza) y Zephyr (mano) | test-v111 §2 + laboratorio | OK |
+| Fuego por shader, entradas/salidas, luna, chroma en todo | test-v111 §3 + capturas con 3 chromas | OK |
+| Una barra por fuera + ▲ | test-v111 §4 + capturas escritorio y celular | OK |
+| Guardado cifrado/firmado, sin consola, CSP | test-v111 §5 + prueba de la versión web (sin globales con ?dev, sin bloqueos de CSP) | OK |
+| Versión web con actualización automática | prueba real: se publica una versión nueva → aviso → «Actualizar» → versión nueva y caché nueva | OK |
+| `npm test` = 25 suites | npm test | OK |

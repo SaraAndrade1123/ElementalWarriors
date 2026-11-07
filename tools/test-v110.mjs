@@ -43,5 +43,5 @@ const THREE = await import('three');
     ok(P[IDX.seat] > .95 && minSeat > .9, `${id}: la cadera no se despega del suelo en toda la escena (seat ≥ ${minSeat.toFixed(2)}, altura ${P[IDX.seatH].toFixed(2)})`); }
   const at = rd('js/game/animation/attacks.js'); ok((at.match(/hnBgnd: 1/g) || []).length >= 3 && /seatH: \.56/.test(at) && /knFx: \.95/.test(at), 'posturas reales: apoyado en la mano (Ignis, Aqua, Zephyr), rodilla en tierra (Terra), piernas cruzadas (Zephyr)');
   ok(/s\('seat', 1 - air\)/.test(rd('js/game/animation/locomotion.js')), 'tumbado tras un K.O.: la cadera toca el suelo en todos los modelos'); }
-ok(js('package.json').version === '1.10.0' && /v1\.10\.0/.test(es['ui.version']), 'versión 1.10.0');
+ok(/^1\.(1\d|[2-9]\d)\./.test(js('package.json').version), 'versión 1.10 o posterior');
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.10: todo correcto'); process.exit(bad ? 1 : 0);

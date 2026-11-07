@@ -21,11 +21,11 @@ quiet(() => {
   s.commit(d => { d.gold.balance = 1; return { ok: true }; });
   ok('versión futura: se ignora y no se sobrescribe', s.readOnly && JSON.parse(nw.getItem('ew.save.v1')).gold.balance === 500);
   const full = { getItem: () => null, setItem() { throw new Error('lleno'); } }, f = new SaveSystem(full);
-  f.commit(d => { d.gold.balance = 7; return { ok: true }; });
+  f.commit(d => { d.gold.balance = 7; d.gold.earned = 7; return { ok: true }; }); // (v1.11) el saldo nunca supera lo ganado
   ok('sin almacenamiento: avisa y sigue en memoria', f.persistent === false && f.data.gold.balance === 7);
 });
 const s0 = sanitize({ gold: { balance: -5, earned: NaN, spent: 1e12 }, owned: ['a', 'a', 7, 'b'], equipped: { 'x y': 'z', ok: 'v' }, stats: { wins: 'x', maxCombo: 1e9 } });
-ok('sanitize limita números y limpia listas', s0.gold.balance === 0 && s0.gold.earned === 0 && s0.gold.spent === 9999999 && s0.owned.join() === 'a,b' && !('x y' in s0.equipped) && s0.stats.wins === 0 && s0.stats.maxCombo === 1e6);
+ok('sanitize limita números y limpia listas', s0.gold.balance === 0 && s0.gold.earned === 9999999 && s0.gold.spent === 9999999 /* (v1.11) sin «ganado» válido se reconstruye: saldo + gastado */ && s0.owned.join() === 'a,b' && !('x y' in s0.equipped) && s0.stats.wins === 0 && s0.stats.maxCombo === 1e6);
 { const { storage, shop, wallet } = fresh(); wallet.add(100); const again = new SaveSystem(storage); ok('el progreso persiste entre sesiones', again.data.gold.balance === 100); }
 
 // Rose Gold
