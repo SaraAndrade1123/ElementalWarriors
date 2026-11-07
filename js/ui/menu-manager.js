@@ -2,7 +2,7 @@ import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { t } from '../systems/localization.js';
 import { movesFor } from '../game/fighter.js';
 
-import { heroCard } from './track-ui.js';
+import { heroCard, rivalPicker, RAND, resolveRival } from './track-ui.js';
 export { heroCard };
 const h = (tag, props = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -88,8 +88,8 @@ export class MenuManager {
   page_training() { this.mode = 'training'; this.page_play(); }
 
   page_play() {
-    const me = this.roster[this.idx]; if (!this.roster[this.rival]) this.rival = (this.idx + 1) % this.roster.length;
-    const rivals = this.roster.map((r, i) => [r, i]); // incluye al mismo guerrero: duelo espejo con su chroma especial
+    const me = this.roster[this.idx]; if (this.rival !== RAND && !this.roster[this.rival]) this.rival = (this.idx + 1) % this.roster.length;
+    const relOf = r => this.scene?.__elements?.matchup?.(me.id, r.id)?.[0]?.rel; // incluye al mismo guerrero: duelo espejo con su chroma especial
     this.panel(t('play.title'),
       heroCard(me, t('play.with')),
       h('p', { class: 'note' }, t('play.mode')),
@@ -98,9 +98,9 @@ export class MenuManager {
         h('div', { class: 'tabs', role: 'group', 'data-role': 'level' }, ...LEVEL_IDS.map(l => h('button', { id: 'lvl-' + l, 'aria-pressed': String((this.level || 'normal') === l), onclick: () => { this.level = l; this.onLevel?.(l); this.keep = 'lvl-' + l; this.page_play(); } }, t('level.' + l)))),
         h('p', { class: 'note lvl-desc' }, t('level.desc.' + (this.level || 'normal')))]),
       h('p', { class: 'note' }, t('play.rival')),
-      h('div', { class: 'tabs', role: 'group', 'data-role': 'rival' }, ...rivals.map(([r, i]) => h('button', { 'aria-pressed': String(i === this.rival), onclick: () => { this.rival = i; this.page_play(); } }, r.name))),
-      i18nMirror(this.roster[this.rival], me),
-      h('button', { class: 'cta', onclick: () => this.onPlay?.(me.id, this.roster[this.rival].id, this.mode) }, t('play.go')),
+      rivalPicker({ roster: this.roster, me, cur: this.rival, pick: i => { this.rival = i; this.keep = null; this.page_play(); }, label: t('play.rival'), relOf }),
+      this.rival === RAND ? h('p', { class: 'note' }, t('rival.random.desc')) : i18nMirror(this.roster[this.rival], me),
+      h('button', { class: 'cta', onclick: () => this.onPlay?.(me.id, this.roster[resolveRival(this.rival, this.roster)].id, this.mode) }, t('play.go')),
       h('p', { class: 'note' }, t('play.controls')));
   }
 

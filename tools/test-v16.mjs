@@ -40,6 +40,6 @@ ok(/song-pick/.test(rd('js/audio/audio-hook.js')) && /song-pick/.test(rd('css/au
 ok(/story-acts/.test(rd('js/ui/modes-ui.js')) && /story-acts/.test(rd('css/mobile.css')), 'historia: «Continuar» y «Empezar desde el principio» ordenados');
 ok(/hover:\s*none/.test(rd('css/mobile.css')), 'sin hover pegado en pantallas táctiles');
 ok(/pairScale/.test(rd('js/game/scene-manager.js')), 'versus 2J: los guerreros se encuadran en el espacio libre');
-ok(/^1\.[6-9]\./.test(js('package.json').version), 'versión 1.6 o posterior');
+ok(/^1\.([6-9]|\d\d)\./.test(js('package.json').version), 'versión 1.6 o posterior');
 
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.6: todo correcto'); process.exit(bad ? 1 : 0);

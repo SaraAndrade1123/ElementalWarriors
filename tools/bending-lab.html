@@ -81,7 +81,7 @@ const lab = window.lab = { ready: false, speed: 1, cam: 'game', draw: true, time
     };
     lab.applyCam = cam => {
       if (lab.cam === 'game') return; const f = sm.match.f[lab.focus], v = sm.match.v[lab.focus], face = f.facing;
-      const dist = lab.dist || 9.5, h = 1.9 + f.y * .5;
+      const dist = lab.dist || 9.5, h = lab.lookH ?? (1.9 + f.y * .5);
       camTarget.set(f.x + (lab.lookX || 0), h, 0);
       const ang = { side: 0, three: .75 * -face, front: -face * (Math.PI / 2 - .28), back: face * (Math.PI / 2 + .28) }[lab.cam] ?? 0;
       // gira alrededor del guerrero; «front» = mirándole a la cara

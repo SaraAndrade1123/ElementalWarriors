@@ -232,13 +232,13 @@ export class SceneManager {
   _tintFx(c) { const f = c.fx ?? c.def.fx; this.fx = f; this.tint.light.set(f.light); this.tint.color.set(f.color); this.pts.material.size = f.size; }
 
   // Versus: muestra a los dos elegidos (el segundo es el espejo si es el mismo guerrero). null/undefined = vuelve a uno solo.
-  showPair(a, b) {
+  showPair(a, b, { quiet = false } = {}) {
     if (!a || !b) return this.clearPair();
     const A = this.chars.get(a), B = a === b ? this.mirror(b) : this.chars.get(b); if (!A || !B) return;
     const prev = this.pair; if (prev && prev[0] === A && prev[1] === B) return;
     if (prev) for (const p of prev) if (p !== A && p !== B) this._rest(p);
     if (this.active) this.active.holder.visible = false;
-    for (const p of [A, B]) { if (!prev?.includes(p)) { p.t0 = this.time; if (p.anim) { p.anim.reset(); p.intro = this.reduce ? null : { name: 'intro', t: 0 }; } } p.holder.visible = true; }
+    for (const p of [A, B]) { if (!prev?.includes(p)) { p.t0 = this.time; if (p.anim) { p.anim.reset(); p.intro = this.reduce || (quiet && p === B) ? null : { name: 'intro', t: 0 }; } } p.holder.visible = true; }
     this.pair = [A, B]; this._tintFx(A);
   }
   clearPair() { if (!this.pair) return; for (const p of this.pair) this._rest(p); this.pair = null; if (this.active) { this.active.holder.visible = true; this._tintFx(this.active); } }

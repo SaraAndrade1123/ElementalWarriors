@@ -1,4 +1,4 @@
-# Elemental Warriors (v1.9.0 · menú vivo, espectador y archivos)
+# Elemental Warriors (v1.10.0 · rival aleatorio, santuarios pulidos y derrotas reales)
 
 ## Cómo abrirlo
 - **Jugar (PC o celular)**: abre `index.html`. Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet. En el celular lo más fácil es el enlace en línea (se abre en Chrome y listo); también puedes pasar `index.html` al teléfono y abrirlo con Chrome. Pon el móvil en horizontal y pulsa **Pantalla completa**.
@@ -128,6 +128,13 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Zephyr**: su voltereta de presentación ya no hace un giro extra hacia atrás al terminar (los giros completos vuelven por el camino corto).
 - **Armas**: aura elemental animada en el filo (del color de las técnicas / del chroma), estelas más largas y curvas, impacto propio por tipo (tajo en cruz, onda de choque, estocada), animaciones sin tirones al sacar el arma. Vista previa con cámara más cercana, cámara lenta al conectar y ficha del arma con su efecto según el elemento.
 - **Interfaz**: tarjeta con el nombre y el elemento del guerrero en Combate de prueba; flechas de la canción con borde y chevrón limpios.
+
+## v1.10.0 — Rival aleatorio, santuarios pulidos, Santuario del Viento y derrotas con contacto real
+- **Contra la CPU** (Combate de prueba y Versus): el rival se elige con fichas por guerrero (gema y color del elemento, ventaja/desventaja elemental, «Espejo») y una ficha **Aleatorio** que se sortea al empezar. En Versus la vista 3D hace de ruleta mientras está elegido.
+- **Fondos del menú** rehechos con calma: sello tenue que gira muy lento, partículas que nacen y mueren con fundido, parpadeos con ondas superpuestas (sin saltos). Fuego: lenguas de fuego difuminadas y calor en la base. Agua: luz de luna, rayos bajo el agua y ondas lentas. Tierra: rocas que flotan en su sitio (ya no orbitan) y grupos de cristales hexagonales. Aire: espiral de viento, mar de nubes, ráfagas y hojas que planean dando vueltas. Se quitó la columna de luz rectangular.
+- **Escenarios**: Bastión Primordial más calmado (arena, cristales y rocas más lentos). **Santuario del Viento** nuevo: cielo azul con horizonte cálido, templos de tejado azul sobre islas flotantes, molinos de viento, banderas de oración que ondean, sol bajo con rayos y ráfagas que cruzan.
+- **PC**: los botones del menú principal ocupan ~30 % del ancho y crecen con la pantalla; la versión y la ayuda de teclas de abajo mantienen su tamaño. Celular sin cambios.
+- **Derrotas reales**: canales nuevos en el esqueleto (`seat/seatH`, `knFx/knBx`, `hnFgnd/hnBgnd`) para que la cadera se apoye a la altura correcta de cada modelo (antes flotaba un palmo), las manos se planten en el suelo con la palma abajo y las rodillas se abran o crucen. Posturas tomadas de cómo se sienta de verdad una persona tras caer: Ignis sentado con una rodilla arriba y apoyado en la mano; Aqua sentada de lado; Terra con una rodilla en tierra; Zephyr con las piernas cruzadas. Se incorporan rodando la espalda sin despegar la cadera. Tumbados tras un K.O. ahora tocan el suelo.
 
 ## v1.9.0 — Menú vivo, Logros y Desafíos unificados, espectador y archivos
 - **Menú**: detrás de cada guerrero aparece el santuario de su elemento, animado (`js/game/menu-backdrop.js`): sello de runas que gira, llamas y sol carmesí (Ignis), ondas y arco de marea (Aqua), rocas en órbita y cristales que laten (Terra), cintas de viento y hojas (Zephyr). Al elegir un guerrero dice una de sus 5 frases propias en un bocadillo. **Título** monumental con el emblema, destello dorado y subtítulo. **Perfil del jugador** (rango según logros, Rose Gold, victorias, guerrero favorito) y aviso «✓ Progreso guardado».

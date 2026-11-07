@@ -13,7 +13,7 @@
  "menu.credits": "Créditos",
  "ui.start": "Comenzar",
  "ui.back": "Volver",
- "ui.version": "v1.9.0 · menú vivo, espectador y archivos",
+ "ui.version": "v1.10.0 · rival aleatorio, santuarios pulidos y derrotas reales",
  "ui.hint": "← → cambian de guerrero · ↑ ↓ navegan · Enter elige · Esc vuelve",
  "ui.loading": "Cargando guerreros… {done}/{total}",
  "ui.ready": "Todo listo",
@@ -1160,5 +1160,10 @@
  "col.music.play": "Escuchar",
  "col.music.on": "Sonando",
  "col.lore.desc": "La historia de los Reinos, de cada guerrero y del torneo.",
- "field.story": "Historia"
+ "field.story": "Historia",
+ "rival.mirror": "Espejo",
+ "rival.random": "Aleatorio",
+ "rival.random.sub": "La CPU elige",
+ "rival.random.p2": "Al azar",
+ "rival.random.desc": "El rival se sortea al empezar el combate entre los cuatro guerreros (también puede tocarte tu propio eco)."
 }

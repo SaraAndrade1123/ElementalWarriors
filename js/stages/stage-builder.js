@@ -123,7 +123,7 @@ export function buildStage(cfg, { half = 8.2, particles = 300 } = {}) {
       const m = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: .9, roughness: .3, flatShading: true });
       for (let i = 0; i < 12; i++) {
         const c = new THREE.Mesh(new THREE.OctahedronGeometry(.5 + R() * .7), m), s = i % 2 ? 1 : -1, x = s * (5 + R() * 15), y0 = .8 + R() * 3.5;
-        c.scale.y = 1.9; add(c, x, y0, -5.5 - R() * 5); c.userData.ph = R() * 6; anim.push(t => { c.rotation.y = t * .6 + c.userData.ph; c.position.y = y0 + Math.sin(t * .8 + c.userData.ph) * .2; });
+        c.scale.y = 1.9; add(c, x, y0, -5.5 - R() * 5); c.userData.ph = R() * 6; anim.push(t => { c.rotation.y = t * .12 + c.userData.ph; c.position.y = y0 + Math.sin(t * .45 + c.userData.ph) * .1; }); // (v1.10) más calmado
       }
     },
     bridges() {
@@ -140,6 +140,43 @@ export function buildStage(cfg, { half = 8.2, particles = 300 } = {}) {
     },
     clouds() {
       for (let i = 0; i < 9; i++) { const sp = flame(-30 + i * 7.5 + R() * 3, 6 + R() * 12, -22 - R() * 10, 12 + R() * 8, '#ffffff'); sp.material.opacity = .5; sp.userData.x0 = sp.position.x; sp.userData.ph = R() * 6; anim.push(t => { sp.position.x = sp.userData.x0 + Math.sin(t * .05 + sp.userData.ph) * 3; }); }
+    },
+    // (v1.10) SANTUARIO DEL VIENTO: templos sobre islas flotantes, molinos de viento y banderas de oración
+    airtemple() {
+      const wall = new THREE.MeshStandardMaterial({ color: 0xece4d2, roughness: .8, flatShading: true }), roof = new THREE.MeshStandardMaterial({ color: 0x3d68b8, roughness: .55, flatShading: true }),
+        gold = new THREE.MeshStandardMaterial({ color: 0xffc35a, emissive: 0x6a3a00, roughness: .35, metalness: .5 }), rock = new THREE.MeshStandardMaterial({ color: ground.clone().lerp(new THREE.Color(0x6d6a72), .5), roughness: 1, flatShading: true }),
+        moss = new THREE.MeshStandardMaterial({ color: 0x7fae6a, roughness: 1, flatShading: true });
+      const tower = (grp, x, z, s) => { let y = .3; for (let k = 0; k < 3; k++) { const r = (1.25 - k * .32) * s, h = (1.5 - k * .25) * s;
+          const w = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.05, h, 10), wall); w.position.set(x, y + h / 2, z); grp.add(w); y += h;
+          const rf = new THREE.Mesh(new THREE.ConeGeometry(r * 1.55, r * 1.1, 10), roof); rf.position.set(x, y + r * .5, z); grp.add(rf); y += r * .75; }
+        const sp = new THREE.Mesh(new THREE.ConeGeometry(.12 * s, 1.2 * s, 6), gold); sp.position.set(x, y + .45 * s, z); grp.add(sp); };
+      const isle = (x, y, z, r, towers, ph) => { const grp = new THREE.Group(); grp.position.set(x, y, z); g.add(grp);
+        const under = new THREE.Mesh(new THREE.ConeGeometry(r, r * 1.6, 8), rock); under.rotation.x = Math.PI; under.position.y = -r * .8; grp.add(under);
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(r, r * .96, .45, 8), moss); grp.add(top);
+        for (const [tx, tz, ts] of towers) tower(grp, tx, tz, ts);
+        anim.push(t => { grp.position.y = y + Math.sin(t * .22 + ph) * .3; grp.rotation.y = Math.sin(t * .05 + ph) * .04; }); };
+      isle(-15, 2.6, -32, 4.6, [[0, 0, 1.25], [-2.3, .8, .8], [2.2, -.6, .7]], 0);
+      isle(16, 1.6, -26, 3.2, [[0, 0, .95], [1.6, .5, .6]], 2);
+      isle(3.5, 7.2, -46, 2.6, [[0, 0, .8]], 4);
+    },
+    windmills() {
+      const wood = new THREE.MeshStandardMaterial({ color: 0x8a6a4a, roughness: 1 }), cloth = [0xffae42, 0xfff2d8];
+      for (const [x, z, h, sp] of [[-11.5, -13, 4.6, .5], [8.5, -15, 5.2, -.4], [13.5, -12, 4, .62]]) {
+        add(new THREE.Mesh(new THREE.CylinderGeometry(.09, .14, h, 6), wood), x, h / 2 - .4, z);
+        const rot = new THREE.Group(); rot.position.set(x, h - .3, z + .15); g.add(rot);
+        for (let i = 0; i < 4; i++) { const b = new THREE.Mesh(new THREE.PlaneGeometry(.42, 1.5), new THREE.MeshStandardMaterial({ color: cloth[i % 2], side: THREE.DoubleSide, roughness: .9 })); b.position.y = .85; b.rotation.y = .35; const arm = new THREE.Group(); arm.rotation.z = i * Math.PI / 2; arm.add(b); rot.add(arm); }
+        add(new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), new THREE.MeshStandardMaterial({ color: 0xffc35a, roughness: .4 })), x, h - .3, z + .2);
+        anim.push(t => { rot.rotation.z = t * sp + Math.sin(t * .6 + x) * .15; });
+      }
+    },
+    prayerflags() {
+      const cols = [0x4f86e0, 0xf2f2ea, 0xe0503c, 0x5fbf6a, 0xffc94a];
+      for (const [x0, x1, z, y] of [[-17, -5.5, -10, 3.8], [5.5, 17, -10, 3.8]]) {
+        for (const x of [x0, x1]) add(new THREE.Mesh(new THREE.CylinderGeometry(.045, .06, y + .5, 6), dark), x, (y + .5) / 2 - .4, z);
+        const n = 14; for (let i = 1; i < n; i++) { const u = i / n, px = x0 + (x1 - x0) * u, py = y - Math.sin(u * Math.PI) * .9;
+          const f = new THREE.Mesh(new THREE.PlaneGeometry(.42, .5), new THREE.MeshStandardMaterial({ color: cols[i % cols.length], side: THREE.DoubleSide, roughness: .9 })); f.geometry.translate(0, -.25, 0); add(f, px, py, z); const ph = i * .7 + x0;
+          anim.push(t => { f.rotation.x = .25 + .2 * Math.sin(t * 1.6 + ph); f.rotation.y = .15 * Math.sin(t * 1.1 + ph * 1.3); }); }
+      }
     },
     sigils() {
       const defs = [['#ff7a35', () => new THREE.ConeGeometry(.9, 1.8, 4)], ['#5fd0ff', () => new THREE.SphereGeometry(.8, 12, 10)], ['#b9d86a', () => new THREE.BoxGeometry(1.3, 1.3, 1.3)], ['#e6f4ff', () => new THREE.TorusGeometry(.7, .2, 8, 20)]];

@@ -42,3 +42,19 @@ export function trackItem(o) {
 }
 export const list = items => h('ul', { class: 'items achs' }, ...items);
 export const note = text => h('p', { class: 'note trk-note' }, text);
+
+// (v1.10) SELECTOR DE RIVAL contra la CPU (Jugar y Versus): una ficha por guerrero (gema y color de su elemento, relación
+// elemental respecto al tuyo, «Espejo» si es el mismo) y una ficha «Aleatorio» que se resuelve al empezar el combate.
+export const RAND = 'rand';
+export const resolveRival = (cur, roster, rnd = Math.random) => cur === RAND ? Math.floor(rnd() * roster.length) % roster.length : cur;
+export function rivalPicker({ roster, me, cur, pick, label, relOf = null, who = null }) {
+  const card = (v, cls, col, gem, name, sub, extra = null) => h('button', { type: 'button', class: 'rvc ' + cls, style: `--c:${col}`, 'aria-pressed': String(v === cur), onclick: () => pick(v) },
+    h('span', { class: 'rv-gem', 'aria-hidden': 'true' }, gem ? h('i', {}, gem) : null), h('span', { class: 'rv-txt' }, h('b', {}, name), h('small', {}, sub), extra));
+  return h('div', { class: 'rvpick', role: 'group', 'aria-label': label },
+    ...roster.map((r, i) => {
+      const mirror = me && r.id === me.id, rel = !mirror && relOf ? relOf(r) : null;
+      return card(i, mirror ? 'rv-mirror' : '', r.fx?.color || '#c9a44c', '', r.name, t('elem.' + r.element),
+        mirror ? h('i', { class: 'rv-tag' }, t('rival.mirror')) : rel ? h('i', { class: 'rv-tag rel-' + rel }, { advantage: '▲ ', disadvantage: '▼ ', neutral: '= ' }[rel] + t('elem.rel.' + rel)) : null);
+    }),
+    card(RAND, 'rv-rand', '#e9d7a0', '?', t('rival.random'), who || t('rival.random.sub')));
+}

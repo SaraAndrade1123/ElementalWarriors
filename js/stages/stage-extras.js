@@ -121,8 +121,9 @@ export function addExtras(cfg, K) {
       anim.push((t, dt) => { for (let i = 0; i < 500; i++) { const j = i * 3; a[j + 1] -= dt * (.7 + ph[i] * .12); a[j] += Math.sin(t * .8 + ph[i]) * dt * .5 + dt * .6; if (a[j + 1] < 0) { a[j + 1] = 16; a[j] = (R() * 2 - 1) * 24; } if (a[j] > 24) a[j] = -24; } p.geometry.attributes.position.needsUpdate = true; }); },
     mist() { for (let i = 0; i < 7; i++) { const sp = sprite(smokeMap, cfg.fog.color, 14 + R() * 8, (R() * 2 - 1) * 20, .8 + R() * 1.5, -5 - R() * 9, THREE.NormalBlending, .35), x0 = sp.position.x, ph = R() * 6; sp.scale.y *= .3;
       anim.push(t => { sp.position.x = x0 + Math.sin(t * .07 + ph) * 4; sp.material.opacity = .25 + .12 * Math.sin(t * .3 + ph); }); } },
-    sandstorm() { const p = pts(420, [26, 7, [-10, 3]], .22, 0xd8c08a, .5); const a = p.geometry.attributes.position.array;
-      anim.push((t, dt) => { for (let i = 0; i < 420; i++) { const j = i * 3; a[j] += dt * (6 + (i % 5)); a[j + 1] += Math.sin(t * 3 + i) * dt * .4; if (a[j] > 26) { a[j] = -26; a[j + 1] = R() * 7; } } p.geometry.attributes.position.needsUpdate = true; }); this.mist(); },
+    sandstorm() { // (v1.10) arena que pasa calmada: menos granos, más lentos y con un vaivén suave
+      const N = 240, p = pts(N, [26, 7, [-10, 3]], .2, 0xd8c08a, .38); const a = p.geometry.attributes.position.array, ph = new Float32Array(N).map(() => R() * 6);
+      anim.push((t, dt) => { for (let i = 0; i < N; i++) { const j = i * 3; a[j] += dt * (1.1 + (i % 5) * .25); a[j + 1] += Math.sin(t * .9 + ph[i]) * dt * .18; if (a[j] > 26) { a[j] = -26; a[j + 1] = R() * 7; } } p.geometry.attributes.position.needsUpdate = true; }); this.mist(); },
     meteors() { const ms = []; for (let i = 0; i < 3; i++) { const s2 = sprite(smokeMap, 0xff8a3a, 1.6, 0, 30, -34, THREE.AdditiveBlending, 0); ms.push({ s: s2, t: 1 + i, x0: 0 }); }
       anim.push((t, dt) => { for (const m of ms) { m.t += dt * .5; if (m.t > 1.6) { m.t = 0; m.x0 = (R() * 2 - 1) * 40; } const k = Math.min(1, m.t); m.s.position.set(m.x0 + k * 14, 26 - k * 18, -34); m.s.material.opacity = m.t < 1 ? .9 : 0; m.s.scale.set(4, 1.2, 1); m.s.material.rotation = -.9; } }); },
     // ── cascada del bosque: acantilado, caída de agua animada, espuma y río ──
@@ -151,7 +152,7 @@ export function addExtras(cfg, K) {
       const m = add(new THREE.Mesh(new THREE.BoxGeometry(2.4, 9, 2), K.stone), 14, 4.1, -12); m.rotation.y = .3;
       add(new THREE.Mesh(new THREE.BoxGeometry(.25, 6, .1), K.emis), 14.2, 4.4, -10.95).rotation.y = .3;
       const rocks = []; for (let i = 0; i < 7; i++) { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(.35 + R() * .45, 0), rockMat); g.add(r); rocks.push({ r, a: i / 7 * 6.28, y: 2 + R() * 6, rad: 2.6 + R() * 1.2 }); }
-      anim.push(t => rocks.forEach(o => { const a = o.a + t * .35; o.r.position.set(14 + Math.cos(a) * o.rad, o.y + Math.sin(t + o.a) * .3, -12 + Math.sin(a) * o.rad * .5); o.r.rotation.x = t * .5 + o.a; })); },
+      anim.push(t => rocks.forEach(o => { const a = o.a + t * .08; o.r.position.set(14 + Math.cos(a) * o.rad, o.y + Math.sin(t * .4 + o.a) * .15, -12 + Math.sin(a) * o.rad * .5); o.r.rotation.x = t * .12 + o.a; })); }, // (v1.10) órbita lenta
     tornado() { const tt = tex(256, 256, (x, W, H) => { x.fillStyle = 'rgba(230,240,255,.18)'; x.fillRect(0, 0, W, H); x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 2; for (let i = 0; i < 24; i++) { x.beginPath(); const y = R() * H; x.moveTo(0, y); x.lineTo(W, y - 30); x.stroke(); } });
       tt.wrapS = tt.wrapT = THREE.RepeatWrapping; tt.repeat.set(3, 2);
       const tw = new THREE.Mesh(new THREE.CylinderGeometry(4, .5, 20, 24, 8, true), new THREE.MeshBasicMaterial({ map: tt, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: false })); add(tw, -18, 9, -32);
@@ -160,6 +161,19 @@ export function addExtras(cfg, K) {
       const cols = [0xff7a35, 0x5fd0ff, 0xb9d86a, 0xe6f4ff], orbs = cols.map(c => ({ s: flame(0, 9, -14, 2.4, '#' + new THREE.Color(c).getHexString()), m: add(new THREE.Mesh(new THREE.SphereGeometry(.45, 16, 12), new THREE.MeshBasicMaterial({ color: c })), 0, 9, -14) }));
       anim.push(t => orbs.forEach((o, i) => { const a = t * .5 + i * Math.PI / 2, x = Math.cos(a) * 6, y = 8 + Math.sin(a) * 2.2, z = -14 + Math.sin(a) * 2; o.s.position.set(x, y, z); o.m.position.set(x, y, z); })); },
 
+    // (v1.10) sol bajo con rayos de luz que se abren en abanico y respiran despacio (santuario del viento)
+    sunrays() { const sx = 7, sy = 5.5, sz = -40; flame(sx, sy, sz, 20, '#ffd9a8').material.opacity = .7; flame(sx, sy, sz + .5, 6, '#fff3dc').material.opacity = .8;
+      const rt = tex(64, 512, (x, W, H) => { const a = x.createLinearGradient(0, 0, W, 0); a.addColorStop(0, 'rgba(255,255,255,0)'); a.addColorStop(.5, 'rgba(255,255,255,1)'); a.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = a; x.fillRect(0, 0, W, H);
+        x.globalCompositeOperation = 'destination-in'; const v = x.createLinearGradient(0, H, 0, 0); v.addColorStop(0, 'rgba(0,0,0,1)'); v.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = v; x.fillRect(0, 0, W, H); });
+      for (let i = 0; i < 7; i++) { const geo = new THREE.PlaneGeometry(4 + R() * 4, 46); geo.translate(0, 23, 0); const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: rt, color: 0xfff0d0, transparent: true, opacity: .08 + R() * .06, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+        const a0 = (i / 6 - .5) * 2.2; m.rotation.z = a0; m.renderOrder = -4; add(m, sx, sy, sz + 1); const ph = R() * 6, op = m.material.opacity;
+        anim.push(t => { m.rotation.z = a0 + .04 * Math.sin(t * .12 + ph); m.material.opacity = op * (.7 + .3 * Math.sin(t * .35 + ph)); }); } },
+    // (v1.10) ráfagas de viento que cruzan el fondo (nacen y se apagan con suavidad)
+    gusts() { const st = tex(256, 16, (x, W, H) => { const a = x.createLinearGradient(0, 0, W, 0); a.addColorStop(0, 'rgba(255,255,255,0)'); a.addColorStop(.75, 'rgba(255,255,255,.9)'); a.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = a; x.fillRect(0, H * .3, W, H * .4); });
+      for (let i = 0; i < 12; i++) { const z = -6 - R() * 16, k = -z / 10, m = new THREE.Mesh(new THREE.PlaneGeometry((2.5 + R() * 3) * k, .07 * k), new THREE.MeshBasicMaterial({ map: st, color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, fog: false }));
+        add(m, 0, 0, z); const o = { age: R() * 5, dur: 3 + R() * 2.5, y: 1 + R() * 8, sp: (3 + R() * 2) * k, amp: .2 + R() * .4, ph: R() * 6, op: .35 + R() * .3 };
+        anim.push((t, dt) => { o.age += dt; if (o.age > o.dur) { o.age = 0; o.y = 1 + R() * 8; o.ph = R() * 6; } const u = o.age / o.dur, span = 30 * k;
+          m.position.set(-span / 2 + u * span, o.y + o.amp * Math.sin(u * 4 + o.ph), z); m.material.opacity = o.op * Math.sin(Math.PI * u) ** 2; }); } },
     // capas de bosque: pinos lejanos azulados y pinos medios
     forestback() {
       layer((x, W, H) => { paint.hills(x, W, H, R, tone(.75), .2, .62, 2); paint.pines(x, W, H, R, tone(.7), 90, .64, .7); }, { w: 170, h: 40, y: 7, z: -34 });

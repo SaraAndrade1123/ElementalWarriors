@@ -15,7 +15,11 @@ export const CH = [
   'comPitch', 'comRoll',                           // inclinación del cuerpo entero (volteretas, caídas); + pitch = hacia delante
   'ftFree',                                        // 0 = pies plantados en el suelo, 1 = los pies siguen al cuerpo (en el aire)
   'hnFpitch', 'hnBpitch',                          // flexión de muñeca (+ = dorso hacia arriba / arma hacia arriba)
-  'wpSpin'                                         // giro extra del arma alrededor del puño (molinetes)
+  'wpSpin',                                        // giro extra del arma alrededor del puño (molinetes)
+  // (v1.10) CONTACTO REAL CON EL SUELO (derrotas, sentarse, arrodillarse):
+  'seat', 'seatH',                                 // seat 0..1 = la cadera se apoya a la altura seatH (× largo de pierna) sobre el suelo, mida lo que mida el modelo
+  'knFx', 'knBx',                                  // rodillas hacia fuera (+) o hacia dentro (−): piernas cruzadas, sentado de lado
+  'hnFgnd', 'hnBgnd'                               // 0..1 = la mano se apoya en el SUELO: hnX/hnY/hnZ pasan a ser posición bajo la cadera (× largo de pierna)
 ];
 export const N = CH.length;
 export const IDX = Object.fromEntries(CH.map((n, i) => [n, i]));

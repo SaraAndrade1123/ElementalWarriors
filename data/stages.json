@@ -188,38 +188,38 @@
     "type": "free"
    },
    "sky": [
-    "#6a8fd6",
-    "#b6cff5",
-    "#f4f8ff"
+    "#2c58b0",
+    "#7fa9e6",
+    "#ffe1bd"
    ],
    "fog": {
-    "color": "#c4d6f2",
-    "density": 0.012
+    "color": "#b4c8ec",
+    "density": 0.009
    },
-   "ground": "#b8c4d8",
-   "slab": "#d0d8e8",
-   "accent": "#e6f4ff",
-   "rim": "#d4ecff",
-   "key": "#ffffff",
-   "keyI": 2.5,
+   "ground": "#7d8db0",
+   "slab": "#b3bdd2",
+   "accent": "#ffae42",
+   "rim": "#d6ecff",
+   "key": "#fff3dc",
+   "keyI": 2.3,
    "props": [
-    "bridges",
-    "flags",
-    "clouds",
-    "pillars"
+    "airtemple",
+    "windmills",
+    "prayerflags",
+    "clouds"
    ],
    "fx": {
     "kind": "streaks",
     "color": "#ffffff",
-    "count": 80,
-    "size": 0.14
+    "count": 60,
+    "size": 0.12
    },
    "extras": [
+    "sunrays",
     "peaks",
     "islands",
-    "tornado",
     "cloudsea",
-    "snow",
+    "gusts",
     "kites",
     "birds"
    ],

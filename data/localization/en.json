@@ -13,7 +13,7 @@
  "menu.credits": "Credits",
  "ui.start": "Start",
  "ui.back": "Back",
- "ui.version": "v1.9.0 · living menu, spectator and archives",
+ "ui.version": "v1.10.0 · random rival, polished shrines and real defeats",
  "ui.hint": "← → switch fighter · ↑ ↓ navigate · Enter select · Esc back",
  "ui.subtitle": "Battle for the Realms",
  "ui.prev": "Previous fighter",
@@ -1160,5 +1160,10 @@
  "col.music.play": "Listen",
  "col.music.on": "Playing",
  "col.lore.desc": "The story of the Realms, of each warrior and of the tournament.",
- "field.story": "Story"
+ "field.story": "Story",
+ "rival.mirror": "Mirror",
+ "rival.random": "Random",
+ "rival.random.sub": "CPU picks",
+ "rival.random.p2": "Surprise",
+ "rival.random.desc": "Your opponent is drawn when the fight starts from all four warriors (you may even face your own echo)."
 }

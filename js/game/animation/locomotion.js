@@ -153,6 +153,7 @@ export function lyingPose(out, base, k, air, t, id) {
   if (k <= .001) return out;
   const s = (n, v) => { const i = IDX[n]; out[i] = out[i] + (v - out[i]) * k; }, fl = Math.sin(t * 9) * .1 * air;
   s('comPitch', mixv(-1.5, -.9, air)); s('comY', mixv(-.83, -.25, air)); s('comZ', mixv(-.45, -.1, air)); s('comYaw', 0); s('comRoll', 0); s('ftFree', air);
+  s('seat', 1 - air); s('seatH', .1); // (v1.10) tumbado DE VERDAD: la cadera toca el suelo en todos los modelos (antes flotaba un palmo)
   s('pelYaw', 0); s('pelRoll', 0); s('pelPitch', mixv(.1, -.2, air)); s('spPitch', mixv(.05, -.35, air)); s('spYaw', 0); s('spRoll', 0);
   s('hdPitch', mixv(-.2, -.45, air)); s('hdYaw', mixv(.4, 0, air)); s('hdRoll', 0);
   // pies: en el aire siguen al cuerpo (marco del cuerpo); en el suelo se apoyan (marco del mundo, ver KO)

@@ -130,9 +130,16 @@ export class Rig {
       let d = null;
       switch (kind[i]) {
         case K.COM: { // desplazamiento del centro de masa (todo el cuerpo)
-          _T.set(c('comX'), c('comY'), c('comZ')); Pn[i].add(_T);
-          this.bones[i].position.copy(this.localP0[i]).add(_v.copy(_T).applyMatrix3(this.comParent3));
-          d = ypr(c('comYaw'), c('comPitch'), -lead * c('comRoll'), dq[i]); this.comI = i; break; }
+          d = ypr(c('comYaw'), c('comPitch'), -lead * c('comRoll'), dq[i]); this.comI = i;
+          _T.set(c('comX'), c('comY'), c('comZ'));
+          const seat = Math.max(0, Math.min(1, c('seat')));
+          if (seat > 0) { // (v1.10) cadera APOYADA en el suelo: las articulaciones de la cadera quedan a seatH × pierna del suelo (sin flotar)
+            const tl = this.I.thL, tr = this.I.thR;
+            const oy = tl != null && tr != null ? (_v.copy(P0[tl]).sub(P0[i]).applyQuaternion(_c.copy(d).multiply(Dp)).y + _w.copy(P0[tr]).sub(P0[i]).applyQuaternion(_c).y) / 2 : 0;
+            const want = c('seatH') * this.legLen - oy - P0[i].y; _T.y += (want - _T.y) * seat;
+          }
+          Pn[i].add(_T); this.bones[i].position.copy(this.localP0[i]).add(_v.copy(_T).applyMatrix3(this.comParent3));
+          break; }
         case K.PEL: d = ypr(-lead * c('pelYaw'), c('pelPitch'), -lead * c('pelRoll'), dq[i]); break;
         case K.SP0: case K.SP1: case K.SP2: {
           const w = kind[i] === K.SP0 ? .3 : kind[i] === K.SP1 ? .35 : .35;
@@ -187,7 +194,8 @@ export class Rig {
     }
     // tumbado o sentado en el suelo (cadera inclinada hacia atrás): la rodilla dobla hacia ARRIBA, no hacia el suelo
     const cp = c('comPitch'), lie = free < 1 ? Math.max(0, Math.min(1, (-Math.atan2(Math.sin(cp), Math.cos(cp)) - .3) / .7)) : 0;
-    _pole.set(s * .22, lie * 1.3, 1 - lie * .75).normalize(); if (free > 0) _pole.applyQuaternion(_c.copy(qI).slerp(this.D[this.I.com], free));
+    const up = Math.max(lie, Math.max(0, Math.min(1, c('seat'))) * .9 * Math.max(0, Math.min(1, (.42 - c('seatH')) / .14))), kn = c('kn' + f + 'x'); // sentado: rodillas arriba; kn: hacia fuera/dentro
+    _pole.set(s * (.22 + kn * 1.6), up * 1.3 - Math.abs(kn) * .5, 1 - up * .75).normalize(); if (free > 0) _pole.applyQuaternion(_c.copy(qI).slerp(this.D[this.I.com], free));
     const D2 = _d.copy(this._limbIK(L, Dp, _T, _pole, dq[L.A], dq[L.B])); has[L.B] = 1;
     // pie: orientación objetivo = reposo (plano) · yaw · pitch; compensa el Δ acumulado de la pierna
     rot(Y, s * c('ft' + f + 'yaw'), _a); rot(X, -c('ft' + f + 'pitch'), _c); _a.multiply(_c);
@@ -206,6 +214,7 @@ export class Rig {
     const open = Math.max(0, Math.min(1, (Math.abs(pitch) - .15) / .8)) * (1 - fist), up = pitch >= 0 ? -.3 : .3; // pitch > 0 = dedos arriba · < 0 = dedos abajo
     // palma objetivo en el espacio del pecho: hacia dentro y algo abajo · abajo al estirar el puño · al frente con la mano abierta empujando
     _pT.set(-s * (1 - ext * .75), -.35 - ext * .8, .1).normalize().lerp(_t3.set(-s * .15, up, 1).normalize(), open).normalize().applyQuaternion(chest);
+    if (this._gnd > 0) _pT.lerp(_t3.set(0, -1, 0), this._gnd).normalize(); // apoyada en el suelo: palma hacia abajo
     // tramo de palma perpendicular a los dedos rectos → giro sobre el antebrazo; lo que sobra → extensión de muñeca (limitada)
     let np = _np.copy(_pT).addScaledVector(h1, -_pT.dot(h1)); if (np.lengthSq() < 1e-6) np.copy(n1); np.normalize();
     _q1.setFromAxisAngle(h1, roll * s); np.applyQuaternion(_q1);
@@ -219,6 +228,10 @@ export class Rig {
   _arm(i, s, f, P, Dp) {
     const L = this.limb[s > 0 ? 'armL' : 'armR'], c = k => P[IDX[k]], { dq, has, D } = this, chest = D[this.I.sp2];
     _T.set(s * c('hn' + f + 'x'), c('hn' + f + 'y'), c('hn' + f + 'z')).multiplyScalar(this.armLen).applyQuaternion(chest).add(this.Pn[L.A]);
+    const gnd = Math.max(0, Math.min(1, c('hn' + f + 'gnd')));
+    if (gnd > 0) { const C0 = this.Pn[this.I.com]; // (v1.10) mano apoyada en el suelo: posición respecto al punto del suelo bajo la cadera
+      _E.set(C0.x + s * c('hn' + f + 'x') * this.legLen, c('hn' + f + 'y') * this.legLen, C0.z + c('hn' + f + 'z') * this.legLen); _T.lerp(_E, gnd); }
+    this._gnd = gnd;
     _pole.set(s * (.35 + c('hn' + f + 'flare')), -1, -.4).applyQuaternion(chest);
     const D2 = this._limbIK(L, Dp, _T, _pole, dq[L.A], dq[L.B]); has[L.B] = 1;
     _w.copy(L.u2).applyQuaternion(D2); // eje del antebrazo

@@ -6,7 +6,7 @@ import { CHALLENGES, kindOf, rivalFor } from '../modes/challenges.js';
 import { LEVEL_IDS } from '../game/difficulty-config.js';
 import { RANDOM } from '../stages/stage-manager.js';
 import { hasKeyboard, onKeyboard } from '../systems/keyboard-detect.js';
-import { heroCard, section, totalBar, catTabs, trackItem, list as trackList, note as trackNote } from './track-ui.js';
+import { heroCard, section, totalBar, catTabs, trackItem, list as trackList, note as trackNote, rivalPicker, RAND, resolveRival } from './track-ui.js';
 
 const h = (tag, props = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -50,17 +50,19 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
 
   // ---------- Versus (contra la CPU o 2 jugadores en el mismo teclado)
   menu.page_versus = function () {
-    const m = me(); if (!roster[S.rival]) S.rival = (menu.idx + 1) % roster.length;
+    const m = me(); if (S.rival !== RAND && !roster[S.rival]) S.rival = (menu.idx + 1) % roster.length;
     menu.rival = S.rival; // la tabla de enfrentamiento elemental (y otras ayudas) leen el rival elegido aquí
     const local = S.vs === 'local', watch = S.vs === 'watch', blocked = local && noKeys(), cur = stages.selected;
     const st = [...stages.list.filter(s => stages.isUnlocked(s)).map(s => [s.id, t(`stage.${s.id}.name`)]), [RANDOM, t('stage.random')]];
-    const go = () => flow.begin({ kind: 'plain', cfg: { a: m.id, b: roster[S.rival].id, mode: local ? 'versus' : 'cpu', rec: local ? 'versus_local' : watch ? 'training' : 'versus_ai', watch, level: S.level, wins: (S.wins + 1) / 2, maxRounds: S.wins + 2, roundTime: S.time } });
+    const relOf = r => menu.scene?.__elements?.matchup?.(m.id, r.id)?.[0]?.rel;
+    const go = () => flow.begin({ kind: 'plain', cfg: { a: m.id, b: roster[resolveRival(S.rival, roster)].id, mode: local ? 'versus' : 'cpu', rec: local ? 'versus_local' : watch ? 'training' : 'versus_ai', watch, level: S.level, wins: (S.wins + 1) / 2, maxRounds: S.wins + 2, roundTime: S.time } });
     this.panel(t('menu.versus'),
       tabs([['cpu', t('versus.tab.cpu')], ['local', t('versus.tab.local')], ['watch', t('versus.tab.watch')]], S.vs, v => { S.vs = v; rerender(); }),
       watch ? note('versus.watch.desc') : null,
       note(watch ? 'versus.watch.a' : 'versus.p1'), heroTabs(),
-      note(local ? 'versus.p2' : watch ? 'versus.watch.b' : 'versus.rival'), tabs(roster.map((r, i) => [i, r.name]), S.rival, i => { S.rival = i; rerender(); }, t('versus.rival'), 'rival'), // el mismo guerrero = duelo espejo
-      h('p', { class: 'note' + (S.rival === menu.idx ? ' mirror-note' : '') }, S.rival === menu.idx ? t('play.mirror', { name: m.name }) : t('versus.same')),
+      note(local ? 'versus.p2' : watch ? 'versus.watch.b' : 'versus.rival'), // el mismo guerrero = duelo espejo · «Aleatorio» se decide al empezar
+      rivalPicker({ roster, me: m, cur: S.rival, pick: i => { S.rival = i; rerender(); }, label: t('versus.rival'), relOf: local ? null : relOf, who: local ? t('rival.random.p2') : null }),
+      h('p', { class: 'note' + (S.rival === menu.idx ? ' mirror-note' : '') }, S.rival === RAND ? t('rival.random.desc') : S.rival === menu.idx ? t('play.mirror', { name: m.name }) : t('versus.same')),
       ...(local ? [] : [note('modes.level'), ...levelTabs()]),
       note('versus.rounds'), tabs(ROUNDS.map(n => [n, String(n)]), S.wins, n => { S.wins = n; rerender(); }, t('versus.rounds')),
       note('versus.time'), tabs(TIMES.map(n => [n, Number.isFinite(n) ? `${n} s` : t('versus.time.inf')]), S.time, n => { S.time = n; rerender(); }, t('versus.time')),

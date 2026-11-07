@@ -175,3 +175,45 @@ body.vs-select .say,body.wpreview .say{display:none}
 .brand .btxt b{font-size:clamp(1.5rem,4.4vh,2.5rem)}.brand .btxt b+b{font-size:clamp(1.7rem,5vh,2.8rem)}
 .brand .bemb{width:clamp(44px,7vh,66px)}
 @media (max-height:800px){#view .nav{gap:5px}#view .nav-item{padding-top:6px;padding-bottom:6px;min-height:0}.pcard{padding:5px 8px;margin-bottom:6px}.pc-av{width:30px;height:30px}.brand .btxt i{margin-top:3px}}
+
+/* (v1.10) Selector de rival: fichas por guerrero + «Aleatorio» */
+.rvpick{flex:none;display:flex;flex-wrap:wrap;gap:8px}
+.rvpick>.rvc{flex:1 1 146px}
+.rvc{position:relative;display:flex;align-items:center;gap:11px;min-width:0;padding:9px 12px 9px 14px;text-align:left;cursor:pointer;border-radius:3px;color:#e9eefb;
+  border:1px solid color-mix(in srgb,var(--c) 34%,rgba(255,255,255,.08));background:linear-gradient(105deg,color-mix(in srgb,var(--c) 16%,rgba(8,12,28,.82)),rgba(8,12,28,.72) 70%);
+  box-shadow:inset 2px 0 0 color-mix(in srgb,var(--c) 55%,transparent);transition:border-color .18s,background .18s,box-shadow .18s,transform .18s}
+.rvc:hover,.rvc:focus-visible{border-color:color-mix(in srgb,var(--c) 70%,transparent);transform:translateY(-1px)}
+.rvc[aria-pressed="true"]{border-color:var(--c);background:linear-gradient(105deg,color-mix(in srgb,var(--c) 38%,rgba(8,12,28,.7)),rgba(8,12,28,.6) 75%);
+  box-shadow:inset 3px 0 0 var(--c),0 0 0 1px color-mix(in srgb,var(--c) 45%,transparent),0 0 18px color-mix(in srgb,var(--c) 30%,transparent)}
+.rv-gem{flex:none;display:grid;place-items:center;width:16px;height:16px;transform:rotate(45deg);font:800 .72rem var(--f-display);color:#0b0f1d;
+  background:linear-gradient(135deg,#fff,var(--c) 45%,color-mix(in srgb,var(--c) 50%,#000));box-shadow:0 0 0 2px rgba(5,8,18,.9),0 0 0 3px color-mix(in srgb,var(--c) 70%,#fff 30%)}
+.rvc[aria-pressed="true"] .rv-gem{box-shadow:0 0 12px var(--c),0 0 0 2px rgba(5,8,18,.9),0 0 0 3px #fff3c8}
+.rv-txt{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.rv-txt b{font:700 1.02rem var(--f-display);letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rv-txt small{font:600 .66rem var(--f-body);letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 75%,#fff)}
+.rv-tag{margin-top:2px;font:700 .6rem var(--f-body);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:#aab4c9}
+.rv-tag.rel-advantage{color:#8fe39a}.rv-tag.rel-disadvantage{color:#ff9b8e}.rv-mirror .rv-tag{color:#e8d48d}
+.rv-rand .rv-gem{background:conic-gradient(from 45deg,#ff7a45,#5fc8ff,#8fe07a,#e8f3ff,#ff7a45);font-size:.8rem}
+.rv-gem i{display:block;transform:rotate(-45deg);font-style:normal;line-height:1}
+#vsprev .vsp.rand b{background:linear-gradient(90deg,#ff9a6a,#8fd6ff,#a6ea8f,#ff9a6a);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rvshine 2.4s linear infinite}
+@keyframes rvshine{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){#vsprev .vsp.rand b{animation:none}}
+
+/* (v1.10) PC (ratón y pantalla ancha): botones del menú grandes; la versión y la ayuda de teclas de abajo NO crecen. */
+@media (min-width:1100px) and (min-height:640px) and (hover:hover) and (pointer:fine){
+  .left{width:clamp(390px,30vw,620px)}
+  #view:not(.docked){display:flex;flex-direction:column;min-height:0}
+  #view>.nav{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:clamp(5px,.9vh,10px)}
+  #view>.nav>li{flex:0 1 64px;min-height:38px;display:flex}
+  #view>.nav .nav-item{height:auto;flex:1;padding:0 26px 0 clamp(54px,3.4vw,70px);--cut:clamp(12px,1vw,18px);
+    font-size:clamp(1.15rem,min(1.6vw,3.05vh),2.15rem);letter-spacing:.06em}
+  #view>.nav .nav-item::after{left:clamp(20px,1.3vw,28px);width:clamp(11px,.85vw,16px);height:clamp(11px,.85vw,16px);margin-top:calc(clamp(11px,.85vw,16px) / -2)}
+  .pcard{padding:clamp(6px,.9vh,10px) clamp(10px,.8vw,14px);--k:1.1}
+  .pc-av{width:calc(36px * var(--k));height:calc(36px * var(--k));font-size:calc(1.1rem * var(--k))}
+  .pc-tx small{font-size:calc(.6rem * var(--k))}.pc-tx b{font-size:calc(.95rem * var(--k))}.pc-tx i{font-size:calc(.7rem * var(--k))}
+  .pc-ach b{font-size:calc(1.15rem * var(--k))}.pc-ach small{font-size:calc(.55rem * var(--k))}
+  .brand .btxt b{font-size:clamp(1.5rem,min(2.15vw,4.6vh),3.1rem)}.brand .btxt b+b{font-size:clamp(1.7rem,min(2.45vw,5.2vh),3.5rem)}
+  .brand .bemb{width:clamp(44px,min(4vw,8vh),84px)}
+  .left .ver{font-size:.88rem}
+}
+@media (min-width:1600px) and (min-height:860px) and (hover:hover) and (pointer:fine){.pcard{--k:1.3}}

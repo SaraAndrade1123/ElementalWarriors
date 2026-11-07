@@ -279,3 +279,13 @@ Limitaciones: no probado en dispositivos reales (solo emulación de Android y es
 | F10 Validación y entrega | EN PROGRESO | 23 suites automáticas + capturas en escritorio y celular emulado; falta probar en dispositivos reales |
 
 Limitaciones registradas: no hay voces (por eso no hay volumen de voces); multijugador en línea no implementado (fase avanzada, no se simula); modelos provisionales de terceros (CC BY 4.0) a sustituir por definitivos; no probado en celulares ni GPU reales.
+
+## v1.10.0 — Verificación
+| Cambio | Archivos | Prueba | Estado |
+|---|---|---|---|
+| Rival con fichas + Aleatorio (Jugar y Versus) | js/ui/track-ui.js, menu-manager.js, modes-ui.js, versus-preview.js | test-v110 §1 + capturas escritorio y celular | OK |
+| Fondos del menú pulidos (4) | js/game/menu-backdrop.js | test-v110 §2 (≤ 0,035 por fotograma) + capturas | OK |
+| Bastión calmado · Santuario del Viento nuevo | js/stages/stage-builder.js, stage-extras.js, data/stages.json | test-v110 §3 + capturas en combate | OK |
+| Botones grandes solo en PC | css/settings.css | test-v110 §4 + capturas 1920×1080 y 1366×768 | OK |
+| Derrotas y K.O. con contacto real con el suelo | pose.js, rig.js, attacks.js, locomotion.js | test-v110 §5 + medición de la altura de la cadera en el laboratorio + capturas | OK |
+| `npm test` = 24 suites | tools/test-v110.mjs | npm test | OK |

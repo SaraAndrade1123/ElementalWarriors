@@ -56,7 +56,7 @@ import { mkdirSync } from 'node:fs';
 {
   const head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>')).replace(/<meta charset[^>]*>\s*/i, '').replace(/<meta name="viewport"[^>]*>\s*/i, '');
   const body = html.slice(html.indexOf('>', html.indexOf('<body')) + 1, html.lastIndexOf('</body>'));
-  const boot = `<script>document.documentElement.lang='es';document.body.dataset.reduce='0';</script>`;
+  const boot = `<script>document.documentElement.lang='es';if(document.body)document.body.dataset.reduce='0';</script>`;
   const css = `<style>html,body{height:100%;margin:0;padding:0!important;background:#05070f;color:#e8ecf5;overflow:hidden}</style>`;
   mkdirSync(join(ROOT, 'dist'), { recursive: true });
   writeFileSync(join(ROOT, 'dist/elemental-warriors-online.html'), head.replace(/<title>[^<]*<\/title>/, '<title>Elemental Warriors</title>') + css + '\n' + boot + body);

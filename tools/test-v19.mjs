@@ -47,5 +47,5 @@ const THREE = await import('three');
 
 // 5 · perfil y guardado
 { const m = rd('js/main.js'); ok(/menu\.profile = /.test(m) && /profile\.saved/.test(m) && es['profile.rank.legend'], 'perfil del jugador (rango, Rose Gold, favorito) y aviso de «Progreso guardado»'); }
-ok(js('package.json').version === '1.9.0' && /v1\.9\.0/.test(es['ui.version']), 'versión 1.9.0');
+ok(/^1\.(9|\d\d)\./.test(js('package.json').version), 'versión 1.9 o posterior');
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.9: todo correcto'); process.exit(bad ? 1 : 0);
