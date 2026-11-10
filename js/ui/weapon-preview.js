@@ -50,12 +50,12 @@ export function createWeaponPreview({ scene, roster, moves, sfx = null, doc = gl
         const win = a.def?.parry; if (!swung && win && a.t >= win[0] + .02 && !me.act && !(me.stun > 0)) { swung = true; return B({ m: true }); } return B(); } }; } m.f[0].x = -want / 2; m.f[1].x = want / 2; m.prev = m.f.map(f => ({ x: f.x, y: f.y }));
     // (v1.8) cámara lenta cuando el arma conecta: se ve el filo, la estela y el impacto
     let slow = 0; const oh = m.onHit, up = m.update;
-    m.onHit = function (ev, idx) { if (idx === 0 && ev.move === 'wp') slow = .6; return oh.call(this, ev, idx); };
-    m.update = function (dt, cam) { const k = slow > 0 ? .3 : 1; slow = Math.max(0, slow - dt); return up.call(this, dt * k, cam); };
+    m.onHit = function (ev, idx) { if (idx === 0 && ev.move === 'wp') slow = .16; /* (v1.12) un instante, no dos segundos de cámara lenta */ return oh.call(this, ev, idx); };
+    m.update = function (dt, cam) { const k = slow > 0 ? .55 : 1; slow = Math.max(0, slow - dt); return up.call(this, dt * k, cam); };
     // cámara de exhibición más cercana: encuadra a los dos a la derecha del panel (en vertical, arriba)
     const render = m.render;
     m.render = function (rdt, cam) {
-      const r = render.call(this, rdt, cam), [a, b] = this.f, mx = (a.x + b.x) / 2, land = cam.aspect > 1.15, zoom = slow > 0 ? .9 : 1;
+      const r = render.call(this, rdt, cam), [a, b] = this.f, mx = (a.x + b.x) / 2, land = cam.aspect > 1.15, zoom = slow > 0 ? .97 : 1;
       const D = (land ? 10 : 13) * zoom, half = D * Math.tan(cam.fov * Math.PI / 360) * cam.aspect, sh = land ? half * .3 : 0;
       cam.position.set(mx - sh, land ? 2.2 : 3.5, D); cam.lookAt(mx - sh, land ? 1.6 : 2.4, 0); return r;
     };

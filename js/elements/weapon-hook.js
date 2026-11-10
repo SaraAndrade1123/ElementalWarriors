@@ -79,7 +79,7 @@ export function installWeapons({ scene, roster = [], save = null, data = null, u
       if (an?.rig) {
         try {
           an.art?.dispose(); an.dir.clips.wp = buildArt(w.kind, an.S);
-          an.art = new ArtSet(an.rig, m.v[i].c.holder, w, colorOf(f.def.id), (themeOf(m.v[i].c.pal, f.def.id)?.c || elemOf(f.def.id).c).getHex()); // aura del filo: color de sus técnicas (o de su chroma) st.arts.push(an);
+          an.art = new ArtSet(an.rig, m.v[i].c.holder, w, colorOf(f.def.id), (themeOf(m.v[i].c.pal, f.def.id)?.c || elemOf(f.def.id).c).getHex()); st.arts.push(an); // aura del filo: color de sus técnicas (o de su chroma). (v1.12) se registra para retirarla al acabar: antes el arma se quedaba en la espalda en el menú
           an.artReady = ff => w.after === 'return' ? !(m.proj || []).some(p => p.owner === ff && p.kind === 'w_boomerang' && !p.dead) : w.after === 'stow' ? true : !(ff.wcd > 0);
         } catch (e) { console.warn('[armas] modelo', w.id, e); }
       }

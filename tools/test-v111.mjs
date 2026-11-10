@@ -22,10 +22,10 @@ const THREE = await import('three');
 // 3 · santuarios: entrada/salida, luna, fuego y chroma
 { const { MenuBackdrop } = await import('../js/game/menu-backdrop.js'); const g = new THREE.Group(), bg = new MenuBackdrop(g);
   for (const r of roster) bg.set(r); bg.set(roster[2]); for (let i = 0; i < 90; i++) bg.update(1 / 60, i / 60, false, { color: new THREE.Color('#ff0000'), light: new THREE.Color('#ff8080') });
-  const th = bg.themes.get(roster[2].id), cols = th.mats.filter(m => m.userData.role === 'C').map(m => m.color.getHexString());
+  const th = bg.themes.get(roster[2].id), cols = th.mats.filter(m => m.userData.role === 'C').map(m => m.color.getHexString()), mix = th.mats.filter(m => m.userData.role === 'mix');
   const rock = th.mats.find(m => m.userData.role === 'rock'), lcol = th.mats.filter(m => m.userData.role === 'L').map(m => m.color.getHexString());
-  ok(cols.length >= 3 && cols.every(c => c === 'ff0000') && lcol.every(c => c === 'ff8080') && rock.emissive.getHexString() === 'ff0000', `el chroma tiñe TODO el santuario (${cols.length + lcol.length + 1} piezas: sello, resplandor, luna, rocas, cristales)`);
-  const src = rd('js/game/menu-backdrop.js'); ok(/moonTex/.test(src) && /LUNA \(todos\)/.test(src), 'luna pintada en los cuatro santuarios');
+  ok(cols.every(c => c === 'ff0000') && lcol.every(c => c === 'ff8080') && rock.emissive.getHexString() === 'ff0000' && mix.length >= 6 && mix.every(m => m.color.r >= m.color.g && m.color.r >= m.color.b), `el chroma tiñe TODO el santuario (${cols.length + lcol.length + mix.length + 1} piezas: cielo, capas del paisaje, resplandor, rocas, cristales)`);
+  const src = rd('js/game/menu-backdrop.js'); ok(/moonTex/.test(src) && /compartida por todos los santuarios/.test(src) && bg.moon, 'luna en todos los santuarios (una sola, compartida)');
   ok(/FIRE_FS/.test(src) && /ShaderMaterial/.test(src) && !/flameTex, color/.test(src), 'fuego por shader (ya no gotas)');
   ok(/BROTAN del suelo/.test(src) && /SE RETRAEN/.test(src) && /stag\(/.test(src), 'entradas y salidas propias (las rocas de Terra se retraen)'); }
 
@@ -50,5 +50,5 @@ const THREE = await import('three');
   ok(['own', 'terms', 'priv', 'third', 'tm', 'contact'].every(k => es[`lg.${k}.h`] && en[`lg.${k}.h`]) && /lg\.third\.models/.test(rd('js/ui/menu-manager.js')), 'Créditos › Legal: titularidad, términos, privacidad, licencias, marcas y contacto');
   ok(existsSync('docs/LEGAL.md') && existsSync('docs/THIRD-PARTY-NOTICES.md') && /MIT License/.test(rd('docs/THIRD-PARTY-NOTICES.md')) && existsSync('docs/DISTRIBUCION.md'), 'documentos legales y de distribución');
   ok(!/No usa personajes/.test(es['cr.insp']), 'los créditos ya no dicen que no se usan personajes de otra franquicia'); }
-ok(js('package.json').version === '1.11.0' && /v1\.11\.0/.test(es['ui.version']), 'versión 1.11.0');
+ok(/^1\.(1[1-9]|[2-9]\d)\./.test(js('package.json').version), 'versión 1.11 o posterior');
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.11: todo correcto'); process.exit(bad ? 1 : 0);

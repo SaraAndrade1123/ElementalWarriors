@@ -265,7 +265,11 @@ export class Match {
     this.zoom = Math.max(0, this.zoom - rdt * 1.6); if (this.adv) this.adv.t -= rdt;
     this.cx += (clamp((ax + bx) / 2, -6, 6) - this.cx) * kc; this.cd += (need * (1 - this.zoom * .18 * A11Y.camK) - this.cd) * kc;
     this.cy += (Math.max(iy(a, 0), iy(b, 1)) * .55 - this.cy) * kc;
-    let sx = 0, sy = 0; if (this.shake > .002 && !this.sm.reduce) { sx = (Math.random() - .5) * this.shake * A11Y.camK; sy = (Math.random() - .5) * this.shake * A11Y.camK; } // (F9) efectos de cámara / cámara tranquila this.shake *= Math.exp(-rdt * 9);
+    // (v1.12) TEMBLOR DE CÁMARA: apagado por defecto (Ajustes › Gráficos › «Temblor en los golpes»). Antes el temblor no se
+    // apagaba nunca (la línea que lo amortiguaba había quedado dentro de un comentario) y la cámara vibraba como un terremoto.
+    let sx = 0, sy = 0; const sk = A11Y.camK * A11Y.shakeK;
+    if (this.shake > .002 && !this.sm.reduce && sk > 0) { const a = Math.min(this.shake, .25) * .5 * sk; sx = (Math.random() - .5) * a; sy = (Math.random() - .5) * a; }
+    this.shake *= Math.exp(-rdt * 12); if (this.shake < .002) this.shake = 0;
     cam.position.set(this.cx + sx, 2.9 + this.cy + sy, this.cd); cam.lookAt(this.cx, 1.9 + this.cy, 0);
   }
 

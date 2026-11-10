@@ -99,19 +99,8 @@ export class SceneManager {
     this.halo.scale.setScalar(11); this.halo.position.set(0, 2.3, -3); this.stage.add(this.halo);
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.MeshStandardMaterial({ color: 0x0a1020, roughness: 1 }));
     ground.rotation.x = -Math.PI / 2; ground.position.y = -.55; this.backdrop.add(ground);
-    const ruin = new THREE.MeshStandardMaterial({ color: 0x1b2740, roughness: .9, flatShading: true });
-    for (let i = 0; i < 10; i++) {
-      const a = (-80 + i * 17.7) * Math.PI / 180, h = 4 + Math.random() * 5;
-      const p = new THREE.Mesh(new THREE.CylinderGeometry(.55, .7, h, 8), ruin);
-      p.position.set(Math.sin(a) * 13, h / 2 - .55, -Math.cos(a) * 13 - 2); this.backdrop.add(p);
-    }
-    const rockGeo = new THREE.DodecahedronGeometry(.5, 0);
+    // (v1.12) sin las columnas ni las rocas grises genéricas: cada guerrero tiene su paisaje propio (js/game/menu-backdrop.js)
     this.rocks = [];
-    for (let i = 0; i < 14; i++) {
-      const r = new THREE.Mesh(rockGeo, ruin), s = .4 + Math.random() * 1.1;
-      r.scale.setScalar(s); r.position.set((Math.random() * 2 - 1) * 12, 2 + Math.random() * 6, -4 - Math.random() * 9);
-      r.userData = { y: r.position.y, ph: Math.random() * 6.28 }; this.backdrop.add(r); this.rocks.push(r);
-    }
   }
 
   _buildLights() {
@@ -318,7 +307,6 @@ export class SceneManager {
     }
     const m = this.reduce ? .2 : 1;
     this.rune.rotation.z += dt * .15 * m;
-    for (const r of this.rocks) { r.position.y = r.userData.y + Math.sin(t * .5 * m + r.userData.ph) * .25; r.rotation.y += dt * .1 * m; }
     this._particles(dt * m, t);
     try { this.themeBg?.update(dt, t, this.reduce, this.tint); } catch (e) { console.warn('[menú] fondo', e); this.themeBg = null; }
     const c = this.active;

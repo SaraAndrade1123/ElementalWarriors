@@ -32,7 +32,7 @@ export function planStory(scenes, { hero, rival, chapter = 0, total = 0, card = 
     else if (/^story\.arrive\./.test(s.key)) { kind = 'world'; w = s.key.slice(13) || world; }
     else if (s.key === `story.${hero}.intro` && home) w = home;
     else if (kind === 'ending') w = final;
-    shots.push({ kind, who: s.who, side, key: s.key, rival: cur, world: w, tour, first: kind === 'line' && !spoke.has(s.who), ots: kind === 'line' && spoke.has(s.who) });
+    shots.push({ kind, who: s.who, side, key: s.key, p: s.p, rival: cur, world: w, tour, first: kind === 'line' && !spoke.has(s.who), ots: kind === 'line' && spoke.has(s.who) });
     if (kind === 'line') spoke.add(s.who);
   }
   if (shots[0]?.kind === 'card') shots[0].rival = shots.find(x => x.rival)?.rival || rival || null;
@@ -83,7 +83,7 @@ export function createStoryCine({ scene, roster = [], doc = globalThis.document,
       el.querySelector('.sskip').textContent = t('story.skip') === 'story.skip' ? 'Saltar escena' : t('story.skip');
       el.querySelector('.sskip').addEventListener('click', e => { e.stopPropagation(); finish(); });
     }
-    const textOf = s => t(s.key);
+    const textOf = s => t(s.key, s.p); // (v1.12) con parámetros (nombre del héroe, reto del capítulo)
     const go = () => {
       k++; st = 0; typed = 0; auto = 0;
       if (k >= shots.length) return finish();

@@ -7,7 +7,7 @@ export const ACTIONS = ['left', 'right', 'jump', 'down', 'l', 'm', 'h', 's', 'r'
 export const KEY_SCHEMES = ['solo', 'vs1', 'vs2'];
 const DEFAULTS = {
   // gráficos
-  quality: coarse ? 'low' : 'medium', res: 100, shadows: 'auto', particles: 'auto', post: 'auto', outlines: true, camFx: true, reduceMotion: prefersReduce,
+  quality: coarse ? 'low' : 'medium', res: 100, shadows: 'auto', particles: 'auto', post: 'auto', outlines: true, camFx: true, camShake: false, reduceMotion: prefersReduce,
   // controles (solo las teclas cambiadas: { solo: { l: 'KeyJ' }, vs1: {...}, vs2: {...} })
   keys: {},
   // táctil
@@ -23,7 +23,7 @@ const validKeys = v => v && typeof v === 'object' && !Array.isArray(v) && Object
 const oneOf = (...a) => v => a.includes(v), bool = v => typeof v === 'boolean', num = (lo, hi) => v => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
 const VALID = {
   quality: oneOf('low', 'medium', 'high'), res: oneOf(50, 70, 85, 100), shadows: oneOf('auto', 'on', 'off'), particles: oneOf('auto', 'low', 'medium', 'high'), post: oneOf('auto', 'on', 'off'),
-  outlines: bool, camFx: bool, reduceMotion: bool, keys: validKeys, tSize: num(.7, 1.5), tOpacity: num(.3, 1), tLayout: oneOf('right', 'left'),
+  outlines: bool, camFx: bool, camShake: bool, reduceMotion: bool, keys: validKeys, tSize: num(.7, 1.5), tOpacity: num(.3, 1), tLayout: oneOf('right', 'left'),
   uiScale: oneOf(.9, 1, 1.15, 1.3), contrast: bool, subtitles: bool, textSpeed: oneOf('slow', 'normal', 'fast', 'instant'), altCues: bool, reduceFlash: bool, calmCam: bool, autoPause: bool,
   lang: oneOf('es', 'en'),
 };

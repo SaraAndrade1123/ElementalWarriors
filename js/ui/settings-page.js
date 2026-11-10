@@ -14,7 +14,7 @@ const h = (tag, props = {}, ...kids) => {
   return e;
 };
 export const SECTIONS = ['graphics', 'sound', 'controls', 'touch', 'access', 'lang'];
-const GROUPS = { graphics: ['quality', 'res', 'shadows', 'particles', 'post', 'outlines', 'camFx', 'reduceMotion'], controls: ['keys'], touch: ['tSize', 'tOpacity', 'tLayout'],
+const GROUPS = { graphics: ['quality', 'res', 'shadows', 'particles', 'post', 'outlines', 'camFx', 'camShake', 'reduceMotion'], controls: ['keys'], touch: ['tSize', 'tOpacity', 'tLayout'],
   access: ['uiScale', 'contrast', 'subtitles', 'textSpeed', 'altCues', 'reduceFlash', 'calmCam', 'autoPause'], lang: ['lang'] };
 // Teclas por defecto de cada esquema (para mostrarlas y detectar conflictos)
 const baseMap = sc => sc === 'solo' ? KEYMAP : SCHEMES.versus[sc === 'vs1' ? 0 : 1];
@@ -42,7 +42,7 @@ export function installSettingsPage(menu, { settings, onBindings } = {}) {
       row(t('set.shadows'), choice('shadows', ['auto', 'on', 'off'], v => t('set.opt.' + v))),
       row(t('set.particles'), choice('particles', ['auto', 'low', 'medium', 'high'], v => v === 'auto' ? t('set.opt.auto') : t('set.q.' + v))),
       row(t('set.post'), choice('post', ['auto', 'on', 'off'], v => t('set.opt.' + v)), t('set.post.tip')),
-      tog('outlines', t('set.outlines'), t('set.outlines.tip')), tog('camFx', t('set.camFx'), t('set.camFx.tip')), tog('reduceMotion', t('set.reduce'), t('set.reduce.tip')),
+      tog('outlines', t('set.outlines'), t('set.outlines.tip')), tog('camFx', t('set.camFx'), t('set.camFx.tip')), tog('camShake', t('set.camShake'), t('set.camShake.tip')), tog('reduceMotion', t('set.reduce'), t('set.reduce.tip')),
       fs ? h('button', { type: 'button', class: 'ghost', onclick: () => { const d = document; (d.fullscreenElement ? d.exitFullscreen?.() : d.documentElement.requestFullscreen?.())?.catch?.(() => {}); } }, t('ui.fullscreen')) : null,
     ];
   }

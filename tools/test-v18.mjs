@@ -57,7 +57,7 @@ const es = js('data/localization/es.json'), en = js('data/localization/en.json')
   ok(/addAura/.test(wa) && /aura: true/.test(wa) && /\{ aura: true \}/.test(wv), 'las armas en la mano y lanzadas llevan aura elemental en el filo');
   ok(/impact\(pos, kind/.test(wv) && /__wv\.impact/.test(rd('js/elements/weapon-hook.js')), 'cada tipo de arma tiene su impacto (filo, contundente, punta)');
   ok(/Catmull-Rom/.test(vfx) && /life: \.22/.test(vfx), 'estelas de arma más largas y curvas (media luna)');
-  ok(/slow = \.6/.test(pv) && /wpcard/.test(pv), 'vista previa: cámara lenta al conectar y ficha del arma'); }
+  ok(/slow = \.\d+/.test(pv) && /wpcard/.test(pv), 'vista previa: cámara lenta breve al conectar y ficha del arma'); }
 
 // 5 · interfaz
 { ok(/heroCard/.test(rd('js/ui/menu-manager.js')) && /hero-card/.test(rd('css/theme.css')), 'Combate de prueba: tarjeta con el nombre del guerrero');

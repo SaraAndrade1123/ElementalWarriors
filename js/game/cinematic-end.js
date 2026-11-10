@@ -104,7 +104,7 @@ export function installOutro({ scene, roster = [], data = null, doc = globalThis
       } else if (s.kind === 'line') {
         const f = this.f[s.who], fd = f.facing || 1, h = H(s.who), e = ease(u);
         if (!s.lose) { _p.set(f.x + fd * (3.1 - .4 * e), h * .3, 5.6 - .7 * e); _l.set(f.x + fd * .1, h * .64, 0); } // contrapicado heroico
-        else { const Wf = this.f[w], d = Math.sign(Wf.x - f.x) || 1; _p.set(f.x + d * (2.3 - .25 * e), h * .46, 4.7 - .4 * e); _l.set(f.x - d * .1, h * .3, 0); } // a ras de suelo, desde el lado del ganador: el vencido le mira desde el suelo
+        else { const Wf = this.f[w], d = Math.sign(Wf.x - f.x) || 1; _p.set(f.x + d * (2.9 - .3 * e), h * .34, 6.1 - .45 * e); _l.set(f.x - d * .05, h * .25, 0); } /* (v1.12) más abierto: se ve el cuerpo entero en el suelo */ // a ras de suelo, desde el lado del ganador: el vencido le mira desde el suelo
       } else { const e = ease(u); _p.set(F.x + dir * (2.6 - .3 * e), H(w) * .58, 5.4 - .8 * e); _l.set(F.x - dir * .55, H(w) * .6, 0); } // retrato (el nombre queda a un lado)
       cam.position.copy(_p); cam.lookAt(_l);
       if (el) {

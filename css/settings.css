@@ -86,13 +86,20 @@ body[data-reduce="1"] .brand .bemb,body[data-reduce="1"] .brand .btxt b{animatio
 @media (max-height:520px){.brand .bemb{width:40px}.brand .btxt b{font-size:1.2rem}.brand .btxt b+b{font-size:1.4rem}.brand .btxt i{display:none}}
 
 /* ── (v1.9) frase del guerrero al elegirlo ── */
-.say{position:absolute;z-index:3;right:max(28px,env(safe-area-inset-right));bottom:calc(max(34px,env(safe-area-inset-bottom)) + 150px);max-width:min(360px,34vw);padding:10px 16px 12px;
-  border:1px solid color-mix(in srgb,var(--accent,#c9a44c) 65%,transparent);border-radius:4px;background:linear-gradient(135deg,rgba(14,22,48,.92),rgba(6,10,22,.88));
-  box-shadow:0 10px 24px rgba(0,0,0,.45),inset 3px 0 0 var(--accent,#c9a44c);pointer-events:none;animation:sayIn .35s cubic-bezier(.2,1.3,.4,1) both}
-.say::after{content:"";position:absolute;left:28px;bottom:-9px;width:16px;height:16px;transform:rotate(45deg);background:#0a1024;border-right:1px solid color-mix(in srgb,var(--accent,#c9a44c) 65%,transparent);border-bottom:1px solid color-mix(in srgb,var(--accent,#c9a44c) 65%,transparent)}
-.say b{display:block;font:800 .72rem var(--f-body);letter-spacing:.24em;text-transform:uppercase;color:var(--accent,#c9a44c)}
-.say p{margin:3px 0 0;font:600 clamp(.86rem,1.9vh,1rem)/1.35 var(--f-body);color:#f2f5fb;font-style:italic}
-.say p::before{content:"« ";color:var(--accent,#c9a44c)}.say p::after{content:" »";color:var(--accent,#c9a44c)}
+.say{position:absolute;z-index:3;right:max(28px,env(safe-area-inset-right));bottom:calc(max(34px,env(safe-area-inset-bottom)) + 150px);max-width:min(380px,34vw);padding:14px 20px 15px 22px;--sc:var(--accent,#c9a44c);
+  /* (v1.12) placa dorada biselada con el color del guerrero (sigue al chroma): gema, nombre grabado y una gran comilla de fondo */
+  background:radial-gradient(120% 90% at 0% 0%,color-mix(in srgb,var(--sc) 26%,transparent),transparent 60%),linear-gradient(160deg,rgba(18,26,54,.96),rgba(7,11,24,.94));
+  border:1px solid rgba(226,189,94,.55);clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+  box-shadow:0 14px 30px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,240,200,.06),inset 0 -24px 40px -30px var(--sc);pointer-events:none;animation:sayIn .4s cubic-bezier(.2,1.25,.4,1) both;overflow:hidden}
+.say::before{content:"\201C";position:absolute;right:10px;top:-14px;font:900 6.2rem/1 var(--f-display);color:var(--sc);opacity:.18;pointer-events:none}
+.say::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,var(--sc) 30%,#f1dc9a 50%,var(--sc) 70%,transparent);opacity:.8}
+.say b{display:flex;align-items:center;gap:9px;font:800 .95rem var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:#f6e7bd;padding-bottom:7px;margin-bottom:7px;
+  background:linear-gradient(90deg,rgba(226,189,94,.65),transparent) bottom/100% 1px no-repeat}
+.say b::before{content:"";width:9px;height:9px;transform:rotate(45deg);background:linear-gradient(135deg,#fff,var(--sc));box-shadow:0 0 8px var(--sc),0 0 0 2px rgba(6,10,22,.9),0 0 0 3px rgba(241,220,154,.7)}
+.say p{position:relative;margin:0;font:600 clamp(.92rem,2vh,1.06rem)/1.42 var(--f-body);color:#f3ecd8;letter-spacing:.01em;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.say p::after{content:"";display:inline-block;width:.45em;height:1em;margin-left:2px;vertical-align:-.12em;background:var(--sc);opacity:0}
+.say.typing p::after{opacity:.8;animation:sayCaret .7s steps(1) infinite}
+@keyframes sayCaret{50%{opacity:0}}
 @keyframes sayIn{from{opacity:0;transform:translateY(8px) scale(.96)}}
 body.vs-select .say,body.wpreview .say{display:none}
 @media (max-width:900px),(max-height:520px){.say{display:none}}
@@ -202,7 +209,7 @@ body.vs-select .say,body.wpreview .say{display:none}
 /* (v1.10) PC (ratón y pantalla ancha): botones del menú grandes; la versión y la ayuda de teclas de abajo NO crecen. */
 @media (min-width:1100px) and (min-height:640px) and (hover:hover) and (pointer:fine){
   .left{width:clamp(390px,30vw,620px)}
-  #view:not(.docked){display:flex;flex-direction:column;min-height:0}
+  #view:not(.docked):has(>.nav){display:flex;flex-direction:column;min-height:0} /* SOLO el menú principal (antes descuadraba Progreso y Créditos) */
   #view>.nav{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:clamp(5px,.9vh,10px)}
   #view>.nav>li{flex:0 1 64px;min-height:38px;display:flex}
   #view>.nav .nav-item{height:auto;flex:1;padding:0 26px 0 clamp(54px,3.4vw,70px);--cut:clamp(12px,1vw,18px);
@@ -243,3 +250,33 @@ body.vs-select .say,body.wpreview .say{display:none}
 .ewup.on{opacity:1;transform:none;pointer-events:auto}
 .ewup:hover,.ewup:focus-visible{filter:brightness(1.12);transform:translateY(-1px)}
 body.cine #ewbars{display:none}
+
+/* (v1.12) MEDALLAS de Logros y Desafíos: moneda con canto dorado del nivel (bronce → mítico), gema central y marca al conseguirla */
+.ach .medal{--m1:#b06a2c;--m2:#ffcf9a;position:relative;width:40px;height:40px;flex:none;clip-path:none!important;border-radius:50%;opacity:1;filter:grayscale(.85) brightness(.7);
+  background:radial-gradient(circle,#101834 0 54%,transparent 55%),conic-gradient(from 200deg,var(--m1),var(--m2),var(--m1),var(--m2),var(--m1))!important;
+  box-shadow:0 0 0 1px rgba(0,0,0,.65),0 3px 8px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.18);color:#fff;font:900 .95rem/1 var(--f-body);text-shadow:0 0 6px var(--m2),0 1px 1px #000;z-index:0}
+.ach .medal::before{content:"";position:absolute;left:50%;top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;transform:rotate(45deg);z-index:-1;
+  background:linear-gradient(135deg,#fff,var(--m2) 40%,var(--m1));box-shadow:0 0 0 2px rgba(10,16,36,.9),0 0 0 3px color-mix(in srgb,var(--m2) 60%,transparent)}
+.ach .medal::after{content:"";position:absolute;inset:3px;border-radius:50%;border:1px dashed rgba(255,255,255,.28);pointer-events:none}
+.ach .medal.bronze{--m1:#7a431a;--m2:#f0b27a}.ach .medal.silver{--m1:#6c7890;--m2:#f4f7fc}.ach .medal.gold{--m1:#8a5e10;--m2:#ffe9a0}
+.ach .medal.platinum{--m1:#4f69c9;--m2:#c8f6ff}.ach .medal.mythic{--m1:#9b3cff;--m2:#ffd257}
+.ach.done .medal{filter:none;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 14px color-mix(in srgb,var(--m2) 55%,transparent),inset 0 0 0 1px rgba(255,255,255,.3)}
+.ach.done .medal::before{width:22px;height:22px;margin:-11px 0 0 -11px;opacity:.55}
+.ach.done.t-mythic .medal{animation:mythSpin 4s linear infinite}
+
+/* (v1.12) Historia en actos: cabecera de acto, número de capítulo en sello, título, rival y reto */
+.st-act{display:flex;flex-direction:column;gap:6px;flex:none}
+.st-acth{display:flex;align-items:baseline;gap:10px;margin:8px 0 0;padding-bottom:4px;border-bottom:1px solid rgba(201,164,76,.3)}
+.st-acth span{font:700 .68rem var(--f-body);letter-spacing:.24em;text-transform:uppercase;color:var(--accent,#c9a44c)}
+.st-acth b{font:800 1.02rem var(--f-display);letter-spacing:.08em;color:#f6e7bd}
+.st-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.st-list li{display:flex!important;align-items:center;gap:10px;padding:8px 10px!important}
+.st-list li .st-txt{flex:1 1 auto}.st-list li .acts{flex:none;display:flex;gap:6px;align-items:center}
+.st-n{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;font:800 .85rem var(--f-display);color:#f6e7bd;background:linear-gradient(135deg,#1c2a58,#0b1226);box-shadow:0 0 0 1px rgba(226,189,94,.6)}
+.st-list li.done .st-n{background:radial-gradient(circle at 35% 30%,#fff3c8,#c9a44c 60%,#7a5a1a);color:#1a1206}
+.st-list li.final .st-n{box-shadow:0 0 0 1px #ffd257,0 0 12px rgba(255,210,87,.5)}
+.st-txt{display:grid;gap:1px;min-width:0}
+.st-txt b{font:800 .95rem var(--f-display);letter-spacing:.04em;color:#f3ecd8}
+.st-txt small{font:600 .74rem var(--f-body);color:#9fb0cc}
+.st-goal{font:600 .76rem var(--f-body);font-style:normal;color:#e8cf86}
+.st-list li.lock{opacity:.55}

@@ -4,15 +4,18 @@
 //   env.record(result, cfg) → Rose Gold ganado (progression.recordMatch)   env.hint(text)  texto de objetivo en el HUD
 //   env.restart()   reinicia el combate actual   env.pauseMatch(on)   env.nameOf(id)   env.progression   env.cfg   env.t
 import { ChallengeTracker, CHALLENGES } from './challenges.js';
+import { goalText } from './story.js';
 
 const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 export function createFlow(env) {
   const { t, progression } = env; let ses = null, tracker = null, last = null;
-  const run = fc => { last = fc; env.fight(fc); if (tracker) env.hint(progressText()); };
+  const run = fc => { last = fc; env.fight(fc); if (tracker) env.hint(progressText()); else if (fc?.goal && fc.goal.t !== 'win') env.hint(t('story.goal.hud', { n: fc.chapter, goal: goalText(fc.goal, t) })); };
   const hero = () => env.nameOf(last.a);
   const side = i => env.sideName ? env.sideName(last, i) : env.nameOf(i ? last.b : last.a); // en un duelo espejo el J2 tiene otro nombre
   const progressText = () => `${t(`ch.${tracker.def.id}.goal`)} · ${tracker.count}/${tracker.def.goal}`;
-  const story = (scenes, done) => (ses?.kind === 'story' && scenes.length ? env.story(scenes, done, { hero: ses.obj.hero, rival: ses.obj.rivals?.[Math.min(ses.obj.i, ses.obj.total - 1)], chapter: Math.min(ses.obj.i, ses.obj.total - 1), total: ses.obj.total, world: ses.obj.stageAt?.(Math.min(ses.obj.i, ses.obj.total - 1)), home: env.cfg?.stageByElement?.[env.cfg?.elementOf?.[ses.obj.hero]], final: env.cfg?.finalStage }) : done());
+  // (v1.12) el reto del capítulo se convierte en texto antes de la escena
+  const withGoal = scenes => scenes.map(s => s.p?.goal ? { ...s, p: { ...s.p, goal: goalText(s.p.goal, t) } } : s);
+  const story = (scenes, done) => (ses?.kind === 'story' && scenes.length ? env.story(withGoal(scenes), done, { hero: ses.obj.hero, rival: ses.obj.rivals?.[Math.min(ses.obj.i, ses.obj.total - 1)], chapter: Math.min(ses.obj.i, ses.obj.total - 1), total: ses.obj.total, world: ses.obj.stageAt?.(Math.min(ses.obj.i, ses.obj.total - 1)), home: env.cfg?.stageByElement?.[env.cfg?.elementOf?.[ses.obj.hero]], final: env.cfg?.finalStage }) : done());
   const base = (r, gold) => [['result.rounds', `${r.wins[0]} - ${r.wins[1]}`], ['result.damage', `${Math.round(r.stats.dmg[0])} / ${Math.round(r.stats.dmg[1])}`], ['result.combo', `${r.stats.combo[0]} / ${r.stats.combo[1]}`], ['result.time', fmt(r.time)], ...(gold ? [['result.gold', `+${gold}`]] : [])];
   const totals = (o, extra = []) => [['result.score', o.score.toLocaleString()], ['result.wins', o.wins], ['result.time', fmt(o.time)], ...extra];
 
@@ -65,6 +68,9 @@ export function createFlow(env) {
       if (story) progression.setStory(L.hero, L.i);
       return env.panel({ title: verdict, sub: t('result.next.rival', { name: env.nameOf(L.rivals[L.i]), n: L.i + 1, total: L.total }), rows: [...rows, ['result.score', L.score.toLocaleString()]],
         next: { label: t('result.next'), run: () => envStory([...L.scenesAfter(i), ...L.scenesBefore()], () => run(L.fight())) } });
+    }
+    if (rep.status === 'goal') { // (v1.12) historia: ganó pero sin cumplir el reto del capítulo → se repite
+      return env.panel({ title: t('story.goal.fail'), sub: goalText(rep.goal, t), rows, again: { label: t('result.retry'), run: () => run(L.useContinue()) }, onMenu: () => L.giveUp() });
     }
     if (rep.status === 'lost') {
       const left = L.continuesLeft; const label = story ? t('result.retry') : t('result.retry.left', { n: left });

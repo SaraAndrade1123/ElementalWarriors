@@ -300,3 +300,14 @@ Limitaciones registradas: no hay voces (por eso no hay volumen de voces); multij
 | Guardado cifrado/firmado, sin consola, CSP | test-v111 §5 + prueba de la versión web (sin globales con ?dev, sin bloqueos de CSP) | OK |
 | Versión web con actualización automática | prueba real: se publica una versión nueva → aviso → «Actualizar» → versión nueva y caché nueva | OK |
 | `npm test` = 25 suites | npm test | OK |
+
+## v1.12.0 — Verificación
+| Cambio | Prueba | Estado |
+|---|---|---|
+| Progreso/Créditos sin descuadre | test-v112 §1 + capturas | OK |
+| Sin temblor de cámara | test-v112 §2 | OK |
+| Victorias y derrota de Aqua | test-v112 §3 + laboratorio y cinemática real | OK |
+| Paisajes del menú y luna con fase real | test-v112 §4 + capturas de los 4 | OK |
+| Historia de 11 capítulos con retos | test-v112 §5 (retos, reflejo, final y textos es/en) + captura | OK |
+| Medallas, bocadillo, símbolos, arma en la espalda, vista previa | test-v112 §6 + capturas | OK |
+| `npm test` = 26 suites | npm test | OK |

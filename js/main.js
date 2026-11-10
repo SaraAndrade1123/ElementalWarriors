@@ -36,11 +36,13 @@ import { patchFighter as patchTransform, patchCpu as patchTransformCpu, installT
 import { Fighter, RULES, movesFor } from './game/fighter.js';
 import { installOutro } from './game/cinematic-end.js';
 // emblema de la ficha: el símbolo del elemento del guerrero que se ve (lo elige el CSS con [data-el]) dentro de un sello, en su color
+const EMB_ARM = '<path d="M32 32c-1.5-7.5 3.5-14 10.5-14.5 4-.3 7 1.6 8.3 4.2-3-2-7.3-1.9-10 .9-2.4 2.5-2.9 5.8-1.6 9"/>';
+// (v1.12) símbolos propios más limpios: llama con corazón, gota con olas, montaña con estratos y un remolino de tres brazos simétrico
 const EMBLEM = `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" class="em-ring"/><circle cx="32" cy="32" r="23.5" class="em-ring2"/>`
-  + `<g class="em em-fire"><path d="M32 13c7 9 11 15 11 22a11 11 0 0 1-22 0c0-5 3-9 5-12 1 4 3 6 5 6-2-6-1-11 1-16z"/></g>`
-  + `<g class="em em-water"><path d="M17 26c5-5 10 5 15 0s10-5 15 0M17 34c5-5 10 5 15 0s10-5 15 0M17 42c5-5 10 5 15 0s10-5 15 0" fill="none" stroke-width="3.4" stroke-linecap="round"/></g>`
-  + `<g class="em em-earth"><path d="M15 45 26 22l6 10 6-14 11 27z"/><path d="M21 45h22" stroke-width="3" stroke-linecap="round"/></g>`
-  + `<g class="em em-wind"><path d="M16 27c8-10 26-9 24 1-1 6-9 6-9 1M14 36h28M18 44c7 0 19 1 22-4" fill="none" stroke-width="3.4" stroke-linecap="round"/></g></svg>`;
+  + `<g class="em em-fire" stroke="none"><path d="M32 9c7.5 9.5 12.5 16 12.5 24.5a12.5 12.5 0 0 1-25 0c0-5.5 2.8-9.8 5.4-12.8.6 4.4 2.6 6.7 4.9 7.2-1.8-6.6-.4-12.6 2.2-18.9z"/><path d="M32 30c3.4 3.8 5 6.8 5 10a5 5 0 0 1-10 0c0-3 2-6 5-10z" fill="#0a1024" opacity=".55"/></g>`
+  + `<g class="em em-water"><g fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M32 9C40 21 47.5 29.5 47.5 39.5a15.5 15.5 0 0 1-31 0C16.5 29.5 24 21 32 9z"/><path d="M22.5 38.5c3.2-3.6 6.6-3.6 9.5 0s6.4 3.6 9.5 0"/><path d="M25 45.5c2.4-2.6 4.8-2.6 7 0s4.6 2.6 7 0"/></g></g>`
+  + `<g class="em em-earth"><path d="M12 47 25.5 22l6.5 11 6.5-15L52 47z" stroke="none"/><path d="M25.5 22 29 28.5M38.5 18l3.5 8" stroke="#0a1024" stroke-width="1.6" opacity=".6" fill="none"/><path d="M14 51h36" stroke-width="2.6" stroke-linecap="round" fill="none"/></g>`
+  + `<g class="em em-wind"><g fill="none" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">${[0, 120, 240].map(r => `<g transform="rotate(${r} 32 32)">${EMB_ARM}</g>`).join('')}</g><circle cx="32" cy="32" r="2.6" stroke="none"/></g></svg>`;
 let inputRef = null; // (v1.11) controles del jugador (antes era una variable global accesible desde la consola)
 import { createWeaponPreview } from './ui/weapon-preview.js';
 
@@ -83,8 +85,12 @@ async function boot() {
     { const say = $('#say'), last = {}; let hideT = 0;
       scene.onShow = def => { if (!say || !def) return; const n = [0, 1, 2, 3, 4].filter(i => t(`menu.say.${def.id}.${i}`) !== `menu.say.${def.id}.${i}`); if (!n.length) return;
         let i = n[Math.floor(Math.random() * n.length)]; if (n.length > 1 && i === last[def.id]) i = n[(n.indexOf(i) + 1) % n.length]; last[def.id] = i;
-        say.querySelector('b').textContent = def.name; say.querySelector('p').textContent = t(`menu.say.${def.id}.${i}`);
-        say.hidden = true; void say.offsetWidth; say.hidden = false; clearTimeout(hideT); hideT = setTimeout(() => { say.hidden = true; }, 6000); }; }
+        say.querySelector('b').textContent = def.name; const full = t(`menu.say.${def.id}.${i}`), pEl = say.querySelector('p');
+        say.hidden = true; void say.offsetWidth; say.hidden = false; clearTimeout(hideT); clearInterval(say.__ty);
+        // (v1.12) la frase se escribe letra a letra (instantánea con «reducir movimiento»)
+        if (document.body.dataset.reduce === '1') pEl.textContent = full;
+        else { let k = 0; pEl.textContent = ''; say.classList.add('typing'); say.__ty = setInterval(() => { k += 2; pEl.textContent = full.slice(0, k); if (k >= full.length) { clearInterval(say.__ty); say.classList.remove('typing'); } }, 28); }
+        hideT = setTimeout(() => { say.hidden = true; }, 6500); }; }
     scene.show(roster[0].id); scene.start();
     status.classList.remove('error'); status.textContent = failed.length ? t('ui.partial', { n: failed.length }) : t('ui.ready'); if (failed.length && scene.loadErrors?.length) status.title = scene.loadErrors.join('\n'); // detalle al pasar el ratón
     // Dificultad de la CPU para los combates sueltos (Jugar / Entrenamiento con maniquí CPU); se guarda en este navegador.
@@ -255,7 +261,7 @@ async function boot() {
     };
     const showStoryPanel = (scenes, done) => {
       const box = $('#story-lines'); box.replaceChildren(...scenes.map(s => { const p = document.createElement('p'), who = s.who === 'narrator' ? t('story.narrator') : nameOf(s.who);
-        p.className = 'line' + (s.who === 'narrator' ? ' narr' : ''); if (s.who !== 'narrator') { const b = document.createElement('b'); b.textContent = who; p.append(b); } p.append(t(s.key)); return p; }));
+        p.className = 'line' + (s.who === 'narrator' ? ' narr' : ''); if (s.who !== 'narrator') { const b = document.createElement('b'); b.textContent = who; p.append(b); } p.append(t(s.key, s.p)); return p; }));
       const go = $('#story-next'); rz.hidden = true; $('#story').hidden = false; go.focus();
       go.onclick = () => { $('#story').hidden = true; go.onclick = null; done(); };
     };

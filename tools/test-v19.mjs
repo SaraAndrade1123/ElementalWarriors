@@ -14,7 +14,7 @@ const THREE = await import('three');
 // 1 · menú
 { const { MenuBackdrop } = await import('../js/game/menu-backdrop.js'); const g = new THREE.Group(), bg = new MenuBackdrop(g);
   for (const r of roster) bg.set(r); for (let i = 0; i < 60; i++) bg.update(1 / 30, i / 30);
-  ok(bg.themes.size === 4 && g.children.length === 4, 'cada guerrero tiene su santuario animado detrás (4 temas distintos)');
+  ok(bg.themes.size === 4 && g.children.length === 4 + (bg.moon ? 1 : 0), /* (v1.12) + la luna compartida */ 'cada guerrero tiene su santuario animado detrás (4 temas distintos)');
   const cur = bg.themes.get(roster[3].id), old = bg.themes.get(roster[0].id); ok(cur.w > .9 && old.w < .05, 'al cambiar de guerrero un santuario se funde con el otro');
   ok(roster.every(r => [0, 1, 2, 3, 4].every(i => es[`menu.say.${r.id}.${i}`] && en[`menu.say.${r.id}.${i}`])) && new Set(roster.flatMap(r => [0, 1, 2, 3, 4].map(i => es[`menu.say.${r.id}.${i}`]))).size === 20, '5 frases propias por guerrero (20 distintas, es/en)');
   const dev = rd('tools/dev/index.html'); ok(/class="brand"><svg class='bemb'/.test(dev) && /id="say"/.test(dev), 'título con emblema y bocadillo de frases'); }

@@ -10,14 +10,22 @@
 
 ## Opción recomendada: GitHub Pages (gratis)
 Ya está todo preparado en `.github/workflows/pages.yml`: en cada cambio subido a la rama `main`, GitHub ejecuta las
-24 baterías de pruebas, compila el juego y lo publica. Si una prueba falla, no se publica nada roto.
+baterías de pruebas, compila el juego y lo publica. Si una prueba falla, no se publica nada roto.
+
+Repositorio oficial: **https://github.com/SaraAndrade1123/ElementalWarriors** (cuenta `SaraAndrade1123`).
 
 Pasos (una sola vez):
-1. En GitHub (cuenta `SaraAndrade1123`), crea un repositorio vacío llamado `elemental-warriors`
-   (público, o privado si tienes GitHub Pro).
-2. Sube el proyecto a ese repositorio (Claude puede hacerlo por ti en cuanto exista).
-3. En el repositorio: **Settings › Pages › Build and deployment › Source: GitHub Actions**.
-4. A los 2-3 minutos el juego queda en `https://saraandrade1123.github.io/ElementalWarriors/`.
+1. Sube el proyecto a ese repositorio, en la rama `main`:
+   ```
+   git remote add origin https://github.com/SaraAndrade1123/ElementalWarriors.git
+   git push -u origin main
+   ```
+   Para que Claude lo suba por ti: en el repositorio, **Settings › Collaborators › Add people**, invita a la cuenta de
+   GitHub conectada a Claude (`SaraAndrade1123`) con permiso de escritura; cuando acepte la invitación, Claude puede hacer
+   el primer envío y los siguientes. (La rama del proyecto ya se llama `main`.)
+2. En el repositorio: **Settings › Pages › Build and deployment › Source: GitHub Actions**.
+3. A los 2-3 minutos el juego queda en **https://saraandrade1123.github.io/ElementalWarriors/**
+   (puedes verlo en la pestaña **Actions**: cada publicación sale en verde si todo fue bien).
 
 Desde ahí, publicar una mejora = subir los cambios. El enlace no cambia nunca.
 Si quieres un dominio propio (por ejemplo `elementalwarriors.com`), se configura en Settings › Pages › Custom domain.

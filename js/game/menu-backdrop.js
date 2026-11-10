@@ -124,23 +124,82 @@ function motes(n, C, size, spawn, move, R) {
 // avance de la entrada de cada pieza con retraso: 0 → 1 suave (la coreografía de entrar/salir)
 const stag = (e, d) => { const u = Math.max(0, Math.min(1, (e - d) / (1 - d))); return u * u * (3 - 2 * u); };
 
+// FASE DE LA LUNA REAL (v1.12): 0 = luna nueva · 0,25 = cuarto creciente · 0,5 = llena · 0,75 = menguante (mes sinódico de 29,53 días)
+export function moonPhase(date = new Date()) { const syn = 29.530588853, ref = Date.UTC(2000, 0, 6, 18, 14); return ((((+date - ref) / 864e5) / syn) % 1 + 1) % 1; }
+export const moonLit = ph => (1 - Math.cos(ph * TAU)) / 2; // fracción iluminada
+// disco lunar con terminador real: una esfera iluminada desde la dirección que da la fase (la parte oscura deja ver un poco de «luz de Tierra»)
+const MOON_FS = `varying vec2 vUv; uniform sampler2D map; uniform float uPh, uOp; uniform vec3 uTint;
+void main(){ vec2 p = (vUv * 2.0 - 1.0) / 0.92; float r2 = dot(p, p); if (r2 > 1.0) discard;
+  vec3 n = vec3(p.x, p.y, sqrt(1.0 - r2)); float a = 6.2831853 * uPh; vec3 L = normalize(vec3(sin(a), 0.08, -cos(a)));
+  float lit = smoothstep(-0.04, 0.06, dot(n, L)); vec3 tx = texture2D(map, vUv).rgb;
+  vec3 c = tx * uTint * (0.2 + 0.86 * lit) + vec3(0.03, 0.05, 0.1) * (1.0 - lit); // luz cenicienta: la parte oscura se intuye
+  gl_FragColor = vec4(c, smoothstep(1.0, 0.95, r2) * uOp); }`;
+function moonMat(ph) { const m = new THREE.ShaderMaterial({ uniforms: { map: { value: moonTex }, uPh: { value: ph }, uOp: { value: 1 }, uTint: { value: new THREE.Color(1, 1, 1) } }, vertexShader: FIRE_VS, fragmentShader: MOON_FS, transparent: true, depthWrite: false }); m.userData.shader = true; return m; }
+
+// PAISAJE EN CAPAS DE PAPEL (v1.12): cada capa es una silueta recortada en tonos de gris con borde iluminado y sombra
+// suave que cae sobre la capa de atrás; el color lo pone el material (sigue al chroma). Tipos: picos volcánicos, olas,
+// montañas en terrazas con pinos y nubes. El detalle (grietas, espuma, terrazas, pinos) va dentro de cada silueta.
+function paperLayer(kind, seed, top = .4) {
+  return canvas(1024, 256, (x, W, H) => {
+    const R = rng(seed), T = document.createElement('canvas'); T.width = W; T.height = H; const y = T.getContext?.('2d'); if (!y) return;
+    y.fillStyle = '#fff'; y.beginPath();
+    const ridge = [];
+    if (kind === 'cloud') { for (let i = 0; i <= 26; i++) { const cx = i / 26 * W + (R() - .5) * 20, r = 22 + R() * 46; y.moveTo(cx + r, H * top + 30); y.arc(cx, H * top + 30, r, 0, TAU); } y.rect(0, H * top + 30, W, H); y.fill(); }
+    else {
+      // crestas naturales por desplazamiento del punto medio (montañas) o por suma de ondas (olas)
+      const N = 128;
+      if (kind === 'wave') for (let i = 0; i <= N; i++) { const u = i / N; ridge.push([u * W, (top + .05 * Math.sin(u * 22 + seed) + .035 * Math.sin(u * 9 + seed * 2) + .02 * Math.sin(u * 47)) * H]); }
+      else { const h = new Float32Array(N + 1), rough = kind === 'jag' ? .62 : .48; let amp = kind === 'jag' ? .34 : .2;
+        h[0] = R() * .2 - .1; h[N] = R() * .2 - .1;
+        for (let step = N; step > 1; step >>= 1, amp *= rough) for (let i = step / 2; i < N; i += step) h[i] = (h[i - step / 2] + h[i + step / 2]) / 2 + (R() - .5) * 2 * amp;
+        for (let i = 0; i <= N; i++) ridge.push([i / N * W, (top + h[i] * (kind === 'jag' ? 1 : .8)) * H]); }
+      y.moveTo(0, H); for (const [px, py] of ridge) y.lineTo(px, py); y.lineTo(W, H); y.closePath(); y.fill();
+    }
+    // relleno degradado y grano de papel (solo dentro de la silueta)
+    y.globalCompositeOperation = 'source-atop'; const gr = y.createLinearGradient(0, H * (top - .2), 0, H); gr.addColorStop(0, '#ffffff'); gr.addColorStop(.45, '#cfcfcf'); gr.addColorStop(1, '#7c7c7c'); y.fillStyle = gr; y.fillRect(0, 0, W, H);
+    for (let i = 0; i < 1800; i++) { y.fillStyle = `rgba(${R() < .5 ? '255,255,255' : '0,0,0'},${.03 + R() * .04})`; y.fillRect(R() * W, R() * H, 2, 2); }
+    // detalles por tipo
+    y.lineCap = 'round';
+    if (kind === 'terrace') { y.strokeStyle = 'rgba(255,255,255,.22)'; y.lineWidth = 2; for (let k = 1; k < 6; k++) { y.beginPath(); for (const [px, py] of ridge) y.lineTo(px, py + k * 22 + 6 * Math.sin(px * .01 + k)); y.stroke(); }
+      y.fillStyle = 'rgba(40,40,40,.55)'; for (let i = 0; i < 40; i++) { const j = Math.floor(R() * ridge.length), [px, py] = ridge[j], h = 10 + R() * 18; y.beginPath(); y.moveTo(px - h * .3, py + 3); y.lineTo(px, py - h); y.lineTo(px + h * .3, py + 3); y.fill(); } }
+    if (kind === 'wave') { y.strokeStyle = 'rgba(255,255,255,.55)'; y.lineWidth = 3; y.beginPath(); for (const [px, py] of ridge) y.lineTo(px, py + 3); y.stroke();
+      y.strokeStyle = 'rgba(255,255,255,.18)'; y.lineWidth = 2; for (let k = 1; k < 5; k++) { y.beginPath(); for (const [px, py] of ridge) y.lineTo(px, py + k * 26 + 8 * Math.sin(px * .03 + k * 2)); y.stroke(); } }
+    if (kind === 'jag') { y.strokeStyle = 'rgba(0,0,0,.35)'; y.lineWidth = 2; for (let i = 0; i < 14; i++) { let px = R() * W, py = H * (top + .1 + R() * .3); y.beginPath(); y.moveTo(px, py); for (let k = 0; k < 4; k++) { px += (R() - .5) * 40; py += 10 + R() * 18; y.lineTo(px, py); } y.stroke(); } }
+    if (kind === 'cloud') { y.strokeStyle = 'rgba(0,0,0,.08)'; y.lineWidth = 6; for (let i = 0; i < 18; i++) { const cx = R() * W, cy = H * (top + .3 + R() * .3), r = 30 + R() * 50; y.beginPath(); y.arc(cx, cy, r, Math.PI * 1.1, Math.PI * 1.9); y.stroke(); } }
+    // borde iluminado
+    if (kind !== 'cloud') { y.globalCompositeOperation = 'source-over'; y.strokeStyle = 'rgba(255,255,255,.6)'; y.lineWidth = 2.5; y.beginPath(); ridge.forEach(([px, py], i) => i ? y.lineTo(px, py + 1.5) : y.moveTo(px, py + 1.5)); y.stroke(); }
+    // la silueta sobre el lienzo final con su sombra hacia arriba (cae sobre la capa de atrás)
+    x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 26; x.shadowOffsetY = -10; x.drawImage(T, 0, 0);
+  });
+}
+// grietas de lava (capa aditiva que brilla encima de una capa volcánica)
+function lavaTex(seed) { return canvas(1024, 256, (x, W, H) => { const R = rng(seed); x.strokeStyle = '#fff'; x.lineCap = 'round'; x.shadowColor = '#fff'; x.shadowBlur = 8;
+  for (let i = 0; i < 12; i++) { let px = R() * W, py = H * (.55 + R() * .2); x.lineWidth = 1.5 + R() * 2; x.beginPath(); x.moveTo(px, py); for (let k = 0; k < 5; k++) { px += (R() - .5) * 50; py += 8 + R() * 14; x.lineTo(px, py); } x.stroke(); } }); }
+const skyTex = canvas(4, 256, (x, W, H) => { const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#000'); g.addColorStop(.55, '#555'); g.addColorStop(.8, '#d8d8d8'); g.addColorStop(1, '#fff'); x.fillStyle = g; x.fillRect(0, 0, W, H); });
+const lanternTex = canvas(64, 96, (x) => { const g = x.createRadialGradient(32, 52, 2, 32, 52, 34); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.5, 'rgba(255,255,255,.5)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 96);
+  x.fillStyle = 'rgba(255,255,255,.95)'; x.beginPath(); x.moveTo(20, 34); x.quadraticCurveTo(32, 26, 44, 34); x.lineTo(46, 68); x.quadraticCurveTo(32, 74, 18, 68); x.closePath(); x.fill(); });
+const birdTex = canvas(64, 32, x => { x.strokeStyle = '#fff'; x.lineWidth = 4; x.lineCap = 'round'; x.beginPath(); x.moveTo(4, 12); x.quadraticCurveTo(18, 2, 32, 18); x.quadraticCurveTo(46, 2, 60, 12); x.stroke(); });
+
 function theme(el, col, light, seed) {
   const g = new THREE.Group(), C = new THREE.Color(col), L = new THREE.Color(light), W = new THREE.Color(0xffffff), anim = [], mats = [], R = rng(seed), RR = (a, b) => a + R() * (b - a);
   // cada material recuerda su «papel» de color (C, L, blanco o luna) para teñirse entero con el chroma: todo o nada
   const M = o => { const role = o.color === C ? 'C' : o.color === L ? 'L' : o.role || null; delete o.role; const m = add(o); m.userData.role = role; mats.push(m); m.userData.base = m.opacity; return m; };
   const plane = (w, h, o, x, y, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), M(o)); m.position.set(x, y, z); g.add(m); return m; };
-  // común: resplandor y sello tenue que gira muy despacio y respira; al entrar se abre girando
-  const glow = plane(9, 9, { map: glowTex, color: C, opacity: .3 }, 0, 2.5, -4.4);
-  const sig = sigilTex(el), s1 = plane(6.6, 6.6, { map: sig, color: C, opacity: .2 }, 0, 2.55, -3.9), s2 = plane(4.1, 4.1, { map: sig, color: L, opacity: .1 }, 0, 2.55, -3.85);
-  let r1 = 0, r2 = 0;
-  anim.push((t, dt, e) => { r1 += dt * .022; r2 -= dt * .035; const k = stag(e, 0); s1.rotation.z = r1 - (1 - k) * .9; s2.rotation.z = r2 + (1 - k) * 1.2; s1.scale.setScalar(.82 + .18 * k); s2.scale.setScalar(.7 + .3 * stag(e, .15));
-    const b = .5 + .5 * Math.sin(t * .55); s1.material.userData.k = (.8 + .2 * b) * k; s2.material.userData.k = (.75 + .25 * (1 - b)) * stag(e, .15); glow.material.userData.k = (.9 + .1 * Math.sin(t * .4)) * k; });
-  // LUNA (todos): disco pintado con mares y cráteres, halo y anillo de bruma; toma un toque del color del elemento y sube al entrar
-  { const mg = new THREE.Group(); mg.position.set(2.9, 5.0, -4.8); g.add(mg);
-    const halo = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 4.2), M({ map: glowTex, color: L, opacity: .3 })); mg.add(halo);
-    const ring = new THREE.Mesh(new THREE.RingGeometry(.86, .9, 96), M({ color: L, opacity: .14 })); mg.add(ring);
-    const disc = new THREE.Mesh(new THREE.CircleGeometry(.78, 64), new THREE.MeshBasicMaterial({ map: moonTex, transparent: true, depthWrite: false, fog: false, opacity: .92 })); disc.material.userData = { role: 'moon', base: .86 }; mats.push(disc.material); disc.position.z = .02; mg.add(disc);
-    anim.push((t, dt, e) => { const k = stag(e, .2); mg.position.y = 5.0 - (1 - k) * .9; mg.rotation.z = Math.sin(t * .05) * .05; halo.material.userData.k = (.85 + .15 * Math.sin(t * .3)) * k; ring.material.userData.k = k; disc.material.userData.k = k; }); }
+  // (v1.12) sin sellos de runas: paisaje propio en capas, cielo, estrellas y una luna lejana con la fase real de hoy
+  const tinted = (o, mix) => { const m = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, fog: false, ...o }); m.userData = { role: 'mix', mix, base: o.opacity ?? 1 }; mats.push(m); return m; };
+  const HZ = { fire: .25, water: .75, earth: 1, air: 1 }[el];
+  const DEPTH = { fire: ['jag', 'jag', 'jag', 'jag', 'jag'], water: ['wave', 'wave', 'wave', 'wave', 'wave'], earth: ['terrace', 'terrace', 'jag', 'terrace', 'terrace'], air: ['cloud', 'cloud', 'cloud', 'cloud', 'cloud'] }[el];
+  const sky = new THREE.Mesh(new THREE.PlaneGeometry(90, 36), tinted({ map: skyTex, opacity: .85 }, { l: .25, dark: .55, haze: 0 })); sky.position.set(0, 9, -26); g.add(sky);
+  anim.push((t, dt, e) => { sky.material.userData.k = stag(e, 0); });
+  const stars = motes(70, W, .09, (p, r) => { p.x0 = (r() - .5) * 40; p.y0 = 6 + r() * 10; p.z = -24; p.dur = 5 + r() * 6; p.bright = .3 + r() * .5; }, (p) => [p.x0, p.y0, p.z], R);
+  g.add(stars.pts); mats.push(stars.mat); anim.push((t, dt, e) => stars.tick(t, dt, stag(e, .3) * (el === 'fire' ? .4 : 1)));
+  // capas de papel: de lejos (claras, con bruma) a cerca (oscuras); suben del suelo al entrar y bajan al salir; se mecen despacio
+  const L5 = [[-19, 3.4, .55, .2, .45, .5], [-16, 2.6, .5, .32, .3, .45], [-13, 1.8, .45, .46, .18, .42], [-10.5, 1.0, .4, .6, .08, .4], [-8.5, .3, .35, .74, 0, .45]];
+  const layers = L5.map(([z, yc, l, dark, haze, top], i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(48, 12), tinted({ map: paperLayer(DEPTH[i], seed + i * 7, top), opacity: 1 }, { l, dark: el === 'fire' ? Math.min(.9, dark + .15) : dark, haze: haze * HZ }));
+    m.userData = { y: yc, x: (R() - .5) * 4, ph: R() * TAU, d: (4 - i) * .07 }; m.position.set(m.userData.x, yc, z); m.renderOrder = -3; g.add(m); return m; });
+  anim.push((t, dt, e) => { layers.forEach((m, i) => { const u = m.userData, k = stag(e, u.d); m.position.y = u.y - (1 - k) * 1.5; m.position.x = u.x + Math.sin(t * .04 + u.ph) * (.3 + i * .12); m.material.userData.k = k; }); });
+  const glow = plane(9, 9, { map: glowTex, color: C, opacity: .24 }, 0, 2.5, -4.4);
+  anim.push((t, dt, e) => { glow.material.userData.k = (.9 + .1 * Math.sin(t * .4)) * stag(e, 0); });
 
   if (el === 'fire') {
     // fuego de verdad que prende desde el suelo: cortina trasera ancha y una delantera más baja, cada una con su ritmo
@@ -152,6 +211,11 @@ function theme(el, col, light, seed) {
     anim.push((t, dt, e) => { back.material.uniforms.uT.value = t; front.material.uniforms.uT.value = t * 1.15 + 7; back.material.uniforms.uGrow.value = stag(e, .1); front.material.uniforms.uGrow.value = stag(e, .3);
       back.position.y = .02 + 1.8 * stag(e, .1); front.position.y = .02 + 1.05 * stag(e, .3); back.scale.y = Math.max(.001, stag(e, .1)); front.scale.y = Math.max(.001, stag(e, .3)); // crece desde el suelo
       haze.material.userData.k = (.85 + .15 * wob(t * .8)) * stag(e, 0); });
+    // grietas de lava que brillan en la capa más cercana y humo que sube despacio de un volcán lejano
+    const lava = new THREE.Mesh(new THREE.PlaneGeometry(48, 12), M({ map: lavaTex(seed + 3), color: L, opacity: .7 })); lava.renderOrder = -2; g.add(lava);
+    anim.push((t, dt, e) => { const near = layers[4]; lava.position.set(near.position.x, near.position.y, near.position.z + .05); lava.material.userData.k = (.65 + .35 * (.5 + .5 * wob(t * .5, 3))) * stag(e, .1); });
+    const smoke = []; for (let i = 0; i < 9; i++) { const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), tinted({ map: dotTex, opacity: .55 }, { l: 0, dark: .82, haze: 0 })); m.userData.ph = i / 9; g.add(m); smoke.push(m); }
+    anim.push((t, dt, e) => { for (const m of smoke) { const u = (t * .035 + m.userData.ph) % 1; m.position.set(-8.5 + u * 3.5 + Math.sin(t * .2 + m.userData.ph * 9) * .5, 4.6 + u * 7, -18.5); m.scale.setScalar(2 + u * 6); m.material.userData.k = life(u) * stag(e, .3); } });
     const emb = motes(46, L, .085, (p, r) => { p.x0 = (r() - .5) * 8; p.z = -1.4 - r() * 3; p.vy = .32 + r() * .4; p.dur = 4 + r() * 4; p.sw = r() * 6; p.bright = .5 + r() * .7; },
       (p, a, t) => [p.x0 + .25 * Math.sin(a * .9 + p.sw), .1 + a * p.vy, p.z], R);
     g.add(emb.pts); mats.push(emb.mat); anim.push((t, dt, e) => emb.tick(t, dt, stag(e, .4)));
@@ -169,13 +233,21 @@ function theme(el, col, light, seed) {
     const bub = motes(30, L, .12, (p, r) => { p.x0 = (r() - .5) * 8; p.z = -1.3 - r() * 3; p.vy = .22 + r() * .25; p.dur = 6 + r() * 5; p.sw = r() * 6; p.bright = .45 + r() * .5; },
       (p, a, t) => [p.x0 + .18 * Math.sin(a * 1.7 + p.sw), .2 + a * p.vy, p.z], R);
     g.add(bub.pts); mats.push(bub.mat); anim.push((t, dt, e) => bub.tick(t, dt, stag(e, .3)));
+    // faroles de espíritu: luces de papel que suben despacio sobre el mar y se apagan muy alto
+    const lan = []; for (let i = 0; i < 11; i++) { const m = plane(.32, .48, { map: lanternTex, color: L, opacity: .75 }, 0, 0, RR(-9, -5)); m.userData = { x: RR(-9, 9), ph: R(), sp: RR(.018, .03) }; lan.push(m); }
+    anim.push((t, dt, e) => { for (const m of lan) { const u = m.userData, k = (t * u.sp + u.ph) % 1; m.position.x = u.x + Math.sin(t * .3 + u.ph * 9) * .4; m.position.y = .6 + k * 9; m.material.userData.k = life(k) * stag(e, .35) * (.8 + .2 * Math.sin(t * 2 + u.ph * 20)); } });
   } else if (el === 'earth') {
     // rocas que BROTAN del suelo al entrar (cada una a su tiempo) y SE RETRAEN al cambiar de guerrero; luego flotan en su sitio
     const rm = new THREE.MeshStandardMaterial({ color: 0x4d4838, roughness: .95, flatShading: true, emissive: C.clone(), emissiveIntensity: .05, transparent: true, opacity: 1 }); rm.userData = { base: 1, role: 'rock' }; mats.push(rm);
     const rocks = []; const spots = [[-4.1, 3.4, -3.2, .42], [-2.9, 1.7, -2.6, .26], [-3.5, 5.1, -3.8, .3], [3.8, 3.9, -3.4, .46], [2.7, 2.1, -2.4, .24], [4.4, 1.3, -2.9, .3], [1.6, 5.4, -3.9, .22], [-1.4, 5.8, -4, .2]];
-    spots.forEach(([x, y, z, s], i) => { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(s, 0), rm); r.position.set(x, y, z); r.rotation.set(RR(0, 3), RR(0, 3), 0);
+    // (v1.12) islotes flotantes: base de roca en punta, tapa de musgo del color del elemento y piedrecitas colgando
+    const moss = new THREE.MeshStandardMaterial({ color: C.clone(), roughness: 1, flatShading: true, transparent: true, opacity: 1 }); moss.userData = { base: 1, role: 'moss' }; mats.push(moss);
+    spots.forEach(([x, y, z, s], i) => { const r = new THREE.Group(); r.position.set(x, y, z); r.rotation.set(0, RR(0, 3), 0);
+      const base = new THREE.Mesh(new THREE.ConeGeometry(s * 1.15, s * 2.2, 7), rm); base.rotation.x = Math.PI; base.position.y = -s * 1.1; r.add(base);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(s * 1.2, s * 1.12, s * .32, 7), moss); r.add(cap);
+      for (let k = 0; k < 3; k++) { const pb = new THREE.Mesh(new THREE.DodecahedronGeometry(s * RR(.12, .2), 0), rm); pb.position.set(RR(-.5, .5) * s, -s * RR(2.4, 3.2), RR(-.5, .5) * s); r.add(pb); }
       r.userData = { y, ph: RR(0, TAU), sp: RR(.35, .55), ry: RR(.04, .09) * (R() < .5 ? -1 : 1), d: (i % 4) * .1 + (y > 4 ? .1 : 0), ry0: 0 }; g.add(r); rocks.push(r); });
-    anim.push((t, dt, e) => { for (const r of rocks) { const u = r.userData, k = stag(e, u.d); u.ry0 += dt * u.ry; r.position.y = u.y + .09 * Math.sin(t * u.sp + u.ph) - (1 - k) * 1.2; r.rotation.y = u.ry0 + (1 - k) * 2; r.rotation.x = .15 * Math.sin(t * u.sp * .7 + u.ph); r.scale.setScalar(.35 + .65 * k); r.visible = k > .01; } });
+    anim.push((t, dt, e) => { for (const r of rocks) { const u = r.userData, k = stag(e, u.d); u.ry0 += dt * u.ry; r.position.y = u.y + .09 * Math.sin(t * u.sp + u.ph) - (1 - k) * 1.2; r.rotation.y = u.ry0 + (1 - k) * 2; r.rotation.x = .05 * Math.sin(t * u.sp * .7 + u.ph); r.rotation.z = .04 * Math.sin(t * u.sp * .5 + u.ph * 2); r.scale.setScalar(.35 + .65 * k); r.visible = k > .01; } });
     // grupos de cristales (prismas hexagonales con punta) que crecen desde el suelo; cada grupo late a su ritmo
     const crystals = [], prism = (r, h) => { const body = new THREE.CylinderGeometry(r * .82, r, h, 6), tip = new THREE.ConeGeometry(r * .82, r * 2.2, 6); tip.translate(0, h / 2 + r * 1.1, 0); return [body, tip]; };
     for (let i = 0; i < 5; i++) { const cm = new THREE.MeshStandardMaterial({ color: C.clone(), emissive: C.clone(), emissiveIntensity: .35, roughness: .2, metalness: .3, flatShading: true, transparent: true, opacity: .82 }); cm.userData = { base: .82, role: 'crystal' }; mats.push(cm);
@@ -204,6 +276,9 @@ function theme(el, col, light, seed) {
     const leaves = []; for (let i = 0; i < 9; i++) { const m = plane(.2, .2, { map: leafTex, color: i % 2 ? L : W, opacity: .75 }, 0, 0, RR(-3.2, -1.4)); m.userData = { age: RR(0, 9), dur: RR(7, 10), y: RR(1, 4.6), ph: RR(0, TAU), spin: RR(1.2, 2.2) }; leaves.push(m); }
     anim.push((t, dt, e) => { for (const m of leaves) { const u = m.userData; u.age += dt; if (u.age > u.dur) { u.age = 0; u.y = 1 + R() * 3.6; } const k = u.age / u.dur;
       m.position.set(-5.2 + k * 10.4, u.y + .45 * Math.sin(k * TAU * 1.2 + u.ph) - k * .6, m.position.z); m.rotation.set(Math.sin(u.age * u.spin) * 1.1, u.age * .5, Math.sin(u.age * u.spin * .8 + 1) * .9); m.material.userData.k = life(k) * stag(e, .4); } });
+    // bandadas lejanas que cruzan batiendo las alas
+    const birds = []; for (let i = 0; i < 7; i++) { const m = new THREE.Mesh(new THREE.PlaneGeometry(.5, .25), tinted({ map: birdTex, opacity: .85 }, { l: 0, dark: .7, haze: 0 })); m.userData = { x: RR(-14, 14), y: RR(4, 7.5), z: RR(-15, -11), sp: RR(.35, .6), ph: R() * TAU }; g.add(m); birds.push(m); }
+    anim.push((t, dt, e) => { for (const m of birds) { const u = m.userData; u.x += dt * u.sp; if (u.x > 15) u.x = -15; m.position.set(u.x, u.y + .15 * Math.sin(t * .7 + u.ph), u.z); m.scale.y = .55 + .45 * Math.abs(Math.sin(t * 5 + u.ph)); m.material.userData.k = Math.min(1, (15 - Math.abs(u.x)) / 3) * stag(e, .4); } });
     const air = motes(36, L, .07, (p, r) => { p.x0 = -5 - r() * 2; p.y0 = r() * 5; p.z = -1.3 - r() * 3; p.vx = .5 + r() * .5; p.dur = 9 + r() * 5; p.sw = r() * 6; p.bright = .4 + r() * .5; },
       (p, a, t) => [p.x0 + a * p.vx, p.y0 + .3 * Math.sin(a * .8 + p.sw), p.z], R);
     g.add(air.pts); mats.push(air.mat); anim.push((t, dt, e) => air.tick(t, dt, stag(e, .3)));
@@ -214,19 +289,32 @@ function theme(el, col, light, seed) {
 }
 
 // pinta cada material según su papel con los colores vivos del tema (el chroma tiñe TODO el santuario, sin restos del color original)
-const _w = new THREE.Color(0xffffff), _t = new THREE.Color();
+const _w = new THREE.Color(0xffffff), _t = new THREE.Color(), _dk = new THREE.Color(0x060a18), _hz = new THREE.Color();
 function paint(th) {
   for (const m of th.mats) {
     const r = m.userData.role; if (!r) continue;
     if (r === 'C') m.color.copy(th.C); else if (r === 'L') m.color.copy(th.L);
     else if (r === 'moon') m.color.copy(_w).lerp(th.L, .22).multiplyScalar(.92);
     else if (r === 'rock') m.emissive.copy(th.C);
+    else if (r === 'mix') { const q = m.userData.mix; _t.copy(th.C).lerp(th.L, q.l).lerp(_dk, q.dark); if (q.haze) _t.lerp(_hz.copy(th.L).lerp(_w, .55), q.haze); m.color.copy(_t); }
+    else if (r === 'moonS') m.uniforms.uTint.value.copy(_w).lerp(th.L, .16);
+    else if (r === 'moss') m.color.copy(th.C).lerp(_dk, .45);
     else if (r === 'crystal') { _t.copy(th.C).lerp(_w, .15); m.color.copy(_t).multiplyScalar(.22); m.emissive.copy(_t).multiplyScalar(.5); }
   }
 }
 
+// LUNA (v1.12) compartida por todos los santuarios (así no hay dos lunas al cambiar de guerrero): lejos, empieza en la fase
+// real de hoy y recorre su ciclo entero en unos 2 minutos, de modo que las fases se ven pasar; toma un toque del color del chroma.
+function buildMoon() {
+  const g = new THREE.Group(); g.position.set(10.5, 8.6, -21); const ph = moonPhase();
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), add({ map: glowTex, opacity: .38 })); g.add(halo);
+  const disc = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3), moonMat(ph)); disc.position.z = .02; g.add(disc);
+  g.traverse(o => { o.renderOrder = -4; o.frustumCulled = false; });
+  return { g, halo, disc, ph, L: new THREE.Color(0xffffff), w: 0 };
+}
+
 export class MenuBackdrop {
-  constructor(parent) { this.parent = parent; this.themes = new Map(); this.cur = null; }
+  constructor(parent) { this.parent = parent; this.themes = new Map(); this.cur = null; try { this.moon = buildMoon(); parent.add(this.moon.g); } catch (e) { console.warn('[menú] luna', e); this.moon = null; } }
   set(def) {
     if (!def) return; const id = def.id;
     if (!this.themes.has(id)) { try { const el = ELEM_OF[id] || def.element || 'air', th = theme(el === 'wind' ? 'air' : el, def.fx?.color || '#47b3ff', def.fx?.light || def.fx?.color || '#ffffff', [...id].reduce((a, c) => a * 31 + c.charCodeAt(0), 7)); paint(th); this.parent.add(th.g); this.themes.set(id, th); } catch (e) { console.warn('[menú] fondo temático', e); return; } }
@@ -246,5 +334,9 @@ export class MenuBackdrop {
       for (const mt of th.mats) { if (mt.userData.shader) { mt.uniforms.uOp.value = mt.userData.base * fade; continue; } mt.opacity = mt.userData.base * fade * (mt.userData.k ?? 1); }
       th.t = (th.t ?? t) + dt * m; for (const f of th.anim) f(th.t, dt * m, e);
     }
+    const M = this.moon; if (M) { const any = this.cur ? 1 : 0; M.w += (any - M.w) * (1 - Math.exp(-dt * 2)); M.g.visible = M.w > .01;
+      if (tint) M.L.lerp(tint.light, 1 - Math.exp(-dt * 3)); M.tm = (M.tm ?? 0) + dt * m; const p = (M.ph + M.tm / 120) % 1, lit = moonLit(p);
+      M.disc.material.uniforms.uPh.value = p; M.disc.material.uniforms.uOp.value = .95 * M.w; M.disc.material.uniforms.uTint.value.copy(_w).lerp(M.L, .16);
+      M.halo.material.color.copy(M.L); M.halo.material.opacity = .38 * M.w * (.3 + .7 * lit) * (.88 + .12 * Math.sin(t * .3)); M.g.rotation.z = Math.sin(t * .05) * .04; }
   }
 }

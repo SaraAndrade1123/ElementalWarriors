@@ -13,11 +13,11 @@
 - **Licencias de terceros**: Three.js (MIT), Cinzel y Rajdhani (OFL 1.1), modelos provisionales (CC BY 4.0) con la
   lista de cambios que exige CC BY. Avisos completos en `docs/THIRD-PARTY-NOTICES.md`.
 - **Marcas**: aviso de no afiliación con Avatar: The Last Airbender (Paramount Global / Nickelodeon).
-- **Contacto y retirada de contenido**: correo para reclamaciones (pendiente: rellénalo en `data/legal.json`).
+- **Contacto y retirada de contenido**: elementalwarriors.therealms1123@gmail.com (se cambia en `data/legal.json`).
 
 ## 2. Lo que tienes que completar tú
-1. `data/legal.json` → `contact` (un correo de contacto del proyecto, no hace falta que sea el personal) y `site`
-   (el enlace oficial cuando lo tengas). Revisa también `owner` (ahora: «Sara Andrade Rodriguez», como en Créditos).
+1. ✅ `data/legal.json` ya tiene el correo de contacto (elementalwarriors.therealms1123@gmail.com) y el enlace oficial
+   (https://saraandrade1123.github.io/ElementalWarriors/). Titular: «Sara Andrade Rodriguez», como en Créditos.
 2. **Sustituir los 4 modelos provisionales por guerreros originales** antes de difundir el juego en público.
    Es lo único que de verdad puede traer una reclamación: un aviso de «no afiliado» NO da permiso para usar
    personajes ajenos, y la licencia CC BY de los modelos solo cubre el trabajo del modelador, no a Zuko, Katara,

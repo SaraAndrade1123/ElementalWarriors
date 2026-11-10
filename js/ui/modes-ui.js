@@ -1,6 +1,7 @@
 // Pantallas de los modos: Arcade/Supervivencia, Versus, Desafíos e Historia. Se "instalan" sobre el MenuManager sin modificar su archivo.
 import { t } from '../systems/localization.js';
 import { Ladder } from '../modes/ladder.js';
+import { StoryRun, goalText } from '../modes/story.js';
 import { Survival } from '../modes/survival.js';
 import { CHALLENGES, kindOf, rivalFor } from '../modes/challenges.js';
 import { LEVEL_IDS } from '../game/difficulty-config.js';
@@ -96,17 +97,22 @@ export function installModes(menu, { cfg, roster, stages, meta, flow }) {
 
   // ---------- Historia
   menu.page_story = function () {
-    const m = me(), order = cfg.order[m.id], got = Math.min(order.length, data().story[m.id] || 0), L = i => new Ladder(cfg, { kind: 'story', hero: m.id, level: S.level, from: i });
-    const play = i => flow.begin({ kind: 'story', obj: L(i), from: i });
-    this.panel(t('menu.story'), heroCard(m, t('story.with')), heroTabs(), h('p', { class: 'note' }, t('story.intro', { name: m.name })), note('modes.level'), ...levelTabs(),
-      h('p', { class: 'note' }, t('story.progress', { a: got, b: order.length })),
-      h('ol', { class: 'ladder chapters' }, ...order.map((id, i) => {
-        const open = i <= got, done = i < got;
-        return h('li', { class: done ? 'done' : open ? '' : 'lock' }, h('span', {}, t(i === order.length - 1 ? 'story.chapter.final' : 'story.chapter', { n: i + 1, name: name(id) })),
+    // (v1.12) 11 capítulos en 4 actos, cada uno con su reto (no basta con ganar)
+    const m = me(), R0 = new StoryRun(cfg, { hero: m.id, level: S.level }), total = R0.total, got = Math.min(total, data().story[m.id] || 0);
+    const play = i => flow.begin({ kind: 'story', obj: new StoryRun(cfg, { hero: m.id, level: S.level, from: i }), from: i });
+    const mods = c => [c.startHp ? t('story.mod.hp', { x: Math.round(c.startHp * 100) }) : null, c.wins === 1 ? t('story.mod.one') : c.wins === 3 ? t('story.mod.bo5') : null, c.rival === 'echo' ? t('story.mod.echo') : null].filter(Boolean);
+    const acts = [1, 2, 3, 4].map(a => h('section', { class: 'st-act' }, h('h4', { class: 'st-acth' }, h('span', {}, t('story.act.n', { n: a })), h('b', {}, t('story.act.t' + a))),
+      h('ol', { class: 'ladder chapters st-list' }, ...R0.chapters.filter(c => c.act === a).map(c => { const i = c.i, open = i <= got, done = i < got, foe = c.rival === 'shadow' ? t('story.shadow.name') : c.rival === 'echo' ? t('story.echo.name', { name: m.name }) : name(c.id);
+        return h('li', { class: (done ? 'done' : open ? '' : 'lock') + (i === total - 1 ? ' final' : '') },
+          h('span', { class: 'st-n' }, String(i + 1)),
+          h('span', { class: 'st-txt' }, h('b', {}, t('story.ch.' + (i + 1))), h('small', {}, `${t('story.vs')} ${foe} · ${t('level.' + R0.levelAt(i))}`), h('i', { class: 'st-goal' }, '◆ ' + goalText(c.goal, t) + (mods(c).length ? ' · ' + mods(c).join(' · ') : ''))),
           h('span', { class: 'acts' }, done ? h('span', { class: 'tag ok' }, t('story.done')) : null, open ? h('button', { class: 'mini', onclick: () => play(i) }, t('story.play')) : h('span', { class: 'tag' }, t('story.locked'))));
-      })),
-      got > 0 && got < order.length
+      }))));
+    this.panel(t('menu.story'), heroCard(m, t('story.with')), heroTabs(), h('p', { class: 'note' }, t('story.intro', { name: m.name, n: total })), note('modes.level'), ...levelTabs(),
+      section(t('story.progress', { a: got, b: total })), totalBar(got, total), ...acts,
+      got > 0 && got < total
         ? h('div', { class: 'row story-acts' }, h('button', { class: 'cta', onclick: () => play(got) }, t('story.continue', { n: got + 1 })), h('button', { class: 'ghost restart', onclick: () => play(0) }, t('story.restart')))
-        : h('button', { class: 'cta', onclick: () => play(0) }, t('story.start')));
+        : h('button', { class: 'cta', onclick: () => play(0) }, t(got >= total ? 'story.replay' : 'story.start')));
   };
+
 }

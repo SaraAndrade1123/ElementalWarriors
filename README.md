@@ -1,4 +1,4 @@
-# Elemental Warriors (v1.11.0 · versión web que se actualiza sola, legal y seguridad)
+# Elemental Warriors (v1.12.0 · historia de 11 capítulos, paisajes del menú y luna real)
 
 ## Cómo abrirlo
 - **Jugar (PC o celular)**: abre `index.html`. Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet. En el celular lo más fácil es el enlace en línea (se abre en Chrome y listo); también puedes pasar `index.html` al teléfono y abrirlo con Chrome. Pon el móvil en horizontal y pulsa **Pantalla completa**.
@@ -128,6 +128,14 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Zephyr**: su voltereta de presentación ya no hace un giro extra hacia atrás al terminar (los giros completos vuelven por el camino corto).
 - **Armas**: aura elemental animada en el filo (del color de las técnicas / del chroma), estelas más largas y curvas, impacto propio por tipo (tajo en cruz, onda de choque, estocada), animaciones sin tirones al sacar el arma. Vista previa con cámara más cercana, cámara lenta al conectar y ficha del arma con su efecto según el elemento.
 - **Interfaz**: tarjeta con el nombre y el elemento del guerrero en Combate de prueba; flechas de la canción con borde y chevrón limpios.
+
+## v1.12.0 — Historia de 11 capítulos con retos, paisajes del menú, luna real y correcciones
+- **Historia** (`js/modes/story.js`): 11 capítulos en 4 actos por guerrero (Despertar, El viaje, El reflejo, Los reinos), cada uno con su reto: ganar a tiempo, encadenar combos, acabar con vida, derribar con un agarre, usar la Resonancia, empezar herido, muerte súbita, el duelo contra tu reflejo y la Sombra del Sello al mejor de cinco. Diálogos nuevos para cada reencuentro con un rival (es/en). Si ganas sin cumplir el reto, se repite el capítulo.
+- **Menú**: sin sellos de runas ni columnas/rocas grises; cada guerrero tiene un paisaje en capas de papel (volcanes con grietas de lava y humo, olas con faroles de espíritu, montañas en terrazas con pinos e islotes flotantes, mar de nubes con aves), cielo y estrellas. Una sola luna lejana con la **fase real** de hoy que recorre su ciclo en unos 2 minutos. Todo sigue al chroma.
+- **Combate**: el temblor de cámara no se apagaba nunca (la línea que lo amortiguaba estaba dentro de un comentario): corregido y ahora viene apagado (Ajustes › Gráficos › «Temblor en los golpes»).
+- **Animaciones**: victorias con los brazos bien colocados (Ignis puño a la cadera, Aqua mano al pecho, Terra puños en la cintura, Zephyr manos tras la nuca); derrota de Aqua sentada sobre los talones con las manos en el regazo; cámara de la derrota más abierta.
+- **Interfaz**: Progreso y Créditos ya no se descuadran (la regla de PC solo afecta al menú principal); bocadillo de frases en placa dorada que se escribe letra a letra; símbolos nuevos de agua (gota con olas) y aire (remolino simétrico); medallas de Logros y Desafíos como monedas del nivel; el arma del último combate ya no se queda en la espalda en el menú; la vista previa de armas ya no se queda en cámara lenta.
+- **Legal y distribución**: correo de contacto y repositorio oficial `SaraAndrade1123/ElementalWarriors` (rama `main`).
 
 ## v1.11.0 — Versión web que se actualiza sola, legal, seguridad y menú más cuidado
 - **Distribución**: `npm run build` crea `dist/web/` (instalable como app, juega sin conexión, avisa «Hay una versión nueva» y se actualiza con un toque). `.github/workflows/pages.yml` la publica en GitHub Pages en cada cambio, solo si pasan las pruebas. Guía: `docs/DISTRIBUCION.md`.
