@@ -1,4 +1,4 @@
-# Elemental Warriors (v1.12.0 · historia de 11 capítulos, paisajes del menú y luna real)
+# Elemental Warriors (v1.12.1 · historia de 11 capítulos, paisajes del menú y luna real)
 
 ## Cómo abrirlo
 - **Jugar (PC o celular)**: abre `index.html`. Es el juego completo en un solo archivo: no necesita servidor, Live Server ni internet. En el celular lo más fácil es el enlace en línea (se abre en Chrome y listo); también puedes pasar `index.html` al teléfono y abrirlo con Chrome. Pon el móvil en horizontal y pulsa **Pantalla completa**.
@@ -128,6 +128,10 @@ La F7 se había construido sobre la F3; esta versión la fusiona con la v0.6.0 p
 - **Zephyr**: su voltereta de presentación ya no hace un giro extra hacia atrás al terminar (los giros completos vuelven por el camino corto).
 - **Armas**: aura elemental animada en el filo (del color de las técnicas / del chroma), estelas más largas y curvas, impacto propio por tipo (tajo en cruz, onda de choque, estocada), animaciones sin tirones al sacar el arma. Vista previa con cámara más cercana, cámara lenta al conectar y ficha del arma con su efecto según el elemento.
 - **Interfaz**: tarjeta con el nombre y el elemento del guerrero en Combate de prueba; flechas de la canción con borde y chevrón limpios.
+
+## v1.12.1 — Muñeca al lanzar armas y subida al repositorio oficial
+- Al lanzar un arma (cuchillos, bumerán, boleadoras…) la muñeca ya no se dobla apuntando un arma que ya no está: solo apunta mientras el arma está en la mano, como mucho ~50°, y al soltarla la mano pasa con un fundido a una postura relajada (`weapon-hook.js`, `rig.js › _wristBlend`, `weapon-art.js`).
+- El proyecto solo apunta al repositorio de Sara (`origin` = https://github.com/SaraAndrade1123/ElementalWarriors.git, rama `main`); `SUBIR-A-GITHUB.bat` / `subir-a-github.sh` lo suben con su cuenta. `docs/DISTRIBUCION.md` actualizado.
 
 ## v1.12.0 — Historia de 11 capítulos con retos, paisajes del menú, luna real y correcciones
 - **Historia** (`js/modes/story.js`): 11 capítulos en 4 actos por guerrero (Despertar, El viaje, El reflejo, Los reinos), cada uno con su reto: ganar a tiempo, encadenar combos, acabar con vida, derribar con un agarre, usar la Resonancia, empezar herido, muerte súbita, el duelo contra tu reflejo y la Sombra del Sello al mejor de cinco. Diálogos nuevos para cada reencuentro con un rival (es/en). Si ganas sin cumplir el reto, se repite el capítulo.

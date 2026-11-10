@@ -15,14 +15,17 @@ baterías de pruebas, compila el juego y lo publica. Si una prueba falla, no se 
 Repositorio oficial: **https://github.com/SaraAndrade1123/ElementalWarriors** (cuenta `SaraAndrade1123`).
 
 Pasos (una sola vez):
-1. Sube el proyecto a ese repositorio, en la rama `main`:
-   ```
-   git remote add origin https://github.com/SaraAndrade1123/ElementalWarriors.git
-   git push -u origin main
-   ```
-   Para que Claude lo suba por ti: en el repositorio, **Settings › Collaborators › Add people**, invita a la cuenta de
-   GitHub conectada a Claude (`SaraAndrade1123`) con permiso de escritura; cuando acepte la invitación, Claude puede hacer
-   el primer envío y los siguientes. (La rama del proyecto ya se llama `main`.)
+1. Sube el proyecto a ese repositorio, en la rama `main`, **con la cuenta de GitHub de Sara**:
+   - La forma fácil: en la carpeta del proyecto (el zip «listo-para-subir») haz doble clic en `SUBIR-A-GITHUB.bat`
+     (Windows) o ejecuta `sh subir-a-github.sh` (Mac/Linux). Hace falta tener Git instalado (git-scm.com); la primera vez
+     se abre el navegador para iniciar sesión en GitHub con la cuenta `SaraAndrade1123`.
+   - O a mano, desde esa carpeta:
+     ```
+     git push -u origin main
+     ```
+     (el proyecto ya trae configurado `origin` = https://github.com/SaraAndrade1123/ElementalWarriors.git)
+   - Para que Claude lo suba directamente, la cuenta de GitHub conectada a Claude (claude.ai › Ajustes › Conectores ›
+     GitHub) tiene que ser la de Sara.
 2. En el repositorio: **Settings › Pages › Build and deployment › Source: GitHub Actions**.
 3. A los 2-3 minutos el juego queda en **https://saraandrade1123.github.io/ElementalWarriors/**
    (puedes verlo en la pestaña **Actions**: cada publicación sale en verde si todo fue bien).

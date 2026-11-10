@@ -13,7 +13,7 @@
  "menu.credits": "Créditos",
  "ui.start": "Comenzar",
  "ui.back": "Volver",
- "ui.version": "v1.12.0 · historia de 11 capítulos, paisajes del menú y luna real",
+ "ui.version": "v1.12.1 · historia de 11 capítulos, paisajes del menú y luna real",
  "ui.hint": "← → cambian de guerrero · ↑ ↓ navegan · Enter elige · Esc vuelve",
  "ui.loading": "Cargando guerreros… {done}/{total}",
  "ui.ready": "Todo listo",

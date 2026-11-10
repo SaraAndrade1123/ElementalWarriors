@@ -28,9 +28,10 @@ function patchAnimator() {
   const up = P.update, anc = P.anchors;
   P.update = function (dt, f, env) {
     const art = this.art, R = this.rig, using = art && f?.act?.name === WP;
-    if (art) { // durante la técnica, la muñeca apunta el arma (canal pitch = ángulo absoluto, como con espada)
-      if (using && !this.__bl) { this.__bl = { blade: R.blade, clamp: R.bladeClamp }; R.blade = art.aim; R.bladeClamp = 2.1; }
-      else if (!using && this.__bl) { R.blade = this.__bl.blade; R.bladeClamp = this.__bl.clamp; this.__bl = null; }
+    if (art) { // durante la técnica, la muñeca apunta el arma (canal pitch = ángulo absoluto, como con espada)…
+      if (using && !this.__bl) this.__bl = { blade: R.blade, clamp: R.bladeClamp };
+      if (using) { const aim = art.inHand; R.blade = aim ? art.aim : null; R.bladeClamp = aim ? .9 : this.__bl.clamp; } // muñeca con arma: como mucho ~50° (una muñeca de verdad no se dobla más) // (v1.12.1) …SOLO mientras el arma está en la mano: antes de sacarla y después de lanzarla la mano se mueve libre (antes se doblaba más de 90° apuntando un arma invisible)
+      else if (this.__bl) { R.blade = this.__bl.blade; R.bladeClamp = this.__bl.clamp; this.__bl = null; }
     }
     const r = up.call(this, dt, f, env);
     if (art && dt > 0) {

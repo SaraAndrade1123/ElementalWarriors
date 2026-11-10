@@ -53,5 +53,12 @@ const es = js('data/localization/es.json'), en = js('data/localization/en.json')
   ok(/remolino de tres brazos simétrico/.test(rd('js/main.js')), 'símbolos nuevos de agua y aire');
   ok(/slow = \.16/.test(rd('js/ui/weapon-preview.js')), 'vista previa de armas: el golpe ya no se queda en cámara lenta');
   const lg = js('data/legal.json'); ok(lg.contact === 'elementalwarriors.therealms1123@gmail.com' && /SaraAndrade1123\/ElementalWarriors/.test(rd('docs/DISTRIBUCION.md')), 'correo de contacto y repositorio oficial'); }
-ok(js('package.json').version === '1.12.0' && /v1\.12\.0/.test(es['ui.version']), 'versión 1.12.0');
+// 7 · (v1.12.1) muñeca al lanzar armas y repositorio
+{ const wh = rd('js/elements/weapon-hook.js'), rig = rd('js/game/animation/rig.js');
+  ok(/R\.blade = aim \? art\.aim : null/.test(wh) && /aim \? \.9/.test(wh), 'la muñeca solo apunta el arma mientras está en la mano y nunca se dobla más de ~50°');
+  ok(/_wristBlend\(s, q, mode\)/.test(rig), 'al soltar el arma la mano pasa a la postura natural con un fundido (sin saltos)');
+  const all = ['docs/DISTRIBUCION.md', 'docs/LEGAL.md', 'README.md', 'SUBIR-A-GITHUB.bat', 'subir-a-github.sh', 'data/legal.json'].map(rd).join('\n');
+  const owners = new Set([...all.matchAll(/github\.com\/([\w-]+)/gi), ...all.matchAll(/([\w-]+)\.github\.io/gi)].map(m => m[1].toLowerCase()));
+  ok(owners.size === 1 && owners.has('saraandrade1123') && /SaraAndrade1123\/ElementalWarriors/.test(rd('SUBIR-A-GITHUB.bat')), 'el proyecto solo apunta al repositorio de Sara (ninguna otra cuenta de GitHub)'); }
+ok(/^1\.(1[2-9]|[2-9]\d)\./.test(js('package.json').version) && /v1\.1\d\.\d/.test(es['ui.version']), 'versión 1.12 o posterior');
 console.log(bad ? `\n${bad} FALLO(S)` : '\nv1.12: todo correcto'); process.exit(bad ? 1 : 0);

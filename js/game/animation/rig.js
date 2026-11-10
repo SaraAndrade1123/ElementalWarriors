@@ -121,6 +121,7 @@ export class Rig {
   // ctx: { lead: +1 si el lado adelantado es el IZQUIERDO, −1 si es el derecho; vel: velocidad del cuerpo (espacio modelo); dt, t }
   apply(P, ctx) {
     const { D, Pn, dq, has, P0, Wr, parent, kind, side, I } = this, n = this.n, lead = ctx.lead;
+    this._dt = ctx.dt > 0 ? Math.min(ctx.dt, .1) : 1 / 60;
     const c = k => P[IDX[k]];
     const fr = s => (s === lead ? 'F' : 'B');
     has.fill(0);
@@ -239,7 +240,7 @@ export class Rig {
     // Con arma «apuntable» (espada, lanza) el canal pitch es el ÁNGULO ABSOLUTO de la hoja en el plano de pantalla
     // (0 = hacia delante, +π/2 = arriba, −π/2 = abajo); si no, es una flexión relativa.
     const HF = this.handFrame[s];
-    if (HF && !this.blade && !this.legacyWrist) { this._wristNatural(L, s, f, c, chest, D2, HF, dq[L.C]); has[L.C] = 1; return; }
+    if (HF && !this.blade && !this.legacyWrist) { this._wristNatural(L, s, f, c, chest, D2, HF, dq[L.C]); has[L.C] = 1; this._wristBlend(s, dq[L.C], 0); return; }
     const rl = this.rollMax && !this.blade ? Math.max(-this.rollMax, Math.min(this.rollMax, c('hn' + f + 'roll'))) : c('hn' + f + 'roll');
     _c.setFromAxisAngle(_w, s * rl); const pitch = c('hn' + f + 'pitch'), bl = this.blade?.[s > 0 ? 'L' : 'R'];
     // sin arma: flexión de muñeca suave y limitada (una mano de verdad no se dobla 90°)
@@ -249,6 +250,14 @@ export class Rig {
       const cur = Math.atan2(_E.y, _E.z); let dlt = pitch - cur; dlt -= Math.round(dlt / (2 * Math.PI)) * 2 * Math.PI;
       const lim = this.bladeClamp ?? 2.1; ang = -Math.max(-lim, Math.min(lim, dlt)); // sin arma en la mano: la muñeca solo «apunta» con un giro natural
     }
-    dq[L.C].setFromAxisAngle(X, ang).multiply(_c); has[L.C] = 1;
+    dq[L.C].setFromAxisAngle(X, ang).multiply(_c); has[L.C] = 1; this._wristBlend(s, dq[L.C], bl ? 1 : 2);
+  }
+
+  // (v1.12.1) Al cambiar la forma de mover la muñeca (mano libre ↔ apuntando un arma) la mano no salta de golpe:
+  // durante ~0,15 s se funde desde la orientación del fotograma anterior.
+  _wristBlend(s, q, mode) {
+    const W = (this._ws ||= {}), st = W[s] || (W[s] = { q: q.clone(), mode, t: 0 });
+    if (st.mode !== mode) { st.mode = mode; st.t = .15; }
+    if (st.t > 0) { const dt = this._dt || 1 / 60; st.t -= dt; st.q.slerp(q, 1 - Math.exp(-dt * 20)); q.copy(st.q); } else st.q.copy(q);
   }
 }

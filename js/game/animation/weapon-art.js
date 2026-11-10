@@ -146,19 +146,19 @@ export function buildArt(kind, S) {
     knives: () => mk('wp', .7, [
       hip(.1), { t: .2, e: 'out2', hnFx: -.25, hnFy: .3, hnFz: .05, hnFpitch: 2.6, hnFfist: .6, spYaw: sy + .5, pelYaw: hy + .2, comZ: -.1, ftBz: -.42, hdPitch: -.08 },
       { t: .26, e: 'in3', hnFx: .05, hnFy: .22, hnFz: 1.02, hnFpitch: .05, hnFfist: .1, hnFflare: .6, spYaw: sy - .55, pelYaw: hy - .25, comZ: .26, spPitch: .2, ftFz: .55, ftBz: -.45 },
-      { t: .4, e: 'out2', hnFy: -.02, hnFz: .86, hnFpitch: -.5, spYaw: sy - .45 }, { t: .58, e: 'io', comZ: .1 },
+      { t: .4, e: 'out2', hnFy: -.02, hnFz: .86, hnFpitch: 0, hnFfist: .35, spYaw: sy - .45 }, { t: .58, e: 'io', comZ: .1 }, // (v1.12.1) tras soltar: mano relajada, muñeca recta
     ], { hit: [.255, .28], show: [.11, .255], release: .255, trails: [['hF', .2, .32]], fx: [{ t: .11, kind: 'w_draw', at: 'wF' }, { t: .26, kind: 'w_release', at: 'hF' }] }),
     bola: () => mk('wp', .85, [
       hip(.1), { t: .22, e: 'out2', hnFx: .05, hnFy: 1.02, hnFz: .1, hnFpitch: 1.57, hnFfist: .8, wpSpin: 0, shFup: .55, hdPitch: -.22, spPitch: -.12, spYaw: sy },
       { t: .34, e: 'lin', wpSpin: 6.28, hnFx: .1, hnFy: 1.0, hnFz: -.05 }, { t: .45, e: 'lin', wpSpin: 12.56, hnFx: 0, hnFy: 1.0, hnFz: .12 },
       { t: .5, e: 'in3', hnFx: .0, hnFy: .55, hnFz: .98, hnFpitch: .6, hnFfist: .1, hnFflare: .5, wpSpin: 15.7, spYaw: sy - .5, comZ: .22, spPitch: .18, ftFz: .52, ftBz: -.42, shFup: .1 },
-      { t: .64, e: 'out2', hnFy: .3, hnFz: .82, hnFpitch: 0, spYaw: sy - .4 }, { t: .78, e: 'io', comZ: .05 },
+      { t: .64, e: 'out2', hnFy: .3, hnFz: .82, hnFpitch: 0, hnFfist: .35, spYaw: sy - .4 }, { t: .78, e: 'io', comZ: .05 },
     ], { hit: [.49, .52], show: [.11, .49], release: .49, trails: [['wF', .22, .5]], fx: [{ t: .11, kind: 'w_draw', at: 'wF' }, { t: .5, kind: 'w_release', at: 'hF' }] }),
     boomerang: () => mk('wp', .8, [
       back(.12), { t: .22, e: 'out2', hnFx: .22, hnFy: .4, hnFz: -.32, hnFpitch: 3.0, hnFfist: .8, spYaw: sy + .55, pelYaw: hy + .25, comZ: -.12, ftBz: -.42, shFup: .1 },
       { t: .3, e: 'in3', hnFx: .0, hnFy: .2, hnFz: 1.04, hnFpitch: 0, hnFfist: .1, hnFflare: .5, wpSpin: 2.5, spYaw: sy - .6, pelYaw: hy - .3, comZ: .3, ftFz: .58, ftBz: -.48, spPitch: .16 },
-      { t: .45, e: 'out2', hnFy: 0, hnFz: .82, hnFpitch: -.4, spYaw: sy - .45 },
-      { t: .66, e: 'io', hnFx: .1, hnFy: .3, hnFz: .55, hnFflare: .6, hnFfist: 0, comZ: .05 }, // mano abierta: esperará la vuelta
+      { t: .45, e: 'out2', hnFy: 0, hnFz: .82, hnFpitch: 0, hnFfist: .3, spYaw: sy - .45 },
+      { t: .66, e: 'io', hnFx: .1, hnFy: .3, hnFz: .55, hnFflare: .6, hnFfist: 0, hnFpitch: .5, comZ: .05 }, // mano abierta, palma al frente: esperará la vuelta
     ], { hit: [.295, .32], show: [.13, .3], release: .3, trails: [['wF', .22, .3]], fx: [{ t: .13, kind: 'w_draw', at: 'wF' }, { t: .3, kind: 'w_release', at: 'hF' }] }),
     dagger: () => mk('wp', .95, [
       hip(.1), { t: .2, e: 'out2', hnFx: .05, hnFy: .38, hnFz: .55, hnFpitch: 1.2, hnFfist: .9, hnBx: .15, hnBy: .12, hnBz: .38, hnBflare: .45, comY: -.14, spYaw: sy + .1, hdPitch: -.06 },
